@@ -19,4 +19,5 @@ Pod::Spec.new do |s|
   s.swift_versions   = ['5.9']
   s.frameworks       = 'SwiftUI'
   s.source_files     = 'Sources/KitoFields/**/*.swift'
+  s.resource_bundles = { 'KitoFields' => ['Sources/KitoFields/Resources/**/*.lproj'] }
 end

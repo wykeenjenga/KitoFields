@@ -190,7 +190,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             contentType: .telephoneNumber,
             textColor: theme.textColor,
             tint: theme.tintColor ?? theme.focusedBorderColor,
-            accessibilityLabel: options.accessibilityLabel ?? options.label ?? "Phone number",
+            accessibilityLabel: options.accessibilityLabel ?? options.label ?? KitoLocalization.string("phone.accessibilityLabel", "Phone number"),
             onEdit: { proposed in process(proposed) },
             onSubmit: { presentation.didSubmit(); options.onSubmit?() }
         )
@@ -210,7 +210,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             }
             .onChange(of: swiftUIFocus) { if isFocused != $0 { isFocused = $0 } }
             .onChange(of: isFocused) { if swiftUIFocus != $0 { swiftUIFocus = $0 } }
-            .accessibilityLabel(options.accessibilityLabel ?? options.label ?? "Phone number")
+            .accessibilityLabel(options.accessibilityLabel ?? options.label ?? KitoLocalization.string("phone.accessibilityLabel", "Phone number"))
         #endif
     }
 
@@ -257,7 +257,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Country: \(country.localizedName), \(country.formattedDialCode)")
+        .accessibilityLabel(KitoLocalization.format("phone.countryAccessibility", "Country: %@, %@", country.localizedName, country.formattedDialCode))
         .accessibilityAddTraits(phone.selectionMode == .locked ? [] : .isButton)
     }
 

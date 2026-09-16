@@ -55,11 +55,3 @@ public enum KitoLocalization {
 }
 
 private final class BundleToken {}
-
-/// Short internal alias.
-enum L10n {
-    static func s(_ key: String, _ fallback: String) -> String { KitoLocalization.string(key, fallback) }
-    static func f(_ key: String, _ fallback: String, _ args: CVarArg...) -> String {
-        String(format: KitoLocalization.string(key, fallback), locale: .current, arguments: args)
-    }
-}

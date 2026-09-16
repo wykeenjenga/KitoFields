@@ -16,11 +16,11 @@ public enum KitoPasswordStrength: Int, CaseIterable, Comparable, Sendable {
 
     public var label: String {
         switch self {
-        case .veryWeak: return L10n.s("strength.veryWeak", "Very weak")
-        case .weak: return L10n.s("strength.weak", "Weak")
-        case .fair: return L10n.s("strength.fair", "Fair")
-        case .strong: return L10n.s("strength.strong", "Strong")
-        case .veryStrong: return L10n.s("strength.veryStrong", "Very strong")
+        case .veryWeak: return KitoLocalization.string("strength.veryWeak", "Very weak")
+        case .weak: return KitoLocalization.string("strength.weak", "Weak")
+        case .fair: return KitoLocalization.string("strength.fair", "Fair")
+        case .strong: return KitoLocalization.string("strength.strong", "Strong")
+        case .veryStrong: return KitoLocalization.string("strength.veryStrong", "Very strong")
         }
     }
 
@@ -122,7 +122,7 @@ public struct KitoStrengthMeter: View {
         }
         .animation(theme.animation, value: strength)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L10n.f("strength.accessibility", "Password strength: %@", strength.label))
+        .accessibilityLabel(KitoLocalization.format("strength.accessibility", "Password strength: %@", strength.label))
     }
 }
 

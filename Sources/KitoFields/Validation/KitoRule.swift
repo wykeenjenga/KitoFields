@@ -33,7 +33,7 @@ public struct KitoRule: Identifiable {
 
     // MARK: Presets
 
-    public static func required(message: String = L10n.s("rule.required", "This field is required")) -> KitoRule {
+    public static func required(message: String = KitoLocalization.string("rule.required", "This field is required")) -> KitoRule {
         KitoRule(id: requiredID, message: message, skipsWhenEmpty: false) {
             !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
@@ -41,64 +41,64 @@ public struct KitoRule: Identifiable {
     public static var required: KitoRule { required() }
 
     public static func minLength(_ length: Int, message: String? = nil) -> KitoRule {
-        KitoRule(id: "inputkit.minLength.\(length)", message: message ?? L10n.f("rule.minLength", "Must be at least %d characters", length)) {
+        KitoRule(id: "inputkit.minLength.\(length)", message: message ?? KitoLocalization.format("rule.minLength", "Must be at least %d characters", length)) {
             $0.count >= length
         }
     }
 
     public static func maxLength(_ length: Int, message: String? = nil) -> KitoRule {
-        KitoRule(id: "inputkit.maxLength.\(length)", message: message ?? L10n.f("rule.maxLength", "Must be at most %d characters", length)) {
+        KitoRule(id: "inputkit.maxLength.\(length)", message: message ?? KitoLocalization.format("rule.maxLength", "Must be at most %d characters", length)) {
             $0.count <= length
         }
     }
 
     public static func exactLength(_ length: Int, message: String? = nil) -> KitoRule {
-        KitoRule(id: "inputkit.exactLength.\(length)", message: message ?? L10n.f("rule.exactLength", "Must be exactly %d characters", length)) {
+        KitoRule(id: "inputkit.exactLength.\(length)", message: message ?? KitoLocalization.format("rule.exactLength", "Must be exactly %d characters", length)) {
             $0.count == length
         }
     }
 
-    public static func email(message: String = L10n.s("rule.email", "Enter a valid email address")) -> KitoRule {
+    public static func email(message: String = KitoLocalization.string("rule.email", "Enter a valid email address")) -> KitoRule {
         KitoRule(id: "inputkit.email", message: message) { KitoEmailValidator.isValid($0) }
     }
     public static var email: KitoRule { email() }
 
-    public static func url(message: String = L10n.s("rule.url", "Enter a valid URL")) -> KitoRule {
+    public static func url(message: String = KitoLocalization.string("rule.url", "Enter a valid URL")) -> KitoRule {
         KitoRule(id: "inputkit.url", message: message) { value in
             guard let url = URL(string: value), let scheme = url.scheme, let host = url.host else { return false }
             return ["http", "https"].contains(scheme.lowercased()) && host.contains(".")
         }
     }
 
-    public static func numeric(message: String = L10n.s("rule.numeric", "Digits only")) -> KitoRule {
+    public static func numeric(message: String = KitoLocalization.string("rule.numeric", "Digits only")) -> KitoRule {
         KitoRule(id: "inputkit.numeric", message: message) { $0.allSatisfy { $0.isASCII && $0.isNumber } }
     }
 
-    public static func decimal(message: String = L10n.s("rule.decimal", "Enter a valid number")) -> KitoRule {
+    public static func decimal(message: String = KitoLocalization.string("rule.decimal", "Enter a valid number")) -> KitoRule {
         KitoRule(id: "inputkit.decimal", message: message) { Double($0.replacingOccurrences(of: ",", with: ".")) != nil }
     }
 
-    public static func alphanumeric(message: String = L10n.s("rule.alphanumeric", "Letters and digits only")) -> KitoRule {
+    public static func alphanumeric(message: String = KitoLocalization.string("rule.alphanumeric", "Letters and digits only")) -> KitoRule {
         KitoRule(id: "inputkit.alphanumeric", message: message) { $0.allSatisfy { $0.isLetter || $0.isNumber } }
     }
 
-    public static func containsUppercase(message: String = L10n.s("rule.uppercase", "At least one uppercase letter")) -> KitoRule {
+    public static func containsUppercase(message: String = KitoLocalization.string("rule.uppercase", "At least one uppercase letter")) -> KitoRule {
         KitoRule(id: "inputkit.uppercase", message: message) { $0.contains { $0.isUppercase } }
     }
 
-    public static func containsLowercase(message: String = L10n.s("rule.lowercase", "At least one lowercase letter")) -> KitoRule {
+    public static func containsLowercase(message: String = KitoLocalization.string("rule.lowercase", "At least one lowercase letter")) -> KitoRule {
         KitoRule(id: "inputkit.lowercase", message: message) { $0.contains { $0.isLowercase } }
     }
 
-    public static func containsDigit(message: String = L10n.s("rule.digit", "At least one number")) -> KitoRule {
+    public static func containsDigit(message: String = KitoLocalization.string("rule.digit", "At least one number")) -> KitoRule {
         KitoRule(id: "inputkit.digit", message: message) { $0.contains { $0.isNumber } }
     }
 
-    public static func containsSymbol(message: String = L10n.s("rule.symbol", "At least one symbol")) -> KitoRule {
+    public static func containsSymbol(message: String = KitoLocalization.string("rule.symbol", "At least one symbol")) -> KitoRule {
         KitoRule(id: "inputkit.symbol", message: message) { $0.contains { !$0.isLetter && !$0.isNumber && !$0.isWhitespace } }
     }
 
-    public static func noWhitespace(message: String = L10n.s("rule.noWhitespace", "Spaces are not allowed")) -> KitoRule {
+    public static func noWhitespace(message: String = KitoLocalization.string("rule.noWhitespace", "Spaces are not allowed")) -> KitoRule {
         KitoRule(id: "inputkit.noWhitespace", message: message) { !$0.contains { $0.isWhitespace } }
     }
 
@@ -110,7 +110,7 @@ public struct KitoRule: Identifiable {
 
     /// Passes when the value equals the value produced by `other()` at validation time
     /// (e.g. confirm-password).
-    public static func matches(_ other: @escaping () -> String, message: String = L10n.s("rule.matches", "Values do not match")) -> KitoRule {
+    public static func matches(_ other: @escaping () -> String, message: String = KitoLocalization.string("rule.matches", "Values do not match")) -> KitoRule {
         KitoRule(id: "inputkit.matches", message: message) { $0 == other() }
     }
 

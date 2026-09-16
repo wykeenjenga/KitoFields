@@ -196,7 +196,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(revealed ? L10n.s("password.hide", "Hide password") : L10n.s("password.show", "Show password"))
+            .accessibilityLabel(revealed ? KitoLocalization.string("password.hide", "Hide password") : KitoLocalization.string("password.show", "Show password"))
         )
     }
 

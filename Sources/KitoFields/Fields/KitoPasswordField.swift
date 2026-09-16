@@ -71,12 +71,12 @@ public struct KitoPasswordField: View, KitoFieldConfigurable {
     /// ```swift
     /// KitoPasswordField("Confirm password", text: $confirm).mustMatch($password)
     /// ```
-    public func mustMatch(_ other: Binding<String>, message: String = L10n.s("password.mismatch", "Passwords do not match")) -> KitoPasswordField {
+    public func mustMatch(_ other: Binding<String>, message: String = KitoLocalization.string("password.mismatch", "Passwords do not match")) -> KitoPasswordField {
         mustMatch({ other.wrappedValue }, message: message)
     }
 
     /// Confirm-password helper with a custom source of truth, evaluated at validation time.
-    public func mustMatch(_ other: @escaping () -> String, message: String = L10n.s("password.mismatch", "Passwords do not match")) -> KitoPasswordField {
+    public func mustMatch(_ other: @escaping () -> String, message: String = KitoLocalization.string("password.mismatch", "Passwords do not match")) -> KitoPasswordField {
         var copy = self
         copy.base.options.rules.append(.matches(other, message: message))
         return copy

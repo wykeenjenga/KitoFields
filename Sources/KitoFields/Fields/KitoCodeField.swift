@@ -66,7 +66,7 @@ public struct KitoCodeField: View {
         }
         .onAppear { if focusBinding?.wrappedValue == true { isFocused = true } }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Verification code")
+        .accessibilityLabel(KitoLocalization.string("code.accessibilityLabel", "Verification code"))
         .accessibilityValue(code.map(String.init).joined(separator: " "))
     }
 

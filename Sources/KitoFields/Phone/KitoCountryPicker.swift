@@ -176,12 +176,12 @@ public struct KitoCountryRow: View {
 
 /// Text used by the picker. Override for localization.
 public struct KitoCountryPickerStrings: Sendable {
-    public var title = "Select KitoCountry"
-    public var searchPrompt = "Search by country or code"
-    public var cancel = "Cancel"
-    public var noResults = "No countries found"
-    public var preferredSection = "Suggested"
-    public var allSection = "All Countries"
+    public var title = KitoLocalization.string("picker.title", "Select Country")
+    public var searchPrompt = KitoLocalization.string("picker.searchPrompt", "Search by country or code")
+    public var cancel = KitoLocalization.string("picker.cancel", "Cancel")
+    public var noResults = KitoLocalization.string("picker.noResults", "No countries found")
+    public var preferredSection = KitoLocalization.string("picker.preferred", "Suggested")
+    public var allSection = KitoLocalization.string("picker.all", "All Countries")
     public init() {}
 }
 
