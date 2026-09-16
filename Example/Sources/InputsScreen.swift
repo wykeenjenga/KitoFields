@@ -80,7 +80,7 @@ struct SignUpFormDemo: View {
 
                     KitoPasswordField("Confirm password", text: $confirm, prompt: "Re-enter your password")
                         .required()
-                        .mustMatch(password)
+                        .mustMatch($password)
                         .validationTrigger(.live)
                         .isValid($confirmValid)
 

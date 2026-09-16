@@ -28,7 +28,7 @@ Then `import KitoFields`.
 | --- | --- |
 | `KitoTextField` | General text input: title or no title, placeholder, leading/trailing accessories, clear button, character limit + counter, multiline, transforms, validation |
 | `KitoEmailField` | Email keyboard and autofill, whitespace stripped, `.email` rule on blur |
-| `KitoPasswordField` | Secure entry, reveal toggle, strength meter, live requirement checklist, confirm-password matching |
+| `KitoPasswordField` | Secure entry, reveal toggle, strength meter, live requirement checklist, confirm-password matching via `.mustMatch($password)` |
 | `KitoPhoneField` | Country selector (sheet / menu / locked), flags, as-you-type formatting, `+`/`00` paste detection, E.164 output, 220+ regions |
 | `KitoCodeField` | OTP boxes backed by one hidden field so SMS autofill and paste work |
 
