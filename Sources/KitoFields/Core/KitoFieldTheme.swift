@@ -130,7 +130,7 @@ public struct KitoFieldTheme: Sendable {
     }
 
     public static var platformFill: Color {
-        #if os(iOS)
+        #if os(iOS) || os(visionOS)
         return Color(UIColor.secondarySystemBackground)
         #elseif os(macOS)
         return Color(NSColor.controlBackgroundColor)

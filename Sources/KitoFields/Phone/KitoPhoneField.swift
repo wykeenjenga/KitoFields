@@ -238,6 +238,10 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
                 Button { showsPicker = true } label: { selectorLabel }
                     .buttonStyle(.plain)
             case .menu:
+                #if os(watchOS)
+                Button { showsPicker = true } label: { selectorLabel }
+                    .buttonStyle(.plain)
+                #else
                 Menu {
                     ForEach(phone.preferred + phone.availableCountries.filter { !phone.preferred.contains($0) }) { c in
                         Button {
@@ -247,8 +251,8 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
                         }
                     }
                 } label: { selectorLabel }
-                .menuStyle(.borderlessButton)
                 .fixedSize()
+                #endif
             case .locked:
                 selectorLabel
             }
@@ -301,11 +305,15 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
 
     private struct SheetDetents: ViewModifier {
         func body(content: Content) -> some View {
-            if #available(iOS 16.0, macOS 13.0, *) {
+            #if os(tvOS)
+            content
+            #else
+            if #available(iOS 16.0, macOS 13.0, watchOS 9.0, visionOS 1.0, *) {
                 content.presentationDetents([.medium, .large])
             } else {
                 content
             }
+            #endif
         }
     }
 

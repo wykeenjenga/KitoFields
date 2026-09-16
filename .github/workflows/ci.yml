@@ -39,3 +39,21 @@ jobs:
       - uses: actions/checkout@v4
       - name: Lint
         run: pod lib lint KitoFields.podspec --allow-warnings --platforms=ios --quick
+
+  platforms:
+    name: Build for ${{ matrix.destination }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        destination:
+          - "generic/platform=iOS Simulator"
+          - "generic/platform=macOS"
+          - "generic/platform=tvOS Simulator"
+          - "generic/platform=watchOS Simulator"
+          - "generic/platform=visionOS Simulator"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build package
+        run: |
+          xcodebuild -scheme KitoFields -destination '${{ matrix.destination }}' -skipPackagePluginValidation build | xcpretty && exit ${PIPESTATUS[0]}

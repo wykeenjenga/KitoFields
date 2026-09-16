@@ -138,7 +138,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
     @ViewBuilder private var configuredTextField: some View {
         Group {
             if let lines = options.multilineRange {
-                if #available(iOS 16.0, macOS 13.0, *) {
+                if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, visionOS 1.0, *) {
                     TextField("", text: $text, axis: .vertical).lineLimit(lines)
                 } else {
                     TextField("", text: $text)

@@ -148,7 +148,7 @@ public extension KitoFieldConfigurable {
 extension View {
     @ViewBuilder
     func kitoKeyboard(_ keyboard: KitoKeyboard) -> some View {
-        #if os(iOS)
+        #if os(iOS) || os(visionOS)
         self.keyboardType(keyboard.uiKeyboardType)
         #else
         self
@@ -157,7 +157,7 @@ extension View {
 
     @ViewBuilder
     func kitoContentType(_ type: KitoContentType) -> some View {
-        #if os(iOS)
+        #if os(iOS) || os(visionOS)
         self.textContentType(type.uiTextContentType)
         #else
         self
@@ -166,7 +166,7 @@ extension View {
 
     @ViewBuilder
     func kitoAutocapitalization(_ mode: KitoAutocapitalization) -> some View {
-        #if os(iOS)
+        #if os(iOS) || os(visionOS)
         self.textInputAutocapitalization(mode.textInputAutocapitalization)
         #else
         self
@@ -174,7 +174,7 @@ extension View {
     }
 }
 
-#if os(iOS)
+#if os(iOS) || os(visionOS)
 extension KitoKeyboard {
     var uiKeyboardType: UIKeyboardType {
         switch self {
