@@ -71,9 +71,11 @@ public struct KitoDateField: View, KitoFieldConfigurable {
             rules.append(KitoRule(id: "inputkit.date.max", message: KitoLocalization.format("number.max", "Must be at most %@", string(maxDate))) { Self.parse($0, format: format).map { $0 <= maxDate } ?? true })
         }
         field.options.rules = rules
+        #if os(iOS) || os(macOS) || os(visionOS)
         if showsCalendarButton, options.trailing == nil {
             field.options.trailing = .button(systemImage: "calendar.badge.clock", accessibilityLabel: "Pick a date") { showsPicker = true }
         }
+        #endif
         return field
             .onChange(of: text) { newText in
                 let parsed = Self.parse(newText, format: format)
@@ -88,6 +90,7 @@ public struct KitoDateField: View, KitoFieldConfigurable {
     }
 
     @ViewBuilder private var pickerSheet: some View {
+        #if os(iOS) || os(macOS) || os(visionOS)
         NavigationView {
             VStack {
                 DatePicker("", selection: Binding(get: { date ?? Date() }, set: { date = $0 }), in: (minDate ?? .distantPast)...(maxDate ?? .distantFuture), displayedComponents: .date)
@@ -101,6 +104,9 @@ public struct KitoDateField: View, KitoFieldConfigurable {
             }
         }
         .modifier(DateSheetDetents())
+        #else
+        EmptyView()
+        #endif
     }
 
     private struct DateSheetDetents: ViewModifier {

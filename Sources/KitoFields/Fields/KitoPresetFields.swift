@@ -62,7 +62,7 @@ public struct KitoUsernameField: View, KitoFieldConfigurable {
         var field = base
         switch status {
         case .checking:
-            field.options.trailing = .custom { ProgressView().controlSize(.small) }
+            field.options.trailing = .custom { ProgressView().modifier(SmallControl()) }
         case .taken:
             field.options.externalError = KitoLocalization.string("username.taken", "That username is taken")
         case .available:
@@ -174,4 +174,16 @@ public struct KitoTextArea: View, KitoFieldConfigurable {
     }
 
     public var body: some View { base }
+}
+
+
+/// `controlSize` is unavailable on tvOS.
+private struct SmallControl: ViewModifier {
+    func body(content: Content) -> some View {
+        #if os(tvOS)
+        content.scaleEffect(0.8)
+        #else
+        content.controlSize(.small)
+        #endif
+    }
 }
