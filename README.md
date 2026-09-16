@@ -260,7 +260,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details, and the issue templates for 
 
 If KitoFields saved you time, you can buy me a coffee. It keeps the packages maintained and the example apps growing.
 
-<a href="https://www.buymeacoffee.com/wykeenjenga"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-black?style=for-the-badge" alt="Buy me a coffee" /></a>
+<a href="https://www.buymeacoffee.com/wycliffnjea"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-black?style=for-the-badge" alt="Buy me a coffee" /></a>
 
 ## License
 
