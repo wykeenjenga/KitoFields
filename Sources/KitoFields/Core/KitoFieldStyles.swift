@@ -162,7 +162,7 @@ public struct KitoFieldStack<Content: View>: View {
 
     public var body: some View {
         let theme = configuration.theme
-        let motion = theme.motion
+        let motion = configuration.motion
         VStack(alignment: .leading, spacing: 0) {
             if showsLabel, let label = configuration.label {
                 label
@@ -268,7 +268,7 @@ public struct KitoFloatingLabelFieldStyle: KitoFieldStyle {
             .padding(theme.contentPadding)
             .frame(minHeight: max(theme.minHeight, 56))
             .kitoFieldChrome(c)
-            .animation(theme.motion.label, value: floating)
+            .animation(c.motion.label, value: floating)
         }
     }
 }

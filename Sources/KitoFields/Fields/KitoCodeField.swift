@@ -29,6 +29,7 @@ public struct KitoCodeField: View {
     @FocusState private var isFocused: Bool
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     public init(code: Binding<String>, length: Int = 6) {
         _code = code
@@ -47,7 +48,7 @@ public struct KitoCodeField: View {
             }
             .contentShape(Rectangle())
             .onTapGesture { isFocused = true }
-            .kitoFieldShake(trigger: errorMessage, animation: theme.motion.shake)
+            .kitoFieldShake(trigger: reduceMotion ? nil : errorMessage, animation: theme.motion.shake)
             if let errorMessage {
                 Label(errorMessage, systemImage: "exclamationmark.circle.fill")
                     .font(theme.helperFont)
@@ -55,8 +56,8 @@ public struct KitoCodeField: View {
             }
         }
         .opacity(isEnabled ? 1 : theme.disabledOpacity)
-        .animation(theme.animation, value: code)
-        .animation(theme.animation, value: isFocused)
+        .animation(reduceMotion ? .easeOut(duration: 0.1) : theme.animation, value: code)
+        .animation(reduceMotion ? .easeOut(duration: 0.1) : theme.animation, value: isFocused)
         .onChange(of: code) { sanitize($0) }
         .onChange(of: isFocused) { focused in
             if let focusBinding, focusBinding.wrappedValue != focused { focusBinding.wrappedValue = focused }

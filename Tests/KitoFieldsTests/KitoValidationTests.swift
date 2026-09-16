@@ -106,3 +106,17 @@ final class KitoFieldMotionTests: XCTestCase {
         XCTAssertTrue(KitoFieldTheme.default.motion.shakesOnError)
     }
 }
+
+final class KitoReducedMotionTests: XCTestCase {
+    func testConfigurationUsesSubtleMotionWhenReduced() {
+        var theme = KitoFieldTheme()
+        theme.motion = .lively
+        let make = { (reduced: Bool) in
+            KitoFieldStyleConfiguration(label: nil, placeholder: nil, input: KitoFieldSlot(EmptyView()), leading: nil, trailing: nil, footer: nil, helperText: nil, errorMessages: [], isFocused: false, isEnabled: true, isEmpty: true, isSuccess: false, theme: theme, reducesMotion: reduced)
+        }
+        XCTAssertTrue(make(false).motion.shakesOnError)
+        XCTAssertGreaterThan(make(false).motion.focusScale, 1)
+        XCTAssertFalse(make(true).motion.shakesOnError)
+        XCTAssertEqual(make(true).motion.focusScale, 1)
+    }
+}
