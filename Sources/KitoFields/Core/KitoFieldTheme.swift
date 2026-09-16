@@ -63,6 +63,12 @@ public struct KitoFieldTheme: Sendable {
 
     // MARK: Typography
     public var font: Font = .body
+    #if canImport(UIKit)
+    /// Font for UIKit-backed inputs (the phone number field on iOS). SwiftUI's `Font` cannot be
+    /// bridged to `UIFont`, so set this alongside `font` when you use a custom typeface.
+    /// Nil uses the Dynamic Type body font.
+    public var uiFont: UIFont? = nil
+    #endif
     public var labelFont: Font = .subheadline.weight(.medium)
     public var helperFont: Font = .caption
     public var iconSize: CGFloat = 17

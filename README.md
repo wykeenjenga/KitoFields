@@ -27,14 +27,14 @@ Professional, fully customisable SwiftUI form inputs: text, email, password, pho
 
 1. File ▸ Add Package Dependencies…
 2. Paste `https://github.com/wykeenjenga/KitoFields.git`
-3. Dependency rule: *Up to Next Major Version* from `1.1.1`
+3. Dependency rule: *Up to Next Major Version* from `1.1.2`
 4. Add the `KitoFields` product to your app target
 
 **In `Package.swift`**
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.1.1")
+    .package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.1.2")
 ],
 targets: [
     .target(name: "MyApp", dependencies: ["KitoFields"])
@@ -168,6 +168,7 @@ Rules other than `.required` pass on empty input, so optional fields stay quiet 
     theme.focusedBorderColor = .indigo
     theme.errorColor = .pink
     theme.font = .system(.body, design: .rounded)
+    theme.uiFont = .systemFont(ofSize: 17, weight: .regular)   // iOS only: font for the UIKit-backed phone input
     theme.requiredIndicator = "*"          // nil to hide
     theme.optionalIndicator = "(optional)" // nil to hide
     theme.errorDisplay = .all              // .first / .all / .none
@@ -209,6 +210,21 @@ Every field animates focus, errors, success ticks, floating labels and flag swap
 - `KitoCodeField` shakes when you set an error message.
 - Shake any view yourself with `.kitoFieldShake(trigger:)`.
 - When the system **Reduce Motion** setting is on, every field automatically switches to `KitoFieldMotion.subtle`: no shake, no lift, short fades. Custom styles get this for free by reading `configuration.motion` instead of `theme.motion`.
+
+## Localization
+
+Every built-in string (rule messages, picker titles, password strength labels, accessibility labels)
+is localized. English, Swahili (`sw`) and French (`fr`) ship in the package; country names come from
+the system for every language. To override or add languages, supply a provider once at launch:
+
+```swift
+KitoLocalization.provider = { key, english in
+    NSLocalizedString("kito.\(key)", value: english, comment: "")   // return nil to keep the bundled copy
+}
+```
+
+Per-field messages still win: `.required(message:)`, `.validation(.minLength(8, message: "…"))`,
+`.phoneErrorMessages { … }` and `.countryPicker { $0.strings.title = "…" }`.
 
 ## Phone numbers
 
