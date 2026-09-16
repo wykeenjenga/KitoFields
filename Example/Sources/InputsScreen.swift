@@ -29,6 +29,7 @@ struct InputsScreen: View {
 // MARK: - Sign-up form
 
 struct SignUpFormDemo: View {
+    @EnvironmentObject private var appearance: AppearanceModel
     @State private var name = ""
     @State private var email = ""
     @State private var phone: KitoPhoneNumber?
@@ -67,6 +68,7 @@ struct SignUpFormDemo: View {
                     KitoPhoneField("Mobile number", phoneNumber: $phone)
                         .required()
                         .countries(preferred: ["KE", "UG", "TZ", "US", "GB"])
+                        .countryPicker { $0.locale = appearance.locale }
                         .helperText("We'll text you a verification code")
                         .validationIndicators()
                         .isValid($phoneValid)

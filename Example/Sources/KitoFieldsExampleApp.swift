@@ -55,6 +55,43 @@ final class AppearanceModel: ObservableObject {
         }
     }
 
+    enum Language: String, CaseIterable, Identifiable {
+        case system, en, sw, fr
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .system: return "System"
+            case .en: return "English"
+            case .sw: return "Kiswahili"
+            case .fr: return "Français"
+            }
+        }
+        var code: String? { self == .system ? nil : rawValue }
+    }
+
+    /// Switches every KitoFields string at runtime through `KitoLocalization.provider`, and the
+    /// country names through the picker locale. Real apps normally rely on the device language;
+    /// this shows how an in-app language setting can drive the package.
+    @Published var language: Language = .system {
+        didSet { applyLanguage() }
+    }
+
+    private var strings: [String: String] = [:]
+
+    private func applyLanguage() {
+        guard let code = language.code,
+              let path = KitoLocalization.bundle.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: code),
+              let table = NSDictionary(contentsOfFile: path) as? [String: String] else {
+            strings = [:]
+            KitoLocalization.provider = nil
+            return
+        }
+        strings = table
+        KitoLocalization.provider = { [table] key, _ in table[key] }
+    }
+
+    var locale: Locale { language.code.map(Locale.init(identifier:)) ?? .autoupdatingCurrent }
+
     @Published var style: Style = .outlined
     @Published var shape: Shape = .capsule
     @Published var motion: Motion = .default
@@ -85,6 +122,8 @@ struct ContentView: View {
         }
         .environmentObject(appearance)
         .tint(appearance.tint)
+        .environment(\.locale, appearance.locale)
+        .id(appearance.language)   // re-render every string when the language changes
     }
 }
 
@@ -114,6 +153,13 @@ struct AppearanceScreen: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Language") {
+                    Picker("Language", selection: $appearance.language) {
+                        ForEach(AppearanceModel.Language.allCases) { Text($0.title).tag($0) }
+                    }.pickerStyle(.segmented)
+                    Text("Validation messages, picker titles, strength labels and accessibility text switch instantly. Field labels typed in this demo stay in English.")
+                        .font(.footnote).foregroundColor(.secondary)
+                }
                 Section("Field style") {
                     Picker("Style", selection: $appearance.style) {
                         ForEach(AppearanceModel.Style.allCases) { Text($0.title).tag($0) }
