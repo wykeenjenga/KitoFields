@@ -168,6 +168,7 @@ Rules other than `.required` pass on empty input, so optional fields stay quiet 
     theme.focusedBorderColor = .indigo
     theme.errorColor = .pink
     theme.font = .system(.body, design: .rounded)
+    theme.uiFont = .systemFont(ofSize: 17, weight: .regular)   // iOS only: font for the UIKit-backed phone input
     theme.requiredIndicator = "*"          // nil to hide
     theme.optionalIndicator = "(optional)" // nil to hide
     theme.errorDisplay = .all              // .first / .all / .none

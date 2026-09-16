@@ -18,6 +18,7 @@ struct KitoNativeTextField: UIViewRepresentable {
     @Binding var isFocused: Bool
     var keyboard: UIKeyboardType = .phonePad
     var contentType: UITextContentType? = .telephoneNumber
+    var font: UIFont?
     var textColor: Color
     var tint: Color
     var accessibilityLabel: String
@@ -30,7 +31,7 @@ struct KitoNativeTextField: UIViewRepresentable {
         field.delegate = context.coordinator
         field.borderStyle = .none
         field.backgroundColor = .clear
-        field.font = .preferredFont(forTextStyle: .body)
+        field.font = font ?? .preferredFont(forTextStyle: .body)
         field.adjustsFontForContentSizeCategory = true
         field.keyboardType = keyboard
         field.textContentType = contentType
@@ -46,6 +47,7 @@ struct KitoNativeTextField: UIViewRepresentable {
     func updateUIView(_ field: UITextField, context: Context) {
         context.coordinator.parent = self
         if field.text != text { field.text = text }
+        field.font = font ?? .preferredFont(forTextStyle: .body)
         field.textColor = UIColor(textColor)
         field.tintColor = UIColor(tint)
         field.keyboardType = keyboard
