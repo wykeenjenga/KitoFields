@@ -8,12 +8,19 @@ Professional, fully customisable SwiftUI form inputs: text, email, password, pho
 
 ## Installation
 
+**Swift Package Manager** (Xcode: File ▸ Add Package Dependencies… and paste the URL):
+
 ```swift
-// Package.swift
-.package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.0.0")
+.package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.1.1")
 ```
 
-Or in Xcode: File ▸ Add Package Dependencies… and paste the URL. Then `import KitoFields`.
+**CocoaPods**:
+
+```ruby
+pod 'KitoFields', '~> 1.1'
+```
+
+Then `import KitoFields`.
 
 ## Fields at a glance
 

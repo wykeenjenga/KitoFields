@@ -1,0 +1,7 @@
+version: 1
+builder:
+  configs:
+    - platform: ios
+      documentation_targets: [KitoFields]
+    - platform: macos-spm
+      documentation_targets: [KitoFields]
