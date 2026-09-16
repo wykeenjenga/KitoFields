@@ -18,6 +18,16 @@ public enum KitoCountrySelection: Sendable {
     case locked
 }
 
+/// Where the phone field's initial region comes from.
+public enum KitoDefaultCountry: Sendable, Equatable {
+    /// United States (+1). The package default.
+    case unitedStates
+    /// The device's current region (`Locale.current`), falling back to the United States.
+    case deviceRegion
+    /// A specific ISO 3166-1 alpha-2 code.
+    case iso(String)
+}
+
 /// Phone-specific settings, configured through `KitoPhoneField`'s fluent modifiers.
 public struct KitoPhoneFieldConfiguration {
     public var showsFlag = true
@@ -33,7 +43,9 @@ public struct KitoPhoneFieldConfiguration {
     public var allowedCountries: Set<String>? = nil
     public var excludedCountries: Set<String> = []
     public var preferredCountries: [String] = []
-    public var defaultCountry: String? = nil
+    /// ISO code preselected while the value is empty. Defaults to "US" (+1). Use
+    /// `.defaultCountry(.deviceRegion)` to follow the device locale instead.
+    public var defaultCountry: String? = "US"
     public var picker = KitoCountryPickerConfiguration()
     public var validator = KitoPhoneValidator()
     public var errorMessages: (KitoPhoneError) -> String = { $0.message }
@@ -106,14 +118,14 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     public init(_ label: String? = nil, phoneNumber: Binding<KitoPhoneNumber?>) {
         phoneBinding = phoneNumber; e164Binding = nil; countryBinding = nil; nationalBinding = nil
         options.label = label
-        _country = State(initialValue: phoneNumber.wrappedValue?.country ?? KitoCountryDatabase.current)
+        _country = State(initialValue: phoneNumber.wrappedValue?.country ?? KitoCountryDatabase.country(isoCode: "US") ?? KitoCountryDatabase.current)
     }
 
     /// Binds to an E.164 string ("+254712123456", or "" while empty). Handy for APIs.
     public init(_ label: String? = nil, e164: Binding<String>) {
         phoneBinding = nil; e164Binding = e164; countryBinding = nil; nationalBinding = nil
         options.label = label
-        _country = State(initialValue: KitoPhoneNumber(e164: e164.wrappedValue)?.country ?? KitoCountryDatabase.current)
+        _country = State(initialValue: KitoPhoneNumber(e164: e164.wrappedValue)?.country ?? KitoCountryDatabase.country(isoCode: "US") ?? KitoCountryDatabase.current)
     }
 
     /// Binds region and national digits separately.
@@ -481,8 +493,18 @@ public extension KitoPhoneField {
             $0.preferredCountries = preferred.map { $0.uppercased() }
         }
     }
-    /// Region selected when the bound value is empty. Defaults to the device region.
+    /// Region selected when the bound value is empty. Defaults to the United States (+1).
     func defaultCountry(_ isoCode: String) -> KitoPhoneField { mutatingPhone { $0.defaultCountry = isoCode.uppercased() } }
+    /// Region selected when the bound value is empty, from a source such as `.deviceRegion`.
+    func defaultCountry(_ source: KitoDefaultCountry) -> KitoPhoneField {
+        mutatingPhone {
+            switch source {
+            case .unitedStates: $0.defaultCountry = "US"
+            case .deviceRegion: $0.defaultCountry = nil
+            case .iso(let code): $0.defaultCountry = code.uppercased()
+            }
+        }
+    }
     func countrySelection(_ mode: KitoCountrySelection) -> KitoPhoneField { mutatingPhone { $0.selectionMode = mode } }
     func showsFlag(_ shows: Bool) -> KitoPhoneField { mutatingPhone { $0.showsFlag = shows } }
     func showsDialCode(_ shows: Bool) -> KitoPhoneField { mutatingPhone { $0.showsDialCode = shows } }

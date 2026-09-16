@@ -177,7 +177,7 @@ struct PhoneDemo: View {
         ScrollView {
             Themed {
                 VStack(alignment: .leading, spacing: 18) {
-                    KitoPhoneField("Default (device region)", phoneNumber: $phone)
+                    KitoPhoneField("Default (United States)", phoneNumber: $phone)
                         .validationIndicators()
                         .onPhoneValidationChange { state = $0 }
                     Group {
@@ -190,6 +190,9 @@ struct PhoneDemo: View {
 
                     KitoPhoneField("Bound to an E.164 string", e164: $e164)
                         .clearButton()
+
+                    KitoPhoneField("Device region", phoneNumber: .constant(nil))
+                        .defaultCountry(.deviceRegion)
                     Text(e164.isEmpty ? "(empty)" : e164).font(.footnote.monospaced())
 
                     KitoPhoneField("Locked to Kenya", country: .constant(KitoCountryDatabase.country(isoCode: "KE")!), nationalNumber: $kenyaOnly)
