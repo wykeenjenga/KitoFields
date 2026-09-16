@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   DESC
   s.homepage         = 'https://github.com/wykeenjenga/KitoFields'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Wycliff Njenga' => 'wycliff@triply.co' }
+  s.author           = { 'Wycliff Njenga' => 'wycliffnjenga19@gmail.com' }
   s.source           = { :git => 'https://github.com/wykeenjenga/KitoFields.git', :tag => s.version.to_s }
   s.social_media_url = 'https://x.com/wycliffnjenga2'
 
