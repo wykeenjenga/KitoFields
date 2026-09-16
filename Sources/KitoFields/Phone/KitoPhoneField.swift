@@ -238,7 +238,8 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
                 Button { showsPicker = true } label: { selectorLabel }
                     .buttonStyle(.plain)
             case .menu:
-                #if os(watchOS)
+                #if os(watchOS) || os(tvOS)
+                // Menu is unavailable on watchOS and needs tvOS 17; use the sheet there.
                 Button { showsPicker = true } label: { selectorLabel }
                     .buttonStyle(.plain)
                 #else
