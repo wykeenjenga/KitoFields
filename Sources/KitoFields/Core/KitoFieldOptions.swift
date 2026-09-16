@@ -53,7 +53,7 @@ public struct KitoFieldOptions {
     public var accessibilityLabel: String?
     /// Marks the field as required: adds a required-indicator to the label and a `.required` rule.
     public var isRequired = false
-    public var requiredMessage = "This field is required"
+    public var requiredMessage = L10n.s("rule.required", "This field is required")
 
     public init() {}
 
@@ -88,7 +88,7 @@ public extension KitoFieldConfigurable {
 
     /// Marks the field required. Shows the theme's required indicator next to the label and
     /// fails validation while empty.
-    func required(_ isRequired: Bool = true, message: String = "This field is required") -> Self {
+    func required(_ isRequired: Bool = true, message: String = L10n.s("rule.required", "This field is required")) -> Self {
         mutating { $0.isRequired = isRequired; $0.requiredMessage = message }
     }
 

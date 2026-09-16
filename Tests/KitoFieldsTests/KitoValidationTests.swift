@@ -106,3 +106,28 @@ final class KitoFieldMotionTests: XCTestCase {
         XCTAssertTrue(KitoFieldTheme.default.motion.shakesOnError)
     }
 }
+
+final class KitoLocalizationTests: XCTestCase {
+    func testAllLanguagesDefineTheSameKeys() {
+        let en = KitoLocalization.keys(forLanguage: "en")
+        XCTAssertGreaterThan(en.count, 30)
+        for code in ["sw", "fr"] {
+            let keys = KitoLocalization.keys(forLanguage: code)
+            XCTAssertEqual(keys, en, "\(code) is missing \(en.subtracting(keys)) / has extra \(keys.subtracting(en))")
+        }
+    }
+
+    func testEnglishFallbackAndProviderOverride() {
+        XCTAssertEqual(KitoLocalization.string("rule.required", "fallback"), KitoLocalization.string("rule.required", "fallback"))
+        XCTAssertEqual(KitoLocalization.string("does.not.exist", "Fallback copy"), "Fallback copy")
+        KitoLocalization.provider = { key, _ in key == "rule.required" ? "Lazima" : nil }
+        defer { KitoLocalization.provider = nil }
+        XCTAssertEqual(KitoRule.required().message, "Lazima")
+        XCTAssertEqual(KitoRule.email().message, KitoLocalization.string("rule.email", ""))
+    }
+
+    func testFormattedMessages() {
+        XCTAssertTrue(KitoRule.minLength(8).message.contains("8"))
+        XCTAssertTrue(KitoRule.exactLength(4).message.contains("4"))
+    }
+}

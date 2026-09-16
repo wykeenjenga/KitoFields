@@ -87,7 +87,7 @@ enum KitoFieldControls {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Clear text")
+            .accessibilityLabel(L10n.s("field.clear", "Clear text"))
         )
     }
 
@@ -97,7 +97,7 @@ enum KitoFieldControls {
                 .font(.system(size: theme.iconSize))
                 .foregroundColor(isError ? theme.errorColor : theme.successColor)
                 .transition(.scale.combined(with: .opacity))
-                .accessibilityLabel(isError ? "Invalid" : "Valid")
+                .accessibilityLabel(isError ? L10n.s("field.invalid", "Invalid") : L10n.s("field.valid", "Valid"))
         )
     }
 }
