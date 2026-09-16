@@ -56,9 +56,9 @@ final class AppearanceModel: ObservableObject {
     }
 
     @Published var style: Style = .outlined
-    @Published var shape: Shape = .rounded
+    @Published var shape: Shape = .capsule
     @Published var motion: Motion = .default
-    @Published var tint: Color = .indigo
+    @Published var tint: Color = .black
     @Published var showsBorder = true
     @Published var showsShadow = false
 
