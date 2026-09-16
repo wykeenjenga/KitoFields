@@ -65,7 +65,8 @@ public struct KitoFieldChrome: ViewModifier {
 
 public extension View {
     func kitoFieldChrome(_ configuration: KitoFieldStyleConfiguration, fill: Color? = nil, borderWidth: CGFloat? = nil, shape: KitoFieldShape? = nil) -> some View {
-        modifier(KitoFieldChrome(
+        modifier(KitoFloatingErrorModifier(configuration: configuration))
+        .modifier(KitoFieldChrome(
             shape: shape ?? configuration.theme.shape,
             fill: fill ?? configuration.backgroundColor,
             borderColor: configuration.borderColor,
@@ -124,7 +125,7 @@ public struct KitoFieldMessages: View {
 
     public var body: some View {
         let theme = configuration.theme
-        let errors = configuration.displayedErrors
+        let errors = configuration.inlineErrors
         if !errors.isEmpty {
             VStack(alignment: .leading, spacing: 2) {
                 ForEach(Array(errors.enumerated()), id: \.offset) { _, message in
@@ -174,7 +175,7 @@ public struct KitoFieldStack<Content: View>: View {
                 .scaleEffect(configuration.isFocused ? motion.focusScale : 1)
                 .modifier(KitoFieldShakeEffect(shakes: shakes))
             KitoFieldMessages(configuration)
-                .padding(.top, (configuration.displayedErrors.isEmpty && configuration.helperText == nil) ? 0 : theme.helperSpacing)
+                .padding(.top, (configuration.inlineErrors.isEmpty && configuration.helperText == nil) ? 0 : theme.helperSpacing)
             if let footer = configuration.footer {
                 footer.padding(.top, theme.helperSpacing)
             }

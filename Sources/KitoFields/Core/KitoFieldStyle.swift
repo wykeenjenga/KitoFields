@@ -40,13 +40,16 @@ public struct KitoFieldStyleConfiguration {
     /// True when the system "Reduce Motion" setting is on. Styles should read `motion` rather
     /// than `theme.motion` so the subtle preset is used automatically.
     public let reducesMotion: Bool
+    /// Where this field shows its errors (options override the theme).
+    public let errorPresentation: KitoErrorPresentation
 
-    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme, reducesMotion: Bool = false) {
+    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme, reducesMotion: Bool = false, errorPresentation: KitoErrorPresentation? = nil) {
         self.label = label; self.placeholder = placeholder; self.input = input
         self.leading = leading; self.trailing = trailing; self.footer = footer
         self.helperText = helperText; self.errorMessages = errorMessages
         self.isFocused = isFocused; self.isEnabled = isEnabled; self.isEmpty = isEmpty
         self.isSuccess = isSuccess; self.theme = theme; self.reducesMotion = reducesMotion
+        self.errorPresentation = errorPresentation ?? theme.errorPresentation
     }
 
     /// The theme's motion, or `KitoFieldMotion.subtle` when Reduce Motion is enabled.
@@ -79,6 +82,11 @@ public struct KitoFieldStyleConfiguration {
         case .all: return errorMessages
         case .none: return []
         }
+    }
+
+    /// Errors to render as text under the field; empty for floating/none presentations.
+    public var inlineErrors: [String] {
+        errorPresentation == .inline ? displayedErrors : []
     }
 
     public var labelColor: Color {

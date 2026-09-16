@@ -78,6 +78,15 @@ Pair it with [KitoButtons](https://github.com/wykeenjenga/KitoButtons) for match
 | `KitoPasswordField` | Secure entry, reveal toggle, strength meter, live requirement checklist, confirm-password matching via `.mustMatch($password)` |
 | `KitoPhoneField` | Country selector (sheet / menu / locked), flags, as-you-type formatting, `+`/`00` paste detection, E.164 output, 220+ regions |
 | `KitoCountryField` | Country selector: flag (emoji, circle, rounded, tile, ISO badge), name, dial code and currency, with a searchable picker that remembers recent picks |
+| `KitoNameField` | Words capitalization, letters-only rule, animated person icon, given/family autofill |
+| `KitoUsernameField` | Lowercase, allowed-character rule, debounced async availability check with spinner and result |
+| `KitoSearchField` | Magnifier, clear, debounced `onSearch` |
+| `KitoURLField` | URL keyboard and validation |
+| `KitoTextArea` | Multi-line with a remaining-characters counter |
+| `KitoNumberField` / `KitoCurrencyField` | Locale-aware numbers, ranges, steppers, units, currency formatting from a code or a `KitoCountry` |
+| `KitoDateField` | Masked date entry, real-date validation, min/max/future, calendar sheet |
+| `KitoCardNumberField` / `KitoCardExpiryField` / `KitoCVVField` | Brand detection (Visa, Mastercard, Amex, Discover, Diners, JCB, UnionPay), brand-specific grouping, Luhn, MM/YY not-expired |
+| `KitoSelectField` | Dropdown with searchable sheet or menu, subtitles and icons |
 | `KitoCodeField` | OTP boxes backed by one hidden field so SMS autofill and paste work |
 
 Every field conforms to `KitoFieldConfigurable`, so they share the same fluent modifiers.
@@ -119,6 +128,25 @@ struct SignUp: View {
         .kitoFieldShape(.capsule)
     }
 }
+```
+
+## Error presentation
+
+```swift
+.errorPresentation(.inline)               // text under the field (default)
+.errorPresentation(.floating)             // bubble anchored above the field
+.errorPresentation(.floatingWhenFocused)  // bubble only while editing
+.errorPresentation(.none)                 // border and indicator only
+.kitoFieldTheme { $0.errorPresentation = .floating; $0.errorBubbleBackground = .black }
+```
+
+## Animated icons
+
+```swift
+.leadingIcon("person", focused: "person.fill", motion: .bounce)     // .swap / .bounce / .wiggle / .pulse
+.leadingIcon("envelope", focused: "envelope.open.fill", error: "envelope.badge", motion: .wiggle)
+KitoPasswordField(text: $pw).animatedLockIcon()                       // lock fills, opens on reveal, wiggles on error
+.leadingAccessory(.reactive { ctx in /* ctx.isFocused, hasError, isSuccess, isEmpty */ })
 ```
 
 ## Shared modifiers (all fields)
@@ -277,7 +305,8 @@ The phone field's `.onCountryChange` hands back the same `KitoCountry`, and `.fl
 
 ### Country picker
 
-Search matches the localized name, English name, ISO code, dial code and currency code, ignoring
+Recent picks and Suggested countries appear as capsule chips (up to four each), followed by
+Recent searches, Your region and A–Z sections. Search matches the localized name, English name, ISO code, dial code and currency code, ignoring
 accents. The list shows **Recent** picks (persisted, per storage key), **Your region**, your
 preferred countries and then A–Z sections. Configure with `.countryPicker { $0.showsRecents = false; $0.showsCurrency = true; $0.groupsAlphabetically = false }`.
 

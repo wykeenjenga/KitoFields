@@ -58,6 +58,8 @@ public struct KitoFieldTheme: Sendable {
     public var focusedLabelColor: Color? = nil
     public var helperColor: Color = .secondary
     public var iconColor: Color = .secondary
+    /// Icon colour while focused; nil uses `focusedBorderColor`.
+    public var focusedIconColor: Color? = nil
     public var tintColor: Color? = nil
     public var disabledOpacity: Double = 0.5
 
@@ -78,6 +80,11 @@ public struct KitoFieldTheme: Sendable {
     public var labelSpacing: CGFloat = 6
     public var helperSpacing: CGFloat = 6
     public var errorDisplay: KitoErrorDisplay = .first
+    /// Inline text, floating bubble, bubble while focused, or none. Fields can override per instance.
+    public var errorPresentation: KitoErrorPresentation = .inline
+    /// Bubble colours for the floating presentations; nil uses `errorColor` and white.
+    public var errorBubbleBackground: Color? = nil
+    public var errorBubbleForeground: Color = .white
     /// Appended to the label of required fields. Set to nil to hide.
     public var requiredIndicator: String? = "*"
     public var requiredIndicatorColor: Color = .red

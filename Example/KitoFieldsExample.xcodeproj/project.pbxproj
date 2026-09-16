@@ -10,9 +10,12 @@
 		73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */; };
 		889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */; };
 		8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */; };
+		C3028B6F6479B7C914B0E5D1 /* FieldSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = F47F3BF8352C95D8C308A264 /* FieldSample.swift */; };
 		C69FE391E6846C6235961042 /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6367614A2FCF304E6AD28BB /* AboutScreen.swift */; };
 		E6F0F89049D71D0E65996854 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */; };
 		EA9E2449C741C4C30DCBE79E /* KitoFields in Frameworks */ = {isa = PBXBuildFile; productRef = 38206AE08621F196CBD4C4DC /* KitoFields */; };
+		EB40FDC44FC71754C44E2912 /* FieldSampleCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96CBFCF437925F4AAC6786A8 /* FieldSampleCatalog.swift */; };
+		F8FF4AE5661F46C2680D8BAB /* FieldSamplesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B192F8AECA1FB5DFFA9AB26 /* FieldSamplesScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,9 +24,12 @@
 		5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitoFieldsExampleApp.swift; sourceTree = "<group>"; };
 		5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6D56BF9E7CAA65F81E73312B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7B192F8AECA1FB5DFFA9AB26 /* FieldSamplesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldSamplesScreen.swift; sourceTree = "<group>"; };
 		8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationsDemo.swift; sourceTree = "<group>"; };
-		8E5D9C7DC9F69A91D57B5643 /* wt-fields-icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-fields-icon"; path = ..; sourceTree = SOURCE_ROOT; };
+		96CBFCF437925F4AAC6786A8 /* FieldSampleCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldSampleCatalog.swift; sourceTree = "<group>"; };
 		C6367614A2FCF304E6AD28BB /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
+		C77E539965197C1A9F0EC907 /* wt-fields-more */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-fields-more"; path = ..; sourceTree = SOURCE_ROOT; };
+		F47F3BF8352C95D8C308A264 /* FieldSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldSample.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +44,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		061B16315E06BACE7031C860 /* Samples */ = {
+			isa = PBXGroup;
+			children = (
+				F47F3BF8352C95D8C308A264 /* FieldSample.swift */,
+				96CBFCF437925F4AAC6786A8 /* FieldSampleCatalog.swift */,
+				7B192F8AECA1FB5DFFA9AB26 /* FieldSamplesScreen.swift */,
+			);
+			path = Samples;
+			sourceTree = "<group>";
+		};
 		192C01F69BB2A8418837B1CE = {
 			isa = PBXGroup;
 			children = (
@@ -56,6 +72,7 @@
 				6D56BF9E7CAA65F81E73312B /* Info.plist */,
 				3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */,
 				5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */,
+				061B16315E06BACE7031C860 /* Samples */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -63,7 +80,7 @@
 		A90EA08C754C72F173BBF83E /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				8E5D9C7DC9F69A91D57B5643 /* wt-fields-icon */,
+				C77E539965197C1A9F0EC907 /* wt-fields-more */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -150,6 +167,9 @@
 			files = (
 				C69FE391E6846C6235961042 /* AboutScreen.swift in Sources */,
 				73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */,
+				C3028B6F6479B7C914B0E5D1 /* FieldSample.swift in Sources */,
+				EB40FDC44FC71754C44E2912 /* FieldSampleCatalog.swift in Sources */,
+				F8FF4AE5661F46C2680D8BAB /* FieldSamplesScreen.swift in Sources */,
 				889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */,
 				8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */,
 			);

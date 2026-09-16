@@ -36,6 +36,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
     @State private var presentation = KitoValidationPresentation()
     @State private var lastReported: KitoValidationState?
     @FocusState private var focusedField: FocusField?
+    @State private var nativeFocused = false
 
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
@@ -59,12 +60,22 @@ public struct KitoTextField: View, KitoFieldConfigurable {
 
     private var isSecureEntry: Bool { secure != nil }
     private var revealed: Bool { secure?.revealedBinding?.wrappedValue ?? isRevealed }
-    private var isFocused: Bool { focusedField != nil }
+    private var isFocused: Bool { focusedField != nil || nativeFocused }
+    private var usesNativeMaskedInput: Bool {
+        #if os(iOS)
+        return options.mask != nil && !isSecureEntry
+        #else
+        return false
+        #endif
+    }
 
     private var validationState: KitoValidationState {
         if let external = options.externalError { return .invalid([external]) }
         var rules = options.effectiveRules
         if let secure { rules += secure.requirements.filter { req in !rules.contains { $0.id == req.id } } }
+        if let limit = options.characterLimit, !options.characterLimitIsHard, !rules.contains(where: { $0.id == "inputkit.maxLength.\(limit)" }) {
+            rules.append(.maxLength(limit))
+        }
         return KitoValidator.validate(text, rules: rules)
     }
 
@@ -115,7 +126,9 @@ public struct KitoTextField: View, KitoFieldConfigurable {
     // MARK: Input control
 
     @ViewBuilder private var inputView: some View {
-        if isSecureEntry {
+        if usesNativeMaskedInput {
+            maskedInput
+        } else if isSecureEntry {
             ZStack(alignment: .leading) {
                 configuredTextField
                     .focused($focusedField, equals: .plain)
@@ -149,6 +162,35 @@ public struct KitoTextField: View, KitoFieldConfigurable {
         }
         .modifier(CommonTextStyling(options: options, theme: theme, contentTypeOverride: nil))
         .onSubmit(handleSubmit)
+    }
+
+    @ViewBuilder private var maskedInput: some View {
+        #if os(iOS)
+        KitoNativeTextField(
+            text: $text,
+            isFocused: $nativeFocused,
+            keyboard: options.keyboard.uiKeyboardType,
+            contentType: options.contentType.uiTextContentType,
+            font: theme.uiFont,
+            textColor: theme.textColor,
+            tint: theme.tintColor ?? theme.focusedBorderColor,
+            accessibilityLabel: options.accessibilityLabel ?? options.label ?? options.placeholder ?? "",
+            onEdit: { proposed in
+                var digits = proposed.asciiDigits
+                if let mask = options.mask {
+                    let capacity = mask.digitCount
+                    if options.characterLimitIsHard || options.characterLimit == nil { digits = String(digits.prefix(capacity)) }
+                    return KitoPhoneFormatter().apply(mask: mask, to: digits)
+                }
+                return proposed
+            },
+            onSubmit: handleSubmit
+        )
+        .frame(minHeight: 22)
+        .onChange(of: nativeFocused) { handleFocusChange($0) }
+        #else
+        configuredTextField.focused($focusedField, equals: .plain)
+        #endif
     }
 
     private struct CommonTextStyling: ViewModifier {
@@ -218,9 +260,11 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                 if hasCounter, let limit = options.characterLimit {
                     HStack {
                         Spacer()
-                        Text("\(text.count) / \(limit)")
+                        Text(options.counterStyle == .count
+                             ? "\(text.count) / \(limit)"
+                             : KitoLocalization.format("counter.remaining", "%d left", max(limit - text.count, 0)))
                             .font(theme.helperFont)
-                            .foregroundColor(text.count >= limit ? theme.errorColor : theme.helperColor)
+                            .foregroundColor(text.count > limit ? theme.errorColor : (text.count == limit ? theme.helperColor.opacity(0.9) : theme.helperColor))
                             .monospacedDigit()
                             .scaleEffect(text.count >= limit ? 1.15 : 1, anchor: .trailing)
                             .animation((reduceMotion ? KitoFieldMotion.subtle : theme.motion).pop, value: text.count >= limit)
@@ -235,7 +279,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
     private func handleTextChange(_ newValue: String) {
         var value = newValue
         if let transform = options.transform { value = transform(value) }
-        if let limit = options.characterLimit, value.count > limit { value = String(value.prefix(limit)) }
+        if let limit = options.characterLimit, options.characterLimitIsHard, options.mask == nil, value.count > limit { value = String(value.prefix(limit)) }
         if value != newValue {
             // Defer the rewrite so a keystroke that arrives before this one is applied is not lost.
             DispatchQueue.main.async {
@@ -291,6 +335,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
     }
 
     private func setFocus(_ focused: Bool) {
+        if usesNativeMaskedInput { nativeFocused = focused; return }
         if focused {
             focusedField = isSecureEntry ? (revealed ? .plain : .secure) : .plain
         } else {

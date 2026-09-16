@@ -18,6 +18,14 @@ public enum KitoContentType: Sendable {
     case none, name, givenName, familyName, username, emailAddress, password, newPassword, oneTimeCode, telephoneNumber, url, streetAddress, postalCode, creditCardNumber
 }
 
+/// How the character counter reads.
+public enum KitoCounterStyle: Sendable {
+    /// "12 / 50"
+    case count
+    /// "38 left"
+    case remaining
+}
+
 public enum KitoAutocapitalization: Sendable {
     case never, words, sentences, characters
 }
@@ -35,6 +43,13 @@ public struct KitoFieldOptions {
     public var showsClearButton = false
     public var characterLimit: Int?
     public var showsCharacterCounter = false
+    /// Hard limits block extra characters; soft limits allow them and flag the counter/error.
+    public var characterLimitIsHard = true
+    public var counterStyle: KitoCounterStyle = .count
+    /// Digit mask such as "#### #### #### ####" or "##/##". Non-digit input is dropped.
+    public var mask: String?
+    /// Where errors are shown; nil follows the theme.
+    public var errorPresentation: KitoErrorPresentation?
     public var rules: [KitoRule] = []
     public var validationTrigger: KitoValidationTrigger = .onBlur
     public var showsSuccessIndicator = false
@@ -98,14 +113,27 @@ public extension KitoFieldConfigurable {
     func leadingIcon(_ systemName: String) -> Self { leadingAccessory(.systemImage(systemName)) }
     /// Shortcut for a trailing SF Symbol.
     func trailingIcon(_ systemName: String) -> Self { trailingAccessory(.systemImage(systemName)) }
+    /// Leading symbol that swaps to `focused` and animates with focus, error and success.
+    /// `.leadingIcon("person", focused: "person.fill")`
+    func leadingIcon(_ systemName: String, focused: String?, error: String? = nil, motion: KitoIconMotion = .bounce) -> Self {
+        leadingAccessory(.animatedSymbol(systemName, focused: focused, error: error, motion: motion))
+    }
 
     /// Shows an "x" button that empties the field.
     func clearButton(_ enabled: Bool = true) -> Self { mutating { $0.showsClearButton = enabled } }
 
-    /// Hard limit on length, optionally with a "12 / 50" counter under the field.
-    func characterLimit(_ limit: Int?, showsCounter: Bool = false) -> Self {
-        mutating { $0.characterLimit = limit; $0.showsCharacterCounter = showsCounter }
+    /// Character cap, optionally with a counter under the field. Hard caps block extra input;
+    /// soft caps allow it and turn the counter red with an error.
+    func characterLimit(_ limit: Int?, showsCounter: Bool = false, hard: Bool = true, counter: KitoCounterStyle = .count) -> Self {
+        mutating { $0.characterLimit = limit; $0.showsCharacterCounter = showsCounter; $0.characterLimitIsHard = hard; $0.counterStyle = counter }
     }
+
+    /// Inline text, a floating bubble, a bubble only while focused, or nothing.
+    func errorPresentation(_ presentation: KitoErrorPresentation) -> Self { mutating { $0.errorPresentation = presentation } }
+
+    /// Formats digits as they are typed, e.g. `"#### #### #### ####"`. On iOS this uses the
+    /// UIKit-backed input so no keystroke is ever lost.
+    func mask(_ mask: String?) -> Self { mutating { $0.mask = mask } }
 
     /// Validation rules and when their failures become visible.
     func validation(_ rules: [KitoRule], trigger: KitoValidationTrigger = .onBlur) -> Self {

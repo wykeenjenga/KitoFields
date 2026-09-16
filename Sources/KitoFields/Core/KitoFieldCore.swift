@@ -45,7 +45,8 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
             isEmpty: isEmpty,
             isSuccess: isSuccess,
             theme: theme,
-            reducesMotion: reduceMotion
+            reducesMotion: reduceMotion,
+            errorPresentation: options.errorPresentation
         )
     }
 
@@ -60,13 +61,17 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
         return KitoFieldSlot(text)
     }
 
+    private var accessoryContext: KitoAccessoryContext {
+        KitoAccessoryContext(theme: theme, isFocused: isFocused, isEmpty: isEmpty, hasError: !errors.isEmpty, isSuccess: isSuccess, reducesMotion: reduceMotion)
+    }
+
     private var leadingSlot: KitoFieldSlot? {
         if let override = leadingOverride { return KitoFieldSlot(override) }
-        return options.leading.map { KitoFieldSlot($0.view(theme: theme)) }
+        return options.leading.map { KitoFieldSlot($0.view(accessoryContext)) }
     }
 
     private var trailingSlot: KitoFieldSlot? {
-        let custom = options.trailing?.view(theme: theme)
+        let custom = options.trailing?.view(accessoryContext)
         if custom == nil && trailingExtras.isEmpty { return nil }
         return KitoFieldSlot(
             HStack(spacing: theme.accessorySpacing * 0.6) {
