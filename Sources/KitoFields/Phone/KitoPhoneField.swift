@@ -188,6 +188,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             isFocused: $isFocused,
             keyboard: (options.keyboard == .default ? KitoKeyboard.phonePad : options.keyboard).uiKeyboardType,
             contentType: .telephoneNumber,
+            font: theme.uiFont,
             textColor: theme.textColor,
             tint: theme.tintColor ?? theme.focusedBorderColor,
             accessibilityLabel: options.accessibilityLabel ?? options.label ?? KitoLocalization.string("phone.accessibilityLabel", "Phone number"),
