@@ -6,21 +6,65 @@ Professional, fully customisable SwiftUI form inputs: text, email, password, pho
 - Author: **Wycliff Njenga**
 - Licence: MIT
 
+<p align="center">
+  <img src="Assets/signup-empty.png" width="200" alt="Sign-up form with required indicators" />
+  <img src="Assets/signup-filled.png" width="200" alt="Sign-up form with validation, strength meter and inline errors" />
+  <img src="Assets/phone.png" width="200" alt="Phone number field with country picker and E.164 output" />
+  <img src="Assets/style-gallery.png" width="200" alt="Outlined, filled, underlined, floating label and plain styles" />
+</p>
+
+<p align="center">
+  <img src="Assets/animations.gif" width="260" alt="Shake on error, focus lift, animated ticks and flags" />
+  <img src="Assets/style-gallery-2.png" width="200" alt="Underlined and floating label styles" />
+  <img src="Assets/animations.png" width="200" alt="Inline errors, live validation, one-time code" />
+</p>
+
 ## Installation
 
-**Swift Package Manager** (Xcode: File ▸ Add Package Dependencies… and paste the URL):
+### Swift Package Manager (recommended)
+
+**In Xcode**
+
+1. File ▸ Add Package Dependencies…
+2. Paste `https://github.com/wykeenjenga/KitoFields.git`
+3. Dependency rule: *Up to Next Major Version* from `1.1.1`
+4. Add the `KitoFields` product to your app target
+
+**In `Package.swift`**
 
 ```swift
-.package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.1.1")
+dependencies: [
+    .package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.1.1")
+],
+targets: [
+    .target(name: "MyApp", dependencies: ["KitoFields"])
+]
 ```
 
-**CocoaPods**:
+### CocoaPods
 
 ```ruby
 pod 'KitoFields', '~> 1.1'
 ```
 
-Then `import KitoFields`.
+Then `pod install` and open the `.xcworkspace`.
+
+### Import
+
+```swift
+import KitoFields
+```
+
+### Requirements
+
+| | Minimum |
+| --- | --- |
+| iOS | 15.0 |
+| macOS | 12.0 |
+| Swift | 5.9 |
+| Xcode | 15 |
+
+Pair it with [KitoButtons](https://github.com/wykeenjenga/KitoButtons) for matching capsule buttons and add-to-cart animations.
 
 ## Fields at a glance
 
