@@ -148,11 +148,18 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
     @ViewBuilder private var input: some View {
         switch config.selectionMode {
         case .menu:
+            #if os(watchOS) || os(tvOS)
+            // Menu is unavailable on watchOS and needs tvOS 17; use the sheet there.
+            Button { showsPicker = true } label: { valueLabel }
+                .buttonStyle(.plain)
+                .disabled(!isEnabled)
+            #else
             Menu {
                 ForEach(config.preferred + config.availableCountries.filter { !config.preferred.contains($0) }) { country in
                     Button { selection = country } label: { Text("\(country.flag) \(country.localizedName)  \(country.formattedDialCode)") }
                 }
             } label: { valueLabel }
+            #endif
         case .sheet, .locked:
             Button { if config.selectionMode == .sheet { showsPicker = true } } label: { valueLabel }
                 .buttonStyle(.plain)
