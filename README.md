@@ -234,7 +234,7 @@ KitoPhoneField(e164: $e164String)                 // "+254712123456" or ""
 KitoPhoneField(country: $country, nationalNumber: $digits)
 
     .countries(allowed: ["KE", "UG"], excluded: [], preferred: ["KE"])
-    .defaultCountry("KE")
+    .defaultCountry("KE")          // default is "US"; .defaultCountry(.deviceRegion) follows the device
     .countrySelection(.sheet)      // .menu / .locked
     .flagStyle(.emoji)             // .isoCode / .hidden
     .showsDialCode(true).showsChevron(true).showsDivider(true)

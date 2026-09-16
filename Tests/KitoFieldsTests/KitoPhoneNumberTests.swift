@@ -112,3 +112,18 @@ final class PhoneNumberTests: XCTestCase {
         XCTAssertEqual(Set([a, us]).count, 1)
     }
 }
+
+final class KitoDefaultCountryTests: XCTestCase {
+    func testDefaultIsUnitedStates() {
+        let config = KitoPhoneFieldConfiguration()
+        XCTAssertEqual(config.defaultCountry, "US")
+        XCTAssertEqual(config.resolvedDefaultCountry().isoCode, "US")
+    }
+
+    func testDeviceRegionFallsBackWhenNotAllowed() {
+        var config = KitoPhoneFieldConfiguration()
+        config.defaultCountry = nil
+        config.allowedCountries = ["KE"]
+        XCTAssertEqual(config.resolvedDefaultCountry().isoCode, "KE")
+    }
+}
