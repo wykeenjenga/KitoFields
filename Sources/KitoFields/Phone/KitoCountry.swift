@@ -76,12 +76,17 @@ public struct KitoCountry: Identifiable, Codable, Sendable {
         }
     }
 
-    /// Currency symbol as shown in the user's locale, e.g. "KSh", "$", "€".
+    /// Currency symbol as shown in the user's locale, e.g. "Ksh", "$", "€".
     public var currencySymbol: String? {
         guard let code = currencyCode else { return nil }
-        let locale = Locale(identifier: "\(Locale.autoupdatingCurrent.identifier)@currency=\(code)")
-        let symbol = locale.currencySymbol
-        return (symbol == nil || symbol == code) ? Locale(identifier: "en_\(isoCode)").currencySymbol : symbol
+        // NumberFormatter resolves the symbol for an arbitrary currency in the user's locale;
+        // Locale.currencySymbol only knows the locale's own currency.
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = .autoupdatingCurrent
+        formatter.currencyCode = code
+        if let symbol = formatter.currencySymbol, symbol != code { return symbol }
+        return Locale(identifier: "en_\(isoCode)").currencySymbol
     }
 
     /// Currency name in the user's locale, e.g. "Kenyan Shilling".
