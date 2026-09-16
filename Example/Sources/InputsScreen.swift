@@ -16,6 +16,7 @@ struct InputsScreen: View {
                 NavigationLink("Sign-up form") { SignUpFormDemo() }
                 NavigationLink("Text field options") { TextFieldOptionsDemo() }
                 NavigationLink("Phone number") { PhoneDemo() }
+                NavigationLink("Country & currency") { CountryDemo() }
                 NavigationLink("Password & strength") { PasswordDemo() }
                 NavigationLink("One-time code") { OTPDemo() }
                 NavigationLink("Style gallery") { StyleGalleryDemo() }
@@ -319,5 +320,60 @@ struct StyleGalleryDemo: View {
                 }
             ))
         }
+    }
+}
+
+
+// MARK: - Country
+
+struct CountryDemo: View {
+    @State private var country: KitoCountry? = KitoCountryDatabase.country(isoCode: "KE")
+    @State private var iso = ""
+    @State private var picked: KitoCountry?
+
+    var body: some View {
+        ScrollView {
+            Themed {
+                VStack(alignment: .leading, spacing: 18) {
+                    KitoCountryField("Country", selection: $country)
+                        .shows(flag: true, name: true, dialCode: true, currency: true)
+                        .flagStyle(.circle)
+                        .required()
+                        .countries(preferred: ["KE", "UG", "TZ", "US", "GB"])
+                        .onCountryChange { picked = $0 }
+
+                    if let c = country {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Callback data").font(.subheadline.weight(.semibold))
+                            Group {
+                                Text("Flag: \(c.flag)   ISO: \(c.isoCode)   Dial: \(c.formattedDialCode)")
+                                Text("Name: \(c.localizedName) (\(c.englishName))")
+                                Text("Currency: \(c.currencyCode ?? "—") \(c.currencySymbol ?? "") · \(c.localizedCurrencyName ?? "")")
+                                Text("Amount: \(c.formatCurrency(1250) ?? "—")")
+                            }
+                            .font(.footnote.monospaced())
+                        }
+                    }
+
+                    Text("Flag styles").font(.subheadline.weight(.semibold)).foregroundColor(.secondary)
+                    KitoCountryField("Emoji", selection: $country).flagStyle(.emoji).showsChevron(false)
+                    KitoCountryField("Circle", selection: $country).flagStyle(.circle).showsChevron(false)
+                    KitoCountryField("Rounded", selection: $country).flagStyle(.rounded).showsChevron(false)
+                    KitoCountryField("Tile", selection: $country).flagStyle(.tile).showsChevron(false)
+                    KitoCountryField("ISO badge", selection: $country).flagStyle(.isoCode).showsChevron(false)
+                    KitoCountryField("No flag, name only", selection: $country).shows(flag: false, name: true).showsChevron(false)
+
+                    Text("ISO code binding").font(.subheadline.weight(.semibold)).foregroundColor(.secondary)
+                    KitoCountryField("Ship to", isoCode: $iso)
+                        .placeholder("Choose a destination")
+                        .clearButton()
+                        .countryPicker { $0.showsCurrency = true }
+                    Text("iso = \"\(iso)\"").font(.footnote.monospaced())
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("Country & currency")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

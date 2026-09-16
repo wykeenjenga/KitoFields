@@ -82,3 +82,38 @@ final class CountryDatabaseTests: XCTestCase {
         XCTAssertNil(KitoCountryDatabase.match(internationalDigits: "0"))
     }
 }
+
+final class KitoCountryDataTests: XCTestCase {
+    func testCurrencies() {
+        XCTAssertEqual(KitoCountryDatabase.country(isoCode: "KE")?.currencyCode, "KES")
+        XCTAssertEqual(KitoCountryDatabase.country(isoCode: "US")?.currencyCode, "USD")
+        XCTAssertEqual(KitoCountryDatabase.country(isoCode: "FR")?.currencyCode, "EUR")
+        XCTAssertNotNil(KitoCountryDatabase.country(isoCode: "KE")?.currencySymbol)
+        XCTAssertTrue(KitoCountryDatabase.country(isoCode: "US")!.formatCurrency(1250, locale: Locale(identifier: "en_US"))!.contains("1,250"))
+    }
+
+    func testSummaryCarriesEverything() {
+        let summary = KitoCountryDatabase.country(isoCode: "KE")!.summary
+        XCTAssertEqual(summary.flag, "🇰🇪")
+        XCTAssertEqual(summary.formattedDialCode, "+254")
+        XCTAssertEqual(summary.currencyCode, "KES")
+        XCTAssertEqual(summary.englishName, "Kenya")
+    }
+
+    func testRecentsRoundTrip() {
+        let key = "test.recents.\(UUID().uuidString)"
+        defer { KitoCountryRecents.clear(key: key) }
+        XCTAssertTrue(KitoCountryRecents.load(key: key).isEmpty)
+        KitoCountryRecents.record(KitoCountryDatabase.country(isoCode: "KE")!, key: key, limit: 2)
+        KitoCountryRecents.record(KitoCountryDatabase.country(isoCode: "US")!, key: key, limit: 2)
+        KitoCountryRecents.record(KitoCountryDatabase.country(isoCode: "KE")!, key: key, limit: 2)
+        XCTAssertEqual(KitoCountryRecents.load(key: key, limit: 2).map(\.isoCode), ["KE", "US"])
+        KitoCountryRecents.record(KitoCountryDatabase.country(isoCode: "GB")!, key: key, limit: 2)
+        XCTAssertEqual(KitoCountryRecents.load(key: key, limit: 2).map(\.isoCode), ["GB", "KE"])
+    }
+
+    func testDiacriticInsensitiveFolding() {
+        XCTAssertEqual(KitoCountryPicker.fold("Côte d'Ivoire"), "cote d'ivoire")
+        XCTAssertEqual(KitoCountryPicker.fold("Réunion"), "reunion")
+    }
+}

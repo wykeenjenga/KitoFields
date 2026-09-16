@@ -37,3 +37,8 @@
 "picker.preferred" = "Suggested";
 "picker.all" = "All Countries";
 "code.accessibilityLabel" = "Verification code";
+"picker.recent" = "Recent";
+"picker.currentRegion" = "Your region";
+"picker.noResultsHint" = "Try the country name, ISO code, dial code or currency.";
+"country.placeholder" = "Select a country";
+"country.accessibilityLabel" = "Country";

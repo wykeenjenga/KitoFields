@@ -37,3 +37,8 @@
 "picker.preferred" = "Zinazopendekezwa";
 "picker.all" = "Nchi Zote";
 "code.accessibilityLabel" = "Msimbo wa uthibitisho";
+"picker.recent" = "Za hivi karibuni";
+"picker.currentRegion" = "Eneo lako";
+"picker.noResultsHint" = "Jaribu jina la nchi, msimbo wa ISO, msimbo wa simu au sarafu.";
+"country.placeholder" = "Chagua nchi";
+"country.accessibilityLabel" = "Nchi";

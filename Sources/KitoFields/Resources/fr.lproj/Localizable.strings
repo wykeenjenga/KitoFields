@@ -37,3 +37,8 @@
 "picker.preferred" = "Suggestions";
 "picker.all" = "Tous les pays";
 "code.accessibilityLabel" = "Code de vérification";
+"picker.recent" = "Récents";
+"picker.currentRegion" = "Votre région";
+"picker.noResultsHint" = "Essayez le nom du pays, le code ISO, l'indicatif ou la devise.";
+"country.placeholder" = "Sélectionner un pays";
+"country.accessibilityLabel" = "Pays";
