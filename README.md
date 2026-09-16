@@ -261,3 +261,24 @@ KitoCodeField(code: $code, length: 6)
 ## Example app
 
 `Example/KitoFieldsExample.xcodeproj` (in this repository) demonstrates every field, style, shape, theme and motion preset: sign-up form, text field options, phone, password, one-time code, style gallery and an animations screen. Regenerate the project with `xcodegen generate` after editing `Example/project.yml`.
+
+## Contributing
+
+KitoFields is open source and open to contributions. The short version:
+
+1. **Open an issue** describing the bug or the feature you would like.
+2. **Fork and branch** from `main`, make the change with tests and a screenshot or GIF for UI work.
+3. **Open a pull request** referencing the issue. CI runs the tests, the iOS example build and the podspec lint.
+4. Once **approved**, a maintainer merges it and it ships in the next release.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details, and the issue templates for what to include.
+
+## Support the project
+
+If KitoFields saved you time, you can buy me a coffee. It keeps the packages maintained and the example apps growing.
+
+<a href="https://www.buymeacoffee.com/wykeenjenga"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-black?style=for-the-badge" alt="Buy me a coffee" /></a>
+
+## License
+
+MIT. See [LICENSE](LICENSE). Made by Wycliff Njenga in Nairobi.

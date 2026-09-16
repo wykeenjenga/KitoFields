@@ -1,0 +1,33 @@
+name: Bug report
+description: Something does not work as documented.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal code or steps in the example app.
+      render: swift
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "1.3.0"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Xcode / iOS version
+      placeholder: "Xcode 16.2, iOS 18.2 simulator"
+    validations:
+      required: true
