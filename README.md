@@ -2,7 +2,7 @@
 
 Professional, fully customisable SwiftUI form inputs: text, email, password, phone number with country picker, and one-time code. One style and theme system drives every field, so a whole app can switch from rounded outlines to capsules or a single underline with one modifier.
 
-- iOS 15+ / macOS 12+, pure SwiftUI, no dependencies
+- iOS 15+, macOS 12+, tvOS 15+, watchOS 8+, visionOS 1+; pure SwiftUI, no dependencies
 - Author: **Wycliff Njenga**
 - Licence: MIT
 
@@ -61,6 +61,9 @@ import KitoFields
 | --- | --- |
 | iOS | 15.0 |
 | macOS | 12.0 |
+| tvOS | 15.0 |
+| watchOS | 8.0 |
+| visionOS | 1.0 |
 | Swift | 5.9 |
 | Xcode | 15 |
 

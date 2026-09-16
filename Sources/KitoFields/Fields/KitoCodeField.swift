@@ -47,7 +47,7 @@ public struct KitoCodeField: View {
                 hiddenField
             }
             .contentShape(Rectangle())
-            .onTapGesture { isFocused = true }
+            .modifier(FocusOnTap { isFocused = true })
             .kitoFieldShake(trigger: reduceMotion ? nil : errorMessage, animation: theme.motion.shake)
             if let errorMessage {
                 Label(errorMessage, systemImage: "exclamationmark.circle.fill")
@@ -158,5 +158,18 @@ public struct KitoCodeField: View {
                     withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) { visible = false }
                 }
         }
+    }
+}
+
+
+/// `onTapGesture` does not exist on tvOS; focus comes from the remote there.
+private struct FocusOnTap: ViewModifier {
+    let action: () -> Void
+    func body(content: Content) -> some View {
+        #if os(tvOS)
+        content
+        #else
+        content.onTapGesture(perform: action)
+        #endif
     }
 }

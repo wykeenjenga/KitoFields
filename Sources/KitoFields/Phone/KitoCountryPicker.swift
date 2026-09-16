@@ -149,7 +149,7 @@ public struct KitoCountryPicker: View {
 
     private struct InlineTitle: ViewModifier {
         func body(content: Content) -> some View {
-            #if os(iOS)
+            #if os(iOS) || os(watchOS) || os(visionOS)
             content.navigationBarTitleDisplayMode(.inline)
             #else
             content
@@ -169,10 +169,12 @@ public struct KitoCountryPicker: View {
 
     private struct ListStyleModifier: ViewModifier {
         func body(content: Content) -> some View {
-            #if os(iOS)
+            #if os(iOS) || os(visionOS)
             content.listStyle(.insetGrouped)
-            #else
+            #elseif os(macOS)
             content.listStyle(.inset)
+            #else
+            content
             #endif
         }
     }

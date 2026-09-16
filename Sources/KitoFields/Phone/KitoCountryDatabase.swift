@@ -36,7 +36,7 @@ public enum KitoCountryDatabase {
     /// The region for the device's locale, defaulting to the United States.
     public static var current: KitoCountry {
         let code: String?
-        if #available(iOS 16.0, macOS 13.0, *) {
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, visionOS 1.0, *) {
             code = Locale.autoupdatingCurrent.region?.identifier
         } else {
             code = Locale.autoupdatingCurrent.regionCode
