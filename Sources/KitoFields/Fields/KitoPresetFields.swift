@@ -177,10 +177,10 @@ public struct KitoTextArea: View, KitoFieldConfigurable {
 }
 
 
-/// `controlSize` is unavailable on tvOS.
+/// `controlSize` is unavailable on tvOS and needs watchOS 9.
 private struct SmallControl: ViewModifier {
     func body(content: Content) -> some View {
-        #if os(tvOS)
+        #if os(tvOS) || os(watchOS)
         content.scaleEffect(0.8)
         #else
         content.controlSize(.small)
