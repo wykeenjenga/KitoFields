@@ -70,6 +70,7 @@ public struct KitoErrorBubble: View {
 /// Attaches the floating error bubble above a field row when the configuration asks for it.
 struct KitoFloatingErrorModifier: ViewModifier {
     let configuration: KitoFieldStyleConfiguration
+    @State private var bubbleHeight: CGFloat = 0
 
     private var shouldShow: Bool {
         guard !configuration.displayedErrors.isEmpty else { return false }
@@ -84,12 +85,24 @@ struct KitoFloatingErrorModifier: ViewModifier {
         content.overlay(alignment: .topLeading) {
             if shouldShow {
                 KitoErrorBubble(messages: configuration.displayedErrors, theme: configuration.theme)
-                    .alignmentGuide(.top) { d in d[.bottom] + 10 }
+                    .background(GeometryReader { proxy in
+                        Color.clear.preference(key: BubbleHeightKey.self, value: proxy.size.height)
+                    })
+                    .onPreferenceChange(BubbleHeightKey.self) { bubbleHeight = $0 }
+                    // Sit fully above the row: move up by the bubble's own height plus the arrow gap.
+                    .offset(y: -(bubbleHeight + 10))
+                    .opacity(bubbleHeight == 0 ? 0 : 1)
                     .transition(.asymmetric(insertion: .scale(scale: 0.9, anchor: .bottomLeading).combined(with: .opacity), removal: .opacity))
                     .zIndex(1)
+                    .allowsHitTesting(false)
             }
         }
         .animation(configuration.motion.error, value: shouldShow)
         .animation(configuration.motion.error, value: configuration.displayedErrors)
+    }
+
+    private struct BubbleHeightKey: PreferenceKey {
+        static var defaultValue: CGFloat = 0
+        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
     }
 }
