@@ -236,7 +236,11 @@ public struct KitoTextField: View, KitoFieldConfigurable {
         if let transform = options.transform { value = transform(value) }
         if let limit = options.characterLimit, value.count > limit { value = String(value.prefix(limit)) }
         if value != newValue {
-            text = value
+            // Defer the rewrite so a keystroke that arrives before this one is applied is not lost.
+            DispatchQueue.main.async {
+                guard text == newValue else { return }
+                text = value
+            }
             return
         }
         if value.isEmpty && !isFocused {

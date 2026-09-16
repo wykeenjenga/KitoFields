@@ -91,7 +91,8 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     @State private var showsPicker = false
     @State private var lastReportedState: KitoPhoneState?
     @State private var hasAppeared = false
-    @FocusState private var isFocused: Bool
+    @State private var isFocused = false
+    @FocusState private var swiftUIFocus: Bool
 
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
@@ -167,7 +168,6 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             input: textField,
             footer: EmptyView?.none
         )
-        .onChange(of: displayText) { handleTextChange($0) }
         .onChange(of: country) { handleCountryChange($0) }
         .onChange(of: isFocused) { handleFocusChange($0) }
         .onChange(of: validationState) { report($0) }
@@ -181,18 +181,37 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         .accessibilityElement(children: .contain)
     }
 
-    private var textField: some View {
+    @ViewBuilder private var textField: some View {
+        #if os(iOS)
+        KitoNativeTextField(
+            text: $displayText,
+            isFocused: $isFocused,
+            keyboard: (options.keyboard == .default ? KitoKeyboard.phonePad : options.keyboard).uiKeyboardType,
+            contentType: .telephoneNumber,
+            textColor: theme.textColor,
+            tint: theme.tintColor ?? theme.focusedBorderColor,
+            accessibilityLabel: options.accessibilityLabel ?? options.label ?? "Phone number",
+            onEdit: { proposed in process(proposed) },
+            onSubmit: { presentation.didSubmit(); options.onSubmit?() }
+        )
+        .frame(minHeight: 22)
+        #else
         TextField("", text: $displayText)
             .textFieldStyle(.plain)
-            .focused($isFocused)
+            .focused($swiftUIFocus)
             .font(theme.font)
             .foregroundColor(theme.textColor)
             .accentColor(theme.tintColor ?? theme.focusedBorderColor)
-            .kitoKeyboard(options.keyboard == .default ? .phonePad : options.keyboard)
-            .kitoContentType(.telephoneNumber)
             .disableAutocorrection(true)
             .onSubmit { presentation.didSubmit(); options.onSubmit?() }
+            .onChange(of: displayText) { newValue in
+                let formatted = process(newValue)
+                if formatted != newValue { rewrite(newValue, to: formatted) }
+            }
+            .onChange(of: swiftUIFocus) { if isFocused != $0 { isFocused = $0 } }
+            .onChange(of: isFocused) { if swiftUIFocus != $0 { swiftUIFocus = $0 } }
             .accessibilityLabel(options.accessibilityLabel ?? options.label ?? "Phone number")
+        #endif
     }
 
     private var trailingExtras: [AnyView] {
@@ -314,7 +333,10 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         phone.formatsAsYouType ? formatter.formatNational(digits, country: country) : digits
     }
 
-    private func handleTextChange(_ newValue: String) {
+    /// Applies an edit: detects international input, strips trunk prefixes, clamps to the region's
+    /// maximum length, commits to the bindings and returns the text that should be displayed.
+    @discardableResult
+    private func process(_ newValue: String) -> String {
         // International entry: "+" or "00" prefix resolves the region as soon as it is unambiguous.
         if phone.detectsCountryFromInternationalInput,
            let international = KitoPhoneParser().internationalDigits(from: newValue) {
@@ -323,17 +345,15 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
                 pendingInternational = nil
                 if matched != country { country = matched }
                 digits = clamp(formatter.stripTrunkPrefix(national, country: matched), for: matched)
-                let formatted = formatter.formatNational(digits, country: matched)
-                if formatted != newValue { displayText = formatted }
                 presentation.didEdit()
                 commit()
-                return
+                return formatter.formatNational(digits, country: matched)
             }
             // Not resolvable yet ("+2"): keep what the user typed.
             pendingInternational = newValue
             if !digits.isEmpty { digits = ""; commit() }
             presentation.didEdit()
-            return
+            return newValue
         }
         pendingInternational = nil
 
@@ -342,7 +362,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             // Just the trunk digit so far ("0"): keep it visible until more digits arrive.
             if digits != "" { digits = ""; commit() }
             presentation.didEdit()
-            return
+            return newValue
         }
         raw = formatter.stripTrunkPrefix(raw, country: country)
         raw = clamp(raw, for: country)
@@ -350,10 +370,20 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         let formatted = format(raw)
         let changed = raw != digits
         digits = raw
-        if formatted != newValue { displayText = formatted }
         if changed || newValue.isEmpty {
             if raw.isEmpty && !isFocused { presentation.reset() } else { presentation.didEdit() }
             commit()
+        }
+        return formatted
+    }
+
+    /// Replaces the field text with its formatted form, but only if no newer keystroke has landed
+    /// in the meantime. Writing synchronously can swallow characters typed faster than SwiftUI
+    /// round-trips the binding (hardware keyboards, fast typists, automated input).
+    private func rewrite(_ observed: String, to formatted: String) {
+        DispatchQueue.main.async {
+            guard displayText == observed else { return }
+            displayText = formatted
         }
     }
 

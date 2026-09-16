@@ -66,8 +66,17 @@ public struct KitoPasswordField: View, KitoFieldConfigurable {
         return copy
     }
 
-    /// Confirm-password helper: fails while the value differs from `other`.
-    public func mustMatch(_ other: @escaping @autoclosure () -> String, message: String = "Passwords do not match") -> KitoPasswordField {
+    /// Confirm-password helper: fails while the value differs from the other field's binding.
+    ///
+    /// ```swift
+    /// KitoPasswordField("Confirm password", text: $confirm).mustMatch($password)
+    /// ```
+    public func mustMatch(_ other: Binding<String>, message: String = "Passwords do not match") -> KitoPasswordField {
+        mustMatch({ other.wrappedValue }, message: message)
+    }
+
+    /// Confirm-password helper with a custom source of truth, evaluated at validation time.
+    public func mustMatch(_ other: @escaping () -> String, message: String = "Passwords do not match") -> KitoPasswordField {
         var copy = self
         copy.base.options.rules.append(.matches(other, message: message))
         return copy
