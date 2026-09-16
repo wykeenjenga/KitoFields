@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  package:
+    name: Package (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v
+
+  ios-example:
+    name: iOS example app
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build example for iOS Simulator
+        run: |
+          xcodebuild \
+            -project Example/KitoFieldsExample.xcodeproj \
+            -scheme KitoFieldsExample \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            build | xcpretty && exit ${PIPESTATUS[0]}
+
+  podspec:
+    name: Podspec lint
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint
+        run: pod lib lint KitoFields.podspec --allow-warnings --platforms=ios --quick
