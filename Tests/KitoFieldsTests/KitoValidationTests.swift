@@ -121,3 +121,76 @@ final class KitoReducedMotionTests: XCTestCase {
         XCTAssertEqual(make(true).motion.focusScale, 1)
     }
 }
+
+final class KitoNewFieldTests: XCTestCase {
+    func testCardBrandDetection() {
+        XCTAssertEqual(KitoCardBrand.detect("4111 1111 1111 1111"), .visa)
+        XCTAssertEqual(KitoCardBrand.detect("5555555555554444"), .mastercard)
+        XCTAssertEqual(KitoCardBrand.detect("2223003122003222"), .mastercard)
+        XCTAssertEqual(KitoCardBrand.detect("378282246310005"), .amex)
+        XCTAssertEqual(KitoCardBrand.detect("6011111111111117"), .discover)
+        XCTAssertEqual(KitoCardBrand.detect("3530111333300000"), .jcb)
+        XCTAssertEqual(KitoCardBrand.detect("6200000000000005"), .unionPay)
+        XCTAssertEqual(KitoCardBrand.detect(""), .unknown)
+        XCTAssertEqual(KitoCardBrand.amex.mask, "#### ###### #####")
+        XCTAssertEqual(KitoCardBrand.amex.cvvLength, 4)
+    }
+
+    func testLuhn() {
+        XCTAssertTrue(KitoCardBrand.passesLuhn("4111 1111 1111 1111"))
+        XCTAssertTrue(KitoCardBrand.passesLuhn("378282246310005"))
+        XCTAssertFalse(KitoCardBrand.passesLuhn("4111 1111 1111 1112"))
+        XCTAssertFalse(KitoCardBrand.passesLuhn("1234"))
+        XCTAssertTrue(KitoRule.luhn().validate("5555555555554444"))
+    }
+
+    func testExpiry() {
+        XCTAssertEqual(KitoCardExpiryField.components("12/30")?.month, 12)
+        XCTAssertEqual(KitoCardExpiryField.components("12/30")?.year, 2030)
+        XCTAssertNil(KitoCardExpiryField.components("13/30"))
+        XCTAssertNil(KitoCardExpiryField.components("1/30"))
+        XCTAssertTrue(KitoCardExpiryField.isExpired(month: 1, year: 2020))
+        XCTAssertFalse(KitoCardExpiryField.isExpired(month: 12, year: 2099))
+        let rules = KitoRule.cardExpiry()
+        XCTAssertEqual(KitoValidator.validate("12/99", rules: rules), .valid)
+        XCTAssertFalse(KitoValidator.validate("01/20", rules: rules).isValid)
+    }
+
+    func testDateParsing() {
+        XCTAssertNotNil(KitoDateField.parse("31/12/2026", format: "dd/MM/yyyy"))
+        XCTAssertNil(KitoDateField.parse("31/02/2026", format: "dd/MM/yyyy"), "February 31st must be rejected")
+        XCTAssertNil(KitoDateField.parse("3/1/2026", format: "dd/MM/yyyy"))
+        XCTAssertNotNil(KitoDateField.parse("2026-02-28", format: "yyyy-MM-dd"))
+        XCTAssertTrue(KitoRule.date(format: "MM/dd/yyyy").validate("02/28/2026"))
+    }
+
+    func testNumberRange() {
+        let rules = KitoRule.range(1...99, locale: Locale(identifier: "en_US"))
+        XCTAssertEqual(KitoValidator.validate("50", rules: rules), .valid)
+        XCTAssertFalse(KitoValidator.validate("0", rules: rules).isValid)
+        XCTAssertFalse(KitoValidator.validate("100", rules: rules).isValid)
+        XCTAssertTrue(KitoRule.personName().validate("Wycliff Njenga-O'Brien"))
+        XCTAssertFalse(KitoRule.personName().validate("W1"))
+        XCTAssertTrue(KitoRule.username().validate("wykee_2"))
+        XCTAssertFalse(KitoRule.username().validate("hi"))
+    }
+
+    func testEmailSuggestions() {
+        XCTAssertEqual(KitoEmailField.suggestion(for: "wycliff@gmial.com"), "wycliff@gmail.com")
+        XCTAssertEqual(KitoEmailField.suggestion(for: "w@hotmial.com"), "w@hotmail.com")
+        XCTAssertNil(KitoEmailField.suggestion(for: "w@gmail.com"), "exact matches need no suggestion")
+        XCTAssertNil(KitoEmailField.suggestion(for: "w@triply.co"), "unrelated domains are left alone")
+        XCTAssertNil(KitoEmailField.suggestion(for: "no-at-sign"))
+    }
+
+    func testRecentSearches() {
+        let key = "test.searches.\(UUID().uuidString)"
+        defer { KitoCountryRecents.clear(key: key) }
+        KitoCountryRecents.recordSearch("ken", key: key, limit: 2)
+        KitoCountryRecents.recordSearch("Ken", key: key, limit: 2)
+        KitoCountryRecents.recordSearch("+44", key: key, limit: 2)
+        XCTAssertEqual(KitoCountryRecents.loadSearches(key: key, limit: 2), ["+44", "Ken"])
+        KitoCountryRecents.recordSearch("   ", key: key)
+        XCTAssertEqual(KitoCountryRecents.loadSearches(key: key, limit: 2).count, 2)
+    }
+}

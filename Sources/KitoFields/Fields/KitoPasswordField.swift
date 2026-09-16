@@ -18,6 +18,8 @@ import SwiftUI
 /// ```
 public struct KitoPasswordField: View, KitoFieldConfigurable {
     private var base: KitoTextField
+    private var animatesLock = false
+    @State private var revealedState = false
 
     public var options: KitoFieldOptions {
         get { base.options }
@@ -33,7 +35,19 @@ public struct KitoPasswordField: View, KitoFieldConfigurable {
         base.options.validationTrigger = .onBlur
     }
 
-    public var body: some View { base }
+    public var body: some View {
+        if animatesLock {
+            var field = base
+            if field.secure?.revealedBinding == nil { field.secure?.revealedBinding = $revealedState }
+            let open = field.secure?.revealedBinding?.wrappedValue ?? revealedState
+            field.options.leading = .animatedSymbol(open ? "lock.open" : "lock", focused: open ? "lock.open.fill" : "lock.fill", error: "lock.trianglebadge.exclamationmark", motion: .wiggle)
+            return AnyView(field)
+        }
+        return AnyView(base)
+    }
+
+    /// Leading lock icon that fills on focus, opens when the password is revealed and wiggles on error.
+    public func animatedLockIcon(_ enabled: Bool = true) -> KitoPasswordField { var c = self; c.animatesLock = enabled; return c }
 
     private func mutatingSecure(_ change: (inout KitoSecureEntryOptions) -> Void) -> KitoPasswordField {
         var copy = self

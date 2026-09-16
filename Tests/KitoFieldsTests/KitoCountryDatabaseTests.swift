@@ -89,6 +89,8 @@ final class KitoCountryDataTests: XCTestCase {
         XCTAssertEqual(KitoCountryDatabase.country(isoCode: "US")?.currencyCode, "USD")
         XCTAssertEqual(KitoCountryDatabase.country(isoCode: "FR")?.currencyCode, "EUR")
         XCTAssertNotNil(KitoCountryDatabase.country(isoCode: "KE")?.currencySymbol)
+        XCTAssertNotEqual(KitoCountryDatabase.country(isoCode: "KE")?.currencySymbol, "$", "KES must not borrow the device currency symbol")
+        XCTAssertEqual(KitoCountryDatabase.country(isoCode: "GB")?.currencySymbol, "£")
         XCTAssertTrue(KitoCountryDatabase.country(isoCode: "US")!.formatCurrency(1250, locale: Locale(identifier: "en_US"))!.contains("1,250"))
     }
 

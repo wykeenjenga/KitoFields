@@ -18,6 +18,7 @@ public struct KitoCountryPicker: View {
 
     @State private var query = ""
     @State private var recents: [KitoCountry] = []
+    @State private var recentSearches: [String] = []
     @Environment(\.dismiss) private var dismiss
     @Environment(\.kitoFieldTheme) private var theme
 
@@ -32,7 +33,11 @@ public struct KitoCountryPicker: View {
     public var body: some View {
         NavigationView {
             list
-                .onAppear { recents = KitoCountryRecents.load(key: configuration.recentsStorageKey, limit: configuration.recentsLimit) }
+                .onAppear {
+                    recents = KitoCountryRecents.load(key: configuration.recentsStorageKey, limit: configuration.recentsLimit)
+                    recentSearches = KitoCountryRecents.loadSearches(key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit)
+                }
+                .onSubmit(of: .search) { KitoCountryRecents.recordSearch(query, key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit) }
                 .navigationTitle(configuration.strings.title)
                 .modifier(InlineTitle())
                 .toolbar {
@@ -58,17 +63,32 @@ public struct KitoCountryPicker: View {
         } else {
             List {
                 if query.isEmpty {
+                    if configuration.showsRecentSearches, !recentSearches.isEmpty {
+                        Section(configuration.strings.recentSearchesSection) {
+                            chips(recentSearches.map { term in Chip(id: "q-\(term)", label: term, symbol: "clock.arrow.circlepath") { query = term } })
+                        }
+                    }
                     if configuration.showsRecents, !recents.isEmpty {
+                        let visible = Array(recents.filter { countries.contains($0) }.prefix(configuration.recentsLimit))
                         Section(configuration.strings.recentSection) {
-                            ForEach(recents.filter { countries.contains($0) }) { row($0) }
+                            if configuration.suggestionStyle == .chips {
+                                chips(visible.map { c in Chip(id: c.isoCode, label: c.localizedName(in: configuration.locale ?? .autoupdatingCurrent), flag: c) { select(c) } })
+                            } else {
+                                ForEach(visible) { row($0) }
+                            }
                         }
                     }
                     if configuration.showsCurrentRegion, let current = currentRegion {
                         Section(configuration.strings.currentRegionSection) { row(current) }
                     }
                     if !preferred.isEmpty {
+                        let visible = Array(preferred.prefix(configuration.suggestedLimit))
                         Section(configuration.strings.preferredSection) {
-                            ForEach(preferred) { row($0) }
+                            if configuration.suggestionStyle == .chips {
+                                chips(visible.map { c in Chip(id: c.isoCode, label: c.localizedName(in: configuration.locale ?? .autoupdatingCurrent), flag: c) { select(c) } })
+                            } else {
+                                ForEach(visible) { row($0) }
+                            }
                         }
                     }
                     if configuration.groupsAlphabetically {
@@ -84,6 +104,52 @@ public struct KitoCountryPicker: View {
             }
             .modifier(ListStyleModifier())
         }
+    }
+
+    private struct Chip: Identifiable {
+        let id: String
+        let label: String
+        var symbol: String? = nil
+        var flag: KitoCountry? = nil
+        let action: () -> Void
+    }
+
+    /// Horizontally scrolling capsule chips.
+    private func chips(_ items: [Chip]) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(items) { chip in
+                    Button(action: chip.action) {
+                        HStack(spacing: 6) {
+                            if let flag = chip.flag { KitoFlag(country: flag, style: configuration.flagStyle == .hidden ? .hidden : .emoji, size: 16) }
+                            if let symbol = chip.symbol { Image(systemName: symbol).font(.caption) }
+                            Text(chip.label).font(.subheadline.weight(.medium)).lineLimit(1)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Capsule().fill(theme.filledBackgroundColor))
+                        .overlay(Capsule().stroke(theme.borderColor.opacity(0.6), lineWidth: 1))
+                        .foregroundColor(.primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+        .listRowBackground(Color.clear)
+    }
+
+    private func select(_ country: KitoCountry) {
+        selection = country
+        if configuration.showsRecents {
+            KitoCountryRecents.record(country, key: configuration.recentsStorageKey, limit: configuration.recentsLimit)
+        }
+        if configuration.showsRecentSearches, !query.trimmingCharacters(in: .whitespaces).isEmpty {
+            KitoCountryRecents.recordSearch(query, key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit)
+        }
+        onSelect?(country)
+        dismiss()
     }
 
     private var currentRegion: KitoCountry? {
@@ -106,12 +172,7 @@ public struct KitoCountryPicker: View {
 
     private func row(_ country: KitoCountry) -> some View {
         Button {
-            selection = country
-            if configuration.showsRecents {
-                KitoCountryRecents.record(country, key: configuration.recentsStorageKey, limit: configuration.recentsLimit)
-            }
-            onSelect?(country)
-            dismiss()
+            select(country)
         } label: {
             KitoCountryRow(country: country, isSelected: country == selection, configuration: configuration, highlight: query)
         }
@@ -268,7 +329,31 @@ public enum KitoCountryRecents {
 
     public static func clear(key: String = defaultKey) {
         UserDefaults.standard.removeObject(forKey: key)
+        UserDefaults.standard.removeObject(forKey: key + ".searches")
     }
+
+    // MARK: Recent search terms
+
+    public static func loadSearches(key: String = defaultKey, limit: Int = 4) -> [String] {
+        Array((UserDefaults.standard.stringArray(forKey: key + ".searches") ?? []).prefix(limit))
+    }
+
+    public static func recordSearch(_ term: String, key: String = defaultKey, limit: Int = 4) {
+        let trimmed = term.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        var terms = UserDefaults.standard.stringArray(forKey: key + ".searches") ?? []
+        terms.removeAll { $0.caseInsensitiveCompare(trimmed) == .orderedSame }
+        terms.insert(trimmed, at: 0)
+        UserDefaults.standard.set(Array(terms.prefix(max(limit, 1))), forKey: key + ".searches")
+    }
+}
+
+/// How the Recent and Suggested sections are drawn.
+public enum KitoSuggestionStyle: Sendable {
+    /// Horizontally scrolling capsule chips (default).
+    case chips
+    /// Ordinary list rows.
+    case rows
 }
 
 /// Text used by the picker. Override for localization.
@@ -280,6 +365,7 @@ public struct KitoCountryPickerStrings: Sendable {
     public var preferredSection = KitoLocalization.string("picker.preferred", "Suggested")
     public var allSection = KitoLocalization.string("picker.all", "All Countries")
     public var recentSection = KitoLocalization.string("picker.recent", "Recent")
+    public var recentSearchesSection = KitoLocalization.string("picker.recentSearches", "Recent searches")
     public var currentRegionSection = KitoLocalization.string("picker.currentRegion", "Your region")
     public var noResultsHint = KitoLocalization.string("picker.noResultsHint", "Try the country name, ISO code, dial code or currency.")
     public init() {}
@@ -295,7 +381,14 @@ public struct KitoCountryPickerConfiguration: Sendable {
     public var strings = KitoCountryPickerStrings()
     /// "Recent" section with the last selections, persisted across launches.
     public var showsRecents = true
-    public var recentsLimit = 5
+    public var recentsLimit = 4
+    /// Chips or rows for the Recent and Suggested sections.
+    public var suggestionStyle: KitoSuggestionStyle = .chips
+    /// Maximum number of preferred countries shown in Suggested.
+    public var suggestedLimit = 4
+    /// "Recent searches" chips that refill the search box.
+    public var showsRecentSearches = true
+    public var recentSearchesLimit = 4
     /// UserDefaults key for recents; give each picker its own key to keep histories separate.
     public var recentsStorageKey = KitoCountryRecents.defaultKey
     /// "Your region" section with the device's current region.

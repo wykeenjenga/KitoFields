@@ -117,7 +117,8 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            InputsScreen().tabItem { Label("Fields", systemImage: "character.cursor.ibeam") }
+            FieldSamplesScreen().tabItem { Label("Samples", systemImage: "square.grid.2x2") }
+            InputsScreen().tabItem { Label("Demos", systemImage: "character.cursor.ibeam") }
             AppearanceScreen().tabItem { Label("Appearance", systemImage: "paintpalette") }
         }
         .environmentObject(appearance)
