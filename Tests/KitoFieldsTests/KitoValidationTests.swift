@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import SwiftUI
 @testable import KitoFields
 
 final class ValidationTests: XCTestCase {
