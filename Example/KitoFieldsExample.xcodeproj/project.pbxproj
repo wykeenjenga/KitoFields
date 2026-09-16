@@ -10,6 +10,7 @@
 		73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */; };
 		889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */; };
 		8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */; };
+		E6F0F89049D71D0E65996854 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */; };
 		EA9E2449C741C4C30DCBE79E /* KitoFields in Frameworks */ = {isa = PBXBuildFile; productRef = 38206AE08621F196CBD4C4DC /* KitoFields */; };
 /* End PBXBuildFile section */
 
@@ -17,9 +18,10 @@
 		30B7158D979F11E4AFC9E510 /* KitoFieldsExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KitoFieldsExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputsScreen.swift; sourceTree = "<group>"; };
 		5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitoFieldsExampleApp.swift; sourceTree = "<group>"; };
+		5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6D56BF9E7CAA65F81E73312B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationsDemo.swift; sourceTree = "<group>"; };
-		C5C9452F544543AB5EE6A67D /* KitoFields */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KitoFields; path = ..; sourceTree = SOURCE_ROOT; };
+		8E5D9C7DC9F69A91D57B5643 /* wt-fields-icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-fields-icon"; path = ..; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +49,7 @@
 			isa = PBXGroup;
 			children = (
 				8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */,
+				5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */,
 				6D56BF9E7CAA65F81E73312B /* Info.plist */,
 				3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */,
 				5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */,
@@ -57,7 +60,7 @@
 		A90EA08C754C72F173BBF83E /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				C5C9452F544543AB5EE6A67D /* KitoFields */,
+				8E5D9C7DC9F69A91D57B5643 /* wt-fields-icon */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -78,6 +81,7 @@
 			buildConfigurationList = 44700FEEF8431675F9AD3152 /* Build configuration list for PBXNativeTarget "KitoFieldsExample" */;
 			buildPhases = (
 				F47273D70FD45F9915DF4A98 /* Sources */,
+				7E2C9C6799DCEFF648725BEB /* Resources */,
 				2C2A99DECC994F54BBB11E32 /* Frameworks */,
 			);
 			buildRules = (
@@ -124,6 +128,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7E2C9C6799DCEFF648725BEB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E6F0F89049D71D0E65996854 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F47273D70FD45F9915DF4A98 /* Sources */ = {
@@ -206,6 +221,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/Info.plist;
@@ -224,6 +240,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Sources/Info.plist;
