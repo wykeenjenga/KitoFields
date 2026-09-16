@@ -10,6 +10,8 @@ import SwiftUI
 import KitoFields
 
 struct InputsScreen: View {
+    @State private var showsAbout = false
+
     var body: some View {
         NavigationStack {
             List {
@@ -22,6 +24,13 @@ struct InputsScreen: View {
                 NavigationLink("Animations") { AnimationsDemo() }
             }
             .navigationTitle("KitoFields")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showsAbout = true } label: { Image(systemName: "info.circle") }
+                        .accessibilityLabel("About")
+                }
+            }
+            .sheet(isPresented: $showsAbout) { AboutScreen() }
         }
     }
 }

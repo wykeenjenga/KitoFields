@@ -10,6 +10,7 @@
 		73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */; };
 		889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */; };
 		8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */; };
+		C69FE391E6846C6235961042 /* AboutScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6367614A2FCF304E6AD28BB /* AboutScreen.swift */; };
 		E6F0F89049D71D0E65996854 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */; };
 		EA9E2449C741C4C30DCBE79E /* KitoFields in Frameworks */ = {isa = PBXBuildFile; productRef = 38206AE08621F196CBD4C4DC /* KitoFields */; };
 /* End PBXBuildFile section */
@@ -22,6 +23,7 @@
 		6D56BF9E7CAA65F81E73312B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationsDemo.swift; sourceTree = "<group>"; };
 		8E5D9C7DC9F69A91D57B5643 /* wt-fields-icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-fields-icon"; path = ..; sourceTree = SOURCE_ROOT; };
+		C6367614A2FCF304E6AD28BB /* AboutScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +50,7 @@
 		628BDB891CB706D39ED38365 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				C6367614A2FCF304E6AD28BB /* AboutScreen.swift */,
 				8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */,
 				5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */,
 				6D56BF9E7CAA65F81E73312B /* Info.plist */,
@@ -145,6 +148,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C69FE391E6846C6235961042 /* AboutScreen.swift in Sources */,
 				73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */,
 				889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */,
 				8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */,
