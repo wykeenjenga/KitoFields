@@ -64,6 +64,47 @@ public struct KitoCountry: Identifiable, Codable, Sendable {
         locale.localizedString(forRegionCode: isoCode) ?? englishName
     }
 
+    // MARK: Currency (derived from the system locale database, no hand-curated table)
+
+    /// ISO 4217 currency code for the region, e.g. "KES", "USD". Nil for regions without one.
+    public var currencyCode: String? {
+        let locale = Locale(identifier: "en_\(isoCode)")
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+            return locale.currency?.identifier
+        } else {
+            return locale.currencyCode
+        }
+    }
+
+    /// Currency symbol as shown in the user's locale, e.g. "KSh", "$", "€".
+    public var currencySymbol: String? {
+        guard let code = currencyCode else { return nil }
+        let locale = Locale(identifier: "\(Locale.autoupdatingCurrent.identifier)@currency=\(code)")
+        let symbol = locale.currencySymbol
+        return (symbol == nil || symbol == code) ? Locale(identifier: "en_\(isoCode)").currencySymbol : symbol
+    }
+
+    /// Currency name in the user's locale, e.g. "Kenyan Shilling".
+    public var localizedCurrencyName: String? {
+        guard let code = currencyCode else { return nil }
+        return Locale.autoupdatingCurrent.localizedString(forCurrencyCode: code)
+    }
+
+    /// Formats an amount in the region's currency, e.g. `format(1250)` → "KSh 1,250.00".
+    public func formatCurrency(_ amount: Decimal, locale: Locale = .autoupdatingCurrent) -> String? {
+        guard let code = currencyCode else { return nil }
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = code
+        formatter.locale = locale
+        return formatter.string(from: amount as NSDecimalNumber)
+    }
+
+    /// Everything an app usually wants back from a country selection, in one value.
+    public var summary: KitoCountrySummary {
+        KitoCountrySummary(country: self)
+    }
+
     public var minNationalNumberLength: Int { nationalNumberLengths.lowerBound }
     public var maxNationalNumberLength: Int { nationalNumberLengths.upperBound }
 
@@ -82,4 +123,30 @@ extension String {
     var digitCount: Int { filter { $0 == "#" }.count }
     /// ASCII digits only.
     var asciiDigits: String { filter { $0.isASCII && $0.isNumber } }
+}
+
+
+/// Flat, ready-to-use snapshot of a country: flag, names, dial code and currency.
+public struct KitoCountrySummary: Hashable, Sendable {
+    public let isoCode: String
+    public let flag: String
+    public let name: String
+    public let englishName: String
+    public let dialCode: String
+    public let formattedDialCode: String
+    public let currencyCode: String?
+    public let currencySymbol: String?
+    public let currencyName: String?
+
+    public init(country: KitoCountry) {
+        isoCode = country.isoCode
+        flag = country.flag
+        name = country.localizedName
+        englishName = country.englishName
+        dialCode = country.dialCode
+        formattedDialCode = country.formattedDialCode
+        currencyCode = country.currencyCode
+        currencySymbol = country.currencySymbol
+        currencyName = country.localizedCurrencyName
+    }
 }

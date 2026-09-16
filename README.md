@@ -74,6 +74,7 @@ Pair it with [KitoButtons](https://github.com/wykeenjenga/KitoButtons) for match
 | `KitoEmailField` | Email keyboard and autofill, whitespace stripped, `.email` rule on blur |
 | `KitoPasswordField` | Secure entry, reveal toggle, strength meter, live requirement checklist, confirm-password matching via `.mustMatch($password)` |
 | `KitoPhoneField` | Country selector (sheet / menu / locked), flags, as-you-type formatting, `+`/`00` paste detection, E.164 output, 220+ regions |
+| `KitoCountryField` | Country selector: flag (emoji, circle, rounded, tile, ISO badge), name, dial code and currency, with a searchable picker that remembers recent picks |
 | `KitoCodeField` | OTP boxes backed by one hidden field so SMS autofill and paste work |
 
 Every field conforms to `KitoFieldConfigurable`, so they share the same fluent modifiers.
@@ -248,6 +249,34 @@ KitoPhoneField(country: $country, nationalNumber: $digits)
 `KitoPhoneNumber` gives you `e164`, `international`, `national`, `formatted(.nationalWithTrunkPrefix)`, `rfc3966`, `url`, `isValid`, and is `Codable` as `{ isoCode, nationalNumber }`. Parse anything with `KitoPhoneNumber(parsing: "+44 7400 123456")` or `KitoPhoneNumber(e164:)`.
 
 `KitoCountryDatabase` exposes all regions with flags, localized names, dial codes, formats and example numbers. Shared dial codes (+1, +7, +44, +61, …) are resolved by area or leading digits.
+
+## Country field and country data
+
+```swift
+KitoCountryField("Country", selection: $country)          // Binding<KitoCountry?>
+KitoCountryField("Country", isoCode: $isoCode)             // Binding<String>, "" when empty
+    .shows(flag: true, name: true, dialCode: true, currency: true)
+    .flagStyle(.circle)                                    // .emoji / .circle / .rounded / .tile / .isoCode / .hidden
+    .countries(preferred: ["KE", "US", "GB"])
+    .required()
+    .onCountryChange { country in
+        country.flag                 // 🇰🇪
+        country.localizedName        // "Kenya"
+        country.formattedDialCode    // "+254"
+        country.currencyCode         // "KES"
+        country.currencySymbol       // "KSh"
+        country.formatCurrency(1250) // "KSh 1,250.00"
+        country.summary              // flat struct with all of the above
+    }
+```
+
+The phone field's `.onCountryChange` hands back the same `KitoCountry`, and `.flagStyle(.circle)` works there too.
+
+### Country picker
+
+Search matches the localized name, English name, ISO code, dial code and currency code, ignoring
+accents. The list shows **Recent** picks (persisted, per storage key), **Your region**, your
+preferred countries and then A–Z sections. Configure with `.countryPicker { $0.showsRecents = false; $0.showsCurrency = true; $0.groupsAlphabetically = false }`.
 
 ## One-time code
 
