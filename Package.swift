@@ -14,7 +14,8 @@ let package = Package(
     targets: [
         .target(
             name: "KitoFields",
-            path: "Sources/KitoFields"
+            path: "Sources/KitoFields",
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "KitoFieldsTests",

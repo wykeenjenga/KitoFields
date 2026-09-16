@@ -16,9 +16,9 @@ public enum KitoPhoneError: Error, Equatable, Sendable {
 
     public var message: String {
         switch self {
-        case .tooShort: return "Phone number is too short"
-        case .tooLong: return "Phone number is too long"
-        case .invalidLeadingDigits: return "Phone number is not valid for this country"
+        case .tooShort: return KitoLocalization.string("phone.tooShort", "Phone number is too short")
+        case .tooLong: return KitoLocalization.string("phone.tooLong", "Phone number is too long")
+        case .invalidLeadingDigits: return KitoLocalization.string("phone.invalidForCountry", "Phone number is not valid for this country")
         case .custom(let text): return text
         }
     }

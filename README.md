@@ -209,6 +209,21 @@ Every field animates focus, errors, success ticks, floating labels and flag swap
 - `KitoCodeField` shakes when you set an error message.
 - Shake any view yourself with `.kitoFieldShake(trigger:)`.
 
+## Localization
+
+Every built-in string (rule messages, picker titles, password strength labels, accessibility labels)
+is localized. English, Swahili (`sw`) and French (`fr`) ship in the package; country names come from
+the system for every language. To override or add languages, supply a provider once at launch:
+
+```swift
+KitoLocalization.provider = { key, english in
+    NSLocalizedString("kito.\(key)", value: english, comment: "")   // return nil to keep the bundled copy
+}
+```
+
+Per-field messages still win: `.required(message:)`, `.validation(.minLength(8, message: "…"))`,
+`.phoneErrorMessages { … }` and `.countryPicker { $0.strings.title = "…" }`.
+
 ## Phone numbers
 
 ```swift
