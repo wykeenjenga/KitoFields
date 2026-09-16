@@ -134,7 +134,7 @@ struct SignUp: View {
 
 ```swift
 .errorPresentation(.inline)               // text under the field (default)
-.errorPresentation(.floating)             // bubble anchored above the field
+.errorPresentation(.floating)             // bubble above the field; flips below when there is no room, never covers the input
 .errorPresentation(.floatingWhenFocused)  // bubble only while editing
 .errorPresentation(.none)                 // border and indicator only
 .kitoFieldTheme { $0.errorPresentation = .floating; $0.errorBubbleBackground = .black }
