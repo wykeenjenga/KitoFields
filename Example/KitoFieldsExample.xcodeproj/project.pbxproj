@@ -1,0 +1,335 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */; };
+		889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */; };
+		8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */; };
+		EA9E2449C741C4C30DCBE79E /* KitoFields in Frameworks */ = {isa = PBXBuildFile; productRef = 38206AE08621F196CBD4C4DC /* KitoFields */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		30B7158D979F11E4AFC9E510 /* KitoFieldsExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KitoFieldsExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputsScreen.swift; sourceTree = "<group>"; };
+		5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitoFieldsExampleApp.swift; sourceTree = "<group>"; };
+		6D56BF9E7CAA65F81E73312B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationsDemo.swift; sourceTree = "<group>"; };
+		C5C9452F544543AB5EE6A67D /* KitoFields */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KitoFields; path = ..; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2C2A99DECC994F54BBB11E32 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA9E2449C741C4C30DCBE79E /* KitoFields in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		192C01F69BB2A8418837B1CE = {
+			isa = PBXGroup;
+			children = (
+				A90EA08C754C72F173BBF83E /* Packages */,
+				628BDB891CB706D39ED38365 /* Sources */,
+				B1BA544DA9A8DDED811372D0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		628BDB891CB706D39ED38365 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				8C14F8405EF0F5B1C73C3390 /* AnimationsDemo.swift */,
+				6D56BF9E7CAA65F81E73312B /* Info.plist */,
+				3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */,
+				5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A90EA08C754C72F173BBF83E /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				C5C9452F544543AB5EE6A67D /* KitoFields */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		B1BA544DA9A8DDED811372D0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				30B7158D979F11E4AFC9E510 /* KitoFieldsExample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		429193B67975A14A7F691A9F /* KitoFieldsExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44700FEEF8431675F9AD3152 /* Build configuration list for PBXNativeTarget "KitoFieldsExample" */;
+			buildPhases = (
+				F47273D70FD45F9915DF4A98 /* Sources */,
+				2C2A99DECC994F54BBB11E32 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KitoFieldsExample;
+			packageProductDependencies = (
+				38206AE08621F196CBD4C4DC /* KitoFields */,
+			);
+			productName = KitoFieldsExample;
+			productReference = 30B7158D979F11E4AFC9E510 /* KitoFieldsExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7925B63C35102FDD1D39E7E8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 7FD0D1BC4D2021E98D33EEB2 /* Build configuration list for PBXProject "KitoFieldsExample" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 192C01F69BB2A8418837B1CE;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				04FB9E9543F305FDA773E6CE /* XCLocalSwiftPackageReference ".." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B1BA544DA9A8DDED811372D0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				429193B67975A14A7F691A9F /* KitoFieldsExample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F47273D70FD45F9915DF4A98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73B041EF6680D6B5B8E0528C /* AnimationsDemo.swift in Sources */,
+				889CCC17DE9C5475D8C42768 /* InputsScreen.swift in Sources */,
+				8F4557C6A6F3A0A74C609EAE /* KitoFieldsExampleApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5D457952B05BFDA61402362F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		60A587637CD2FD5289AA521E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = co.triply.KitoFieldsExample;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1FB2E40D00774F0C3B5E4BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = co.triply.KitoFieldsExample;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C76E75B0BE77474C41B3DEC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		44700FEEF8431675F9AD3152 /* Build configuration list for PBXNativeTarget "KitoFieldsExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60A587637CD2FD5289AA521E /* Debug */,
+				A1FB2E40D00774F0C3B5E4BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7FD0D1BC4D2021E98D33EEB2 /* Build configuration list for PBXProject "KitoFieldsExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5D457952B05BFDA61402362F /* Debug */,
+				C76E75B0BE77474C41B3DEC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		04FB9E9543F305FDA773E6CE /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		38206AE08621F196CBD4C4DC /* KitoFields */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KitoFields;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 7925B63C35102FDD1D39E7E8 /* Project object */;
+}

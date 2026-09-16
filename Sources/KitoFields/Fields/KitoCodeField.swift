@@ -47,6 +47,7 @@ public struct KitoCodeField: View {
             }
             .contentShape(Rectangle())
             .onTapGesture { isFocused = true }
+            .kitoFieldShake(trigger: errorMessage, animation: theme.motion.shake)
             if let errorMessage {
                 Label(errorMessage, systemImage: "exclamationmark.circle.fill")
                     .font(theme.helperFont)

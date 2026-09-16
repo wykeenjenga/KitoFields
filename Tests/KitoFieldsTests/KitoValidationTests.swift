@@ -90,3 +90,19 @@ final class ValidationTests: XCTestCase {
         XCTAssertFalse(p.shouldShowErrors(for: .live))
     }
 }
+
+final class KitoFieldMotionTests: XCTestCase {
+    func testShakeEffectRestsAtWholeShakes() {
+        XCTAssertEqual(KitoFieldShakeEffect(shakes: 0).effectValue(size: .zero).m31, 0, accuracy: 0.0001)
+        XCTAssertEqual(KitoFieldShakeEffect(shakes: 1).effectValue(size: .zero).m31, 0, accuracy: 0.0001)
+        XCTAssertEqual(abs(KitoFieldShakeEffect(shakes: 0.125, amplitude: 8).effectValue(size: .zero).m31), 8, accuracy: 0.0001)
+    }
+
+    func testMotionPresets() {
+        XCTAssertEqual(KitoFieldMotion.default.focusScale, 1)
+        XCTAssertGreaterThan(KitoFieldMotion.lively.focusScale, 1)
+        XCTAssertNotNil(KitoFieldMotion.lively.focusedShadow)
+        XCTAssertFalse(KitoFieldMotion.subtle.shakesOnError)
+        XCTAssertTrue(KitoFieldTheme.default.motion.shakesOnError)
+    }
+}

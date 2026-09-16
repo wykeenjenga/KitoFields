@@ -246,12 +246,16 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         HStack(spacing: 6) {
             if phone.showsFlag {
                 KitoFlag(country: country, style: phone.flagStyle, size: theme.iconSize + 5)
+                    .id(country.isoCode)
+                    .transition(.scale(scale: 0.5).combined(with: .opacity))
             }
             if phone.showsDialCode {
                 Text(country.formattedDialCode)
                     .font(theme.font)
                     .foregroundColor(theme.textColor)
                     .monospacedDigit()
+                    .id(country.dialCode)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if phone.showsChevron && phone.selectionMode != .locked {
                 Image(systemName: "chevron.down")
@@ -260,6 +264,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             }
         }
         .contentShape(Rectangle())
+        .animation(theme.motion.pop, value: country)
     }
 
     private var picker: some View {

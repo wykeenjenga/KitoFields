@@ -141,6 +141,23 @@ struct CardFieldStyle: KitoFieldStyle {
 }
 ```
 
+## Motion
+
+Every field animates focus, errors, success ticks, floating labels and flag swaps through
+`KitoFieldTheme.motion` (`KitoFieldMotion`):
+
+```swift
+.kitoFieldTheme { $0.motion = .lively }        // spring focus, 2% lift, glow; .subtle disables the shake
+.kitoFieldTheme { $0.motion.shakesOnError = false; $0.motion.focusScale = 1.03 }
+```
+
+- Fields shake horizontally the moment an error first appears (`shakesOnError`).
+- `focusScale` and `focusedShadow` lift the focused field.
+- Floating labels spring into place (`motion.label`); ticks, clear buttons, counters and flags pop (`motion.pop`).
+- `KitoPhoneField` animates the flag and dial code when the country changes.
+- `KitoCodeField` shakes when you set an error message.
+- Shake any view yourself with `.kitoFieldShake(trigger:)`.
+
 ## Phone numbers
 
 ```swift
@@ -173,6 +190,6 @@ KitoCodeField(code: $code, length: 6)
     .onComplete { code in verify(code) }
 ```
 
-## Sample app
+## Example app
 
-`Examples/KitShowcase` (in the parent repository) demonstrates every field, style, shape and theme with a live appearance switcher. Generate the project with `xcodegen generate` if you change `project.yml`.
+`Example/KitoFieldsExample.xcodeproj` (in this repository) demonstrates every field, style, shape, theme and motion preset: sign-up form, text field options, phone, password, one-time code, style gallery and an animations screen. Regenerate the project with `xcodegen generate` after editing `Example/project.yml`.

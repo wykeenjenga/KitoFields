@@ -221,6 +221,8 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                             .font(theme.helperFont)
                             .foregroundColor(text.count >= limit ? theme.errorColor : theme.helperColor)
                             .monospacedDigit()
+                            .scaleEffect(text.count >= limit ? 1.15 : 1, anchor: .trailing)
+                            .animation(theme.motion.pop, value: text.count >= limit)
                     }
                 }
             }

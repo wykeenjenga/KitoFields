@@ -70,7 +70,7 @@ public extension View {
             fill: fill ?? configuration.backgroundColor,
             borderColor: configuration.borderColor,
             borderWidth: borderWidth ?? configuration.borderWidth,
-            shadow: configuration.theme.shadow
+            shadow: (configuration.isFocused ? configuration.theme.motion.focusedShadow : nil) ?? configuration.theme.shadow
         ))
     }
 }
@@ -147,10 +147,12 @@ public struct KitoFieldMessages: View {
 }
 
 /// Label above, then content, then messages and footer. Used by all built-in styles.
+/// Also owns the field-level motion: focus scale, error shake and animated messages.
 public struct KitoFieldStack<Content: View>: View {
     let configuration: KitoFieldStyleConfiguration
     var showsLabel = true
     let content: Content
+    @State private var shakes: CGFloat = 0
 
     public init(_ configuration: KitoFieldStyleConfiguration, showsLabel: Bool = true, @ViewBuilder content: () -> Content) {
         self.configuration = configuration
@@ -160,6 +162,7 @@ public struct KitoFieldStack<Content: View>: View {
 
     public var body: some View {
         let theme = configuration.theme
+        let motion = theme.motion
         VStack(alignment: .leading, spacing: 0) {
             if showsLabel, let label = configuration.label {
                 label
@@ -168,6 +171,8 @@ public struct KitoFieldStack<Content: View>: View {
                     .padding(.bottom, theme.labelSpacing)
             }
             content
+                .scaleEffect(configuration.isFocused ? motion.focusScale : 1)
+                .modifier(KitoFieldShakeEffect(shakes: shakes))
             KitoFieldMessages(configuration)
                 .padding(.top, (configuration.displayedErrors.isEmpty && configuration.helperText == nil) ? 0 : theme.helperSpacing)
             if let footer = configuration.footer {
@@ -175,8 +180,14 @@ public struct KitoFieldStack<Content: View>: View {
             }
         }
         .opacity(configuration.isEnabled ? 1 : theme.disabledOpacity)
-        .animation(theme.animation, value: configuration.isFocused)
-        .animation(theme.animation, value: configuration.errorMessages)
+        .animation(motion.focus, value: configuration.isFocused)
+        .animation(motion.error, value: configuration.errorMessages)
+        .animation(motion.pop, value: configuration.isSuccess)
+        .animation(motion.pop, value: configuration.isEmpty)
+        .onChange(of: configuration.errorMessages.isEmpty) { isEmpty in
+            guard !isEmpty, motion.shakesOnError else { return }
+            withAnimation(motion.shake) { shakes += 1 }
+        }
     }
 }
 
@@ -257,6 +268,7 @@ public struct KitoFloatingLabelFieldStyle: KitoFieldStyle {
             .padding(theme.contentPadding)
             .frame(minHeight: max(theme.minHeight, 56))
             .kitoFieldChrome(c)
+            .animation(theme.motion.label, value: floating)
         }
     }
 }

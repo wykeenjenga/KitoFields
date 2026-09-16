@@ -80,7 +80,10 @@ public struct KitoFieldTheme: Sendable {
     public var showsFocusHighlight: Bool = true
 
     // MARK: Motion
-    public var animation: Animation? = .easeInOut(duration: 0.15)
+    /// All field animation timings (focus, error, label float, pops, shake).
+    public var motion: KitoFieldMotion = .default
+    /// Legacy single animation used by footers and pickers; defaults to `motion.focus`.
+    public var animation: Animation? = .spring(response: 0.3, dampingFraction: 0.8)
 
     public init() {}
 
