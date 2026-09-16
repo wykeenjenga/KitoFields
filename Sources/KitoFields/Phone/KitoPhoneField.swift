@@ -96,6 +96,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
 
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let formatter = KitoPhoneFormatter()
 
@@ -284,7 +285,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             }
         }
         .contentShape(Rectangle())
-        .animation(theme.motion.pop, value: country)
+        .animation((reduceMotion ? KitoFieldMotion.subtle : theme.motion).pop, value: country)
     }
 
     private var picker: some View {

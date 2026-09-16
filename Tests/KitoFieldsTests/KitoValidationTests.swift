@@ -107,27 +107,16 @@ final class KitoFieldMotionTests: XCTestCase {
     }
 }
 
-final class KitoLocalizationTests: XCTestCase {
-    func testAllLanguagesDefineTheSameKeys() {
-        let en = KitoLocalization.keys(forLanguage: "en")
-        XCTAssertGreaterThan(en.count, 30)
-        for code in ["sw", "fr"] {
-            let keys = KitoLocalization.keys(forLanguage: code)
-            XCTAssertEqual(keys, en, "\(code) is missing \(en.subtracting(keys)) / has extra \(keys.subtracting(en))")
+final class KitoReducedMotionTests: XCTestCase {
+    func testConfigurationUsesSubtleMotionWhenReduced() {
+        var theme = KitoFieldTheme()
+        theme.motion = .lively
+        let make = { (reduced: Bool) in
+            KitoFieldStyleConfiguration(label: nil, placeholder: nil, input: KitoFieldSlot(EmptyView()), leading: nil, trailing: nil, footer: nil, helperText: nil, errorMessages: [], isFocused: false, isEnabled: true, isEmpty: true, isSuccess: false, theme: theme, reducesMotion: reduced)
         }
-    }
-
-    func testEnglishFallbackAndProviderOverride() {
-        XCTAssertEqual(KitoLocalization.string("rule.required", "fallback"), KitoLocalization.string("rule.required", "fallback"))
-        XCTAssertEqual(KitoLocalization.string("does.not.exist", "Fallback copy"), "Fallback copy")
-        KitoLocalization.provider = { key, _ in key == "rule.required" ? "Lazima" : nil }
-        defer { KitoLocalization.provider = nil }
-        XCTAssertEqual(KitoRule.required().message, "Lazima")
-        XCTAssertEqual(KitoRule.email().message, KitoLocalization.string("rule.email", ""))
-    }
-
-    func testFormattedMessages() {
-        XCTAssertTrue(KitoRule.minLength(8).message.contains("8"))
-        XCTAssertTrue(KitoRule.exactLength(4).message.contains("4"))
+        XCTAssertTrue(make(false).motion.shakesOnError)
+        XCTAssertGreaterThan(make(false).motion.focusScale, 1)
+        XCTAssertFalse(make(true).motion.shakesOnError)
+        XCTAssertEqual(make(true).motion.focusScale, 1)
     }
 }

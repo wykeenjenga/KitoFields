@@ -39,6 +39,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
 
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private enum FocusField: Hashable { case plain, secure }
 
@@ -222,7 +223,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                             .foregroundColor(text.count >= limit ? theme.errorColor : theme.helperColor)
                             .monospacedDigit()
                             .scaleEffect(text.count >= limit ? 1.15 : 1, anchor: .trailing)
-                            .animation(theme.motion.pop, value: text.count >= limit)
+                            .animation((reduceMotion ? KitoFieldMotion.subtle : theme.motion).pop, value: text.count >= limit)
                     }
                 }
             }

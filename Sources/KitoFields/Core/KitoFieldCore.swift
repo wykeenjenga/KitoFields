@@ -24,6 +24,7 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
     @Environment(\.kitoFieldStyle) private var style
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         style.makeBody(configuration: configuration)
@@ -43,7 +44,8 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
             isEnabled: isEnabled,
             isEmpty: isEmpty,
             isSuccess: isSuccess,
-            theme: theme
+            theme: theme,
+            reducesMotion: reduceMotion
         )
     }
 

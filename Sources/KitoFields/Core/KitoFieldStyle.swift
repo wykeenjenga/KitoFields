@@ -37,14 +37,20 @@ public struct KitoFieldStyleConfiguration {
     /// True when the value is non-empty and passes every rule, and the field wants success shown.
     public let isSuccess: Bool
     public let theme: KitoFieldTheme
+    /// True when the system "Reduce Motion" setting is on. Styles should read `motion` rather
+    /// than `theme.motion` so the subtle preset is used automatically.
+    public let reducesMotion: Bool
 
-    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme) {
+    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme, reducesMotion: Bool = false) {
         self.label = label; self.placeholder = placeholder; self.input = input
         self.leading = leading; self.trailing = trailing; self.footer = footer
         self.helperText = helperText; self.errorMessages = errorMessages
         self.isFocused = isFocused; self.isEnabled = isEnabled; self.isEmpty = isEmpty
-        self.isSuccess = isSuccess; self.theme = theme
+        self.isSuccess = isSuccess; self.theme = theme; self.reducesMotion = reducesMotion
     }
+
+    /// The theme's motion, or `KitoFieldMotion.subtle` when Reduce Motion is enabled.
+    public var motion: KitoFieldMotion { reducesMotion ? .subtle : theme.motion }
 
     public var hasError: Bool { !errorMessages.isEmpty }
 

@@ -209,6 +209,7 @@ Every field animates focus, errors, success ticks, floating labels and flag swap
 - `KitoPhoneField` animates the flag and dial code when the country changes.
 - `KitoCodeField` shakes when you set an error message.
 - Shake any view yourself with `.kitoFieldShake(trigger:)`.
+- When the system **Reduce Motion** setting is on, every field automatically switches to `KitoFieldMotion.subtle`: no shake, no lift, short fades. Custom styles get this for free by reading `configuration.motion` instead of `theme.motion`.
 
 ## Localization
 
