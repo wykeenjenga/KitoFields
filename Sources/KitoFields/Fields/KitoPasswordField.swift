@@ -73,6 +73,17 @@ public struct KitoPasswordField: View, KitoFieldConfigurable {
         mutatingSecure { $0.requirements = rules; $0.showsRequirementChecklist = showsChecklist }
     }
 
+    /// Full control of the strength meter and requirement checklist: styles, icons, colours,
+    /// labels, order, hide-when-met, custom scoring. See `KitoPasswordUIConfiguration`.
+    public func passwordUI(_ configure: @escaping (inout KitoPasswordUIConfiguration) -> Void) -> KitoPasswordField {
+        mutatingSecure { configure(&$0.ui) }
+    }
+
+    /// Shortcut for `passwordUI { $0.checklistStyle = style }`.
+    public func checklistStyle(_ style: KitoChecklistStyle) -> KitoPasswordField { mutatingSecure { $0.ui.checklistStyle = style } }
+    /// Shortcut for `passwordUI { $0.meterStyle = style }`.
+    public func meterStyle(_ style: KitoStrengthMeterStyle) -> KitoPasswordField { mutatingSecure { $0.ui.meterStyle = style } }
+
     /// Hints autofill to generate/save a new password (sign-up flows).
     public func newPassword() -> KitoPasswordField {
         var copy = self

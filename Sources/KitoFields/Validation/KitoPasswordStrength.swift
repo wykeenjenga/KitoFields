@@ -94,7 +94,7 @@ public struct KitoPasswordStrengthEvaluator: Sendable {
     }
 }
 
-/// Four-segment strength bar with a label.
+/// Four-segment strength bar with a label. For styles, colours and labels use `KitoStrengthMeterView`.
 public struct KitoStrengthMeter: View {
     public var strength: KitoPasswordStrength
     public var showsLabel = true

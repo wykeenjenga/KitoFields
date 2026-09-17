@@ -37,3 +37,39 @@ final class PasswordStrengthTests: XCTestCase {
         XCTAssertEqual(KitoPasswordStrength.allCases.count, 5)
     }
 }
+
+final class KitoPasswordRuleTests: XCTestCase {
+    func testNotCommon() {
+        XCTAssertFalse(KitoRule.notCommonPassword().validate("password"))
+        XCTAssertFalse(KitoRule.notCommonPassword().validate("Qwerty"))
+        XCTAssertTrue(KitoRule.notCommonPassword().validate("Kito!2026"))
+    }
+
+    func testNoRepeats() {
+        XCTAssertFalse(KitoRule.noRepeatedCharacters(max: 3).validate("paaassword"))
+        XCTAssertTrue(KitoRule.noRepeatedCharacters(max: 3).validate("paassword"))
+    }
+
+    func testNoSequences() {
+        XCTAssertFalse(KitoRule.noSequences().validate("xabcdx"))
+        XCTAssertFalse(KitoRule.noSequences().validate("x4321x"))
+        XCTAssertTrue(KitoRule.noSequences().validate("Kito!2026"))
+    }
+
+    func testNotContaining() {
+        let rule = KitoRule.notContaining({ "wycliff@triply.co" })
+        XCTAssertFalse(rule.validate("Wycliff2026!"))
+        XCTAssertTrue(rule.validate("Kito!2026"))
+        XCTAssertTrue(KitoRule.notContaining({ "ab" }).validate("abcdefgh"), "short personal values are ignored")
+    }
+
+    func testUIConfigurationDefaults() {
+        var ui = KitoPasswordUIConfiguration()
+        XCTAssertEqual(ui.checklistStyle, .list)
+        XCTAssertEqual(ui.meterStyle, .segments(4))
+        XCTAssertEqual(ui.label(for: .veryStrong), KitoPasswordStrength.veryStrong.label)
+        ui.levelLabels[.veryStrong] = "Fort Knox"
+        XCTAssertEqual(ui.label(for: .veryStrong), "Fort Knox")
+        XCTAssertEqual(KitoRule.strictPassword().count, 8)
+    }
+}
