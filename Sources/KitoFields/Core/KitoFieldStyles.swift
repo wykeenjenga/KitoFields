@@ -129,12 +129,12 @@ public struct KitoFieldMessages: View {
         if !errors.isEmpty {
             VStack(alignment: .leading, spacing: 2) {
                 ForEach(Array(errors.enumerated()), id: \.offset) { _, message in
-                    Label {
-                        Text(message)
-                    } icon: {
-                        Image(systemName: "exclamationmark.circle.fill")
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        if let icon = theme.errorIcon {
+                            Image(systemName: icon).font(theme.errorIconFont ?? theme.errorFont ?? theme.helperFont)
+                        }
+                        Text(message).font(theme.errorFont ?? theme.helperFont)
                     }
-                    .font(theme.helperFont)
                     .foregroundColor(theme.errorColor)
                 }
             }

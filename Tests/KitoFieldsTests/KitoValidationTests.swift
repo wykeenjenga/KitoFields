@@ -194,3 +194,28 @@ final class KitoNewFieldTests: XCTestCase {
         XCTAssertEqual(KitoCountryRecents.loadSearches(key: key, limit: 2).count, 2)
     }
 }
+
+final class KitoReviewTests: XCTestCase {
+    func testErrorThemeDefaults() {
+        let theme = KitoFieldTheme()
+        XCTAssertEqual(theme.errorIcon, "exclamationmark.circle.fill")
+        XCTAssertNil(theme.errorFont)
+        XCTAssertNil(theme.errorIconFont)
+    }
+
+    func testFocusEqualsBridge() {
+        enum Field: Hashable { case name, email }
+        var current: Field? = nil
+        let bridge = Binding<Bool>(
+            get: { current == .email },
+            set: { on in if on { current = .email } else if current == .email { current = nil } }
+        )
+        XCTAssertFalse(bridge.wrappedValue)
+        bridge.wrappedValue = true
+        XCTAssertEqual(current, .email)
+        current = .name
+        XCTAssertFalse(bridge.wrappedValue)
+        bridge.wrappedValue = false
+        XCTAssertEqual(current, .name, "resigning must not clear another field's focus")
+    }
+}

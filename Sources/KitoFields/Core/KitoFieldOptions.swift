@@ -162,6 +162,29 @@ public extension KitoFieldConfigurable {
 
     /// Two-way focus control from outside the field.
     func focused(_ binding: Binding<Bool>) -> Self { mutating { $0.focusBinding = binding } }
+
+    /// Focus driven by a screen-wide `@FocusState var field: Field?`, exactly like SwiftUI's own
+    /// `.focused(_:equals:)`. Setting `field = .email` focuses this field; the field sets it back
+    /// to nil when it resigns. Lets a form jump to the first failing field.
+    ///
+    /// ```swift
+    /// @FocusState private var focus: Field?
+    /// KitoEmailField(text: $email).focused($focus, equals: .email)
+    /// ```
+    func focused<V: Hashable>(_ binding: FocusState<V?>.Binding, equals value: V) -> Self {
+        mutating {
+            $0.focusBinding = Binding<Bool>(
+                get: { binding.wrappedValue == value },
+                set: { isFocused in
+                    if isFocused {
+                        binding.wrappedValue = value
+                    } else if binding.wrappedValue == value {
+                        binding.wrappedValue = nil
+                    }
+                }
+            )
+        }
+    }
     /// Continuously written with the field's validity (handy for enabling a submit button).
     func isValid(_ binding: Binding<Bool>) -> Self { mutating { $0.isValidBinding = binding } }
 

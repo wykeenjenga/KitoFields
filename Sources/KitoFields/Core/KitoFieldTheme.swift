@@ -73,6 +73,12 @@ public struct KitoFieldTheme: Sendable {
     #endif
     public var labelFont: Font = .subheadline.weight(.medium)
     public var helperFont: Font = .caption
+    /// Font for error text; nil uses `helperFont`.
+    public var errorFont: Font? = nil
+    /// SF Symbol shown before each error line; nil hides the icon.
+    public var errorIcon: String? = "exclamationmark.circle.fill"
+    /// Font (size/weight) for the error icon; nil matches the error text.
+    public var errorIconFont: Font? = nil
     public var iconSize: CGFloat = 17
 
     // MARK: Layout
