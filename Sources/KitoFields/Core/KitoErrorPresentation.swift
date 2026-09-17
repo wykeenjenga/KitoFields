@@ -38,8 +38,12 @@ public struct KitoErrorBubble: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             ForEach(Array(messages.enumerated()), id: \.offset) { _, message in
-                Label { Text(message) } icon: { Image(systemName: "exclamationmark.circle.fill") }
-                    .font(theme.helperFont.weight(.medium))
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    if let icon = theme.errorIcon {
+                        Image(systemName: icon).font(theme.errorIconFont ?? theme.errorFont ?? theme.helperFont)
+                    }
+                    Text(message).font((theme.errorFont ?? theme.helperFont).weight(.medium))
+                }
             }
         }
         .foregroundColor(theme.errorBubbleForeground)

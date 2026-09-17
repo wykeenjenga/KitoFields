@@ -191,6 +191,7 @@ Rule presets: `.strongPassword()`, `.strictPassword()`, `.notCommonPassword()`, 
 .multiline(3...6)
 .transform { $0.lowercased() }
 .focused($isNameFocused)        // Binding<Bool>
+.focused($focus, equals: .name) // FocusState<Field?>.Binding, like SwiftUI's own modifier
 .isValid($nameIsValid)          // continuously written, handy for enabling a submit button
 .onValidationChange { state in } .onSubmit { } .onFocusChange { focused in }
 ```
@@ -227,6 +228,8 @@ Rules other than `.required` pass on empty input, so optional fields stay quiet 
     theme.requiredIndicator = "*"          // nil to hide
     theme.optionalIndicator = "(optional)" // nil to hide
     theme.errorDisplay = .all              // .first / .all / .none
+    theme.errorIcon = "exclamationmark.circle" // nil hides it
+    theme.errorFont = .system(size: 13); theme.errorIconFont = .system(size: 12)
     theme.shadow = KitoShadow()
 }
 ```
