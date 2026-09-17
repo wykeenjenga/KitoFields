@@ -22,6 +22,8 @@ public struct KitoCodeField: View {
     private var boxSize = CGSize(width: 46, height: 54)
     private var spacing: CGFloat = 10
     private var allowsLetters = false
+    private var showsCaret = true
+    private var digitFont: Font?
     private var errorMessage: String?
     private var onComplete: ((String) -> Void)?
     private var focusBinding: Binding<Bool>?
@@ -97,10 +99,10 @@ public struct KitoCodeField: View {
         return ZStack {
             if hasValue {
                 Text(isSecure ? "●" : String(characters[index]))
-                    .font(theme.font.weight(.semibold))
+                    .font(digitFont ?? theme.font.weight(.semibold))
                     .foregroundColor(theme.textColor)
                     .transition(.scale.combined(with: .opacity))
-            } else if isActive {
+            } else if isActive && showsCaret {
                 Rectangle()
                     .fill(theme.focusedBorderColor)
                     .frame(width: 2, height: boxSize.height * 0.45)
@@ -142,6 +144,10 @@ public struct KitoCodeField: View {
     public func secure(_ enabled: Bool = true) -> KitoCodeField { mutating { $0.isSecure = enabled } }
     public func boxSize(_ size: CGSize) -> KitoCodeField { mutating { $0.boxSize = size } }
     public func spacing(_ value: CGFloat) -> KitoCodeField { mutating { $0.spacing = value } }
+    /// Hide the blinking caret in the active box; the box then shows focus through its border only.
+    public func showsCaret(_ enabled: Bool) -> KitoCodeField { mutating { $0.showsCaret = enabled } }
+    /// Font for the entered digits; defaults to the theme font at semibold.
+    public func digitFont(_ font: Font) -> KitoCodeField { mutating { $0.digitFont = font } }
     /// Accepts letters as well as digits (uppercased).
     public func alphanumeric(_ enabled: Bool = true) -> KitoCodeField { mutating { $0.allowsLetters = enabled } }
     /// Error shown under the boxes (e.g. "Incorrect code").
