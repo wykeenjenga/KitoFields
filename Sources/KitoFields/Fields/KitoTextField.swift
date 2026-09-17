@@ -16,6 +16,7 @@ struct KitoSecureEntryOptions {
     var requirements: [KitoRule] = []
     var showsRequirementChecklist = false
     var revealedBinding: Binding<Bool>?
+    var ui = KitoPasswordUIConfiguration()
 }
 
 /// The general-purpose text field. `KitoEmailField`, `KitoPasswordField` and friends are presets on top of it.
@@ -250,12 +251,17 @@ public struct KitoTextField: View, KitoFieldConfigurable {
         let hasStrength = secure?.showsStrengthMeter == true
         let hasChecklist = secure?.showsRequirementChecklist == true && !(secure?.requirements.isEmpty ?? true)
         if hasCounter || hasStrength || hasChecklist {
-            VStack(alignment: .leading, spacing: 6) {
-                if hasStrength, let secure {
-                    KitoStrengthMeter(strength: secure.strengthEvaluator.evaluate(text))
-                }
-                if hasChecklist, let secure {
-                    KitoRequirementChecklist(rules: secure.requirements, value: text)
+            VStack(alignment: .leading, spacing: secure?.ui.spacing ?? 6) {
+                if let secure {
+                    let strength = secure.ui.scorer?(text) ?? secure.strengthEvaluator.evaluate(text)
+                    let meterVisible = hasStrength && !(secure.ui.hidesMeterWhenEmpty && text.isEmpty)
+                    if secure.ui.order == .meterThenChecklist {
+                        if meterVisible { KitoStrengthMeterView(strength: strength, ui: secure.ui) }
+                        if hasChecklist { KitoRequirementChecklistView(rules: secure.requirements, value: text, ui: secure.ui) }
+                    } else {
+                        if hasChecklist { KitoRequirementChecklistView(rules: secure.requirements, value: text, ui: secure.ui) }
+                        if meterVisible { KitoStrengthMeterView(strength: strength, ui: secure.ui) }
+                    }
                 }
                 if hasCounter, let limit = options.characterLimit {
                     HStack {

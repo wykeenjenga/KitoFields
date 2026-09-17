@@ -65,3 +65,8 @@
 "picker.done" = "OK";
 "name.label" = "Nom complet";
 "picker.recentSearches" = "Recherches récentes";
+"password.requirementsMet" = "%d exigences sur %d remplies";
+"password.common" = "Trop courant, choisissez quelque chose de moins devinable";
+"password.repeats" = "Pas de caractère répété %d fois de suite";
+"password.sequences" = "Pas de suites comme abcd ou 1234";
+"password.containsPersonal" = "Ne doit pas contenir votre nom ni votre e-mail";

@@ -65,3 +65,8 @@
 "picker.done" = "Nimemaliza";
 "name.label" = "Jina kamili";
 "picker.recentSearches" = "Utafutaji wa hivi karibuni";
+"password.requirementsMet" = "Masharti %d kati ya %d yametimizwa";
+"password.common" = "Ni ya kawaida mno, chagua isiyo rahisi kukisiwa";
+"password.repeats" = "Hakuna herufi inayorudiwa mara %d mfululizo";
+"password.sequences" = "Hakuna mfuatano kama abcd au 1234";
+"password.containsPersonal" = "Isijumuishe jina lako au barua pepe";

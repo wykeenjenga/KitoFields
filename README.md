@@ -149,6 +149,29 @@ KitoPasswordField(text: $pw).animatedLockIcon()                       // lock fi
 .leadingAccessory(.reactive { ctx in /* ctx.isFocused, hasError, isSuccess, isEmpty */ })
 ```
 
+## Password meter and checklist
+
+Everything about the strength meter and requirement checklist is configurable through `.passwordUI { }`:
+
+```swift
+KitoPasswordField(text: $password)
+    .strengthMeter()
+    .requirements(KitoRule.strictPassword() + [.notContaining({ email })])
+    .passwordUI { ui in
+        ui.checklistStyle = .chips            // .list / .grid / .chips / .compact / .hidden
+        ui.meterStyle = .ring                 // .segments(4) / .bar / .ring / .dots(6) / .textOnly / .hidden
+        ui.metSymbol = "checkmark.seal.fill"; ui.unmetSymbol = "seal"
+        ui.metColor = .indigo; ui.strikesThroughMet = true
+        ui.showsOnlyUnmet = true; ui.hidesChecklistWhenAllMet = true
+        ui.showsProgressHeader = true         // "3 of 5 requirements met"
+        ui.levelLabels[.veryStrong] = "Fort Knox"; ui.levelColors[.veryStrong] = .mint
+        ui.order = .checklistThenMeter
+        ui.scorer = { pw in pw.count > 12 ? .veryStrong : .fair }   // your own scoring
+    }
+```
+
+Rule presets: `.strongPassword()`, `.strictPassword()`, `.notCommonPassword()`, `.noRepeatedCharacters(max:)`, `.noSequences(length:)`, `.notContaining({ email })`, plus every rule's `message:` parameter for custom or translated text.
+
 ## Shared modifiers (all fields)
 
 ```swift
