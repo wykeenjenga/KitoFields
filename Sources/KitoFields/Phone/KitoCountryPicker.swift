@@ -56,7 +56,7 @@ public struct KitoCountryPicker: View {
             VStack(spacing: 8) {
                 Image(systemName: "magnifyingglass").font(.largeTitle).foregroundColor(.secondary)
                 Text(configuration.strings.noResults).foregroundColor(.secondary)
-                Text(configuration.strings.noResultsHint).font(.footnote).foregroundColor(.secondary).multilineTextAlignment(.center)
+                Text(configuration.strings.noResultsHint).font(theme.helperFont).foregroundColor(.secondary).multilineTextAlignment(.center)
             }
             .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -123,7 +123,7 @@ public struct KitoCountryPicker: View {
                         HStack(spacing: 6) {
                             if let flag = chip.flag { KitoFlag(country: flag, style: configuration.flagStyle == .hidden ? .hidden : .emoji, size: 16) }
                             if let symbol = chip.symbol { Image(systemName: symbol).font(.caption) }
-                            Text(chip.label).font(.subheadline.weight(.medium)).lineLimit(1)
+                            Text(chip.label).font(theme.labelFont).lineLimit(1)
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -261,6 +261,8 @@ public struct KitoCountryRow: View {
     public var configuration: KitoCountryPickerConfiguration
     public var highlight: String = ""
 
+    @Environment(\.kitoFieldTheme) private var theme
+
     public init(country: KitoCountry, isSelected: Bool, configuration: KitoCountryPickerConfiguration = KitoCountryPickerConfiguration(), highlight: String = "") {
         self.country = country
         self.isSelected = isSelected
@@ -276,7 +278,7 @@ public struct KitoCountryRow: View {
                     .foregroundColor(.primary)
                 if configuration.showsCurrency, let code = country.currencyCode {
                     Text([code, country.currencySymbol].compactMap { $0 }.joined(separator: " · "))
-                        .font(.caption)
+                        .font(theme.helperFont)
                         .foregroundColor(.secondary)
                 }
             }
