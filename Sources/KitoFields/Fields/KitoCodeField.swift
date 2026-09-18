@@ -25,6 +25,7 @@ public struct KitoCodeField: View {
     private var showsCaret = true
     private var digitFont: Font?
     private var errorMessage: String?
+    private var clearsOnErrorAfter: TimeInterval?
     private var onComplete: ((String) -> Void)?
     private var focusBinding: Binding<Bool>?
 
@@ -61,6 +62,10 @@ public struct KitoCodeField: View {
         .animation(reduceMotion ? .easeOut(duration: 0.1) : theme.animation, value: code)
         .animation(reduceMotion ? .easeOut(duration: 0.1) : theme.animation, value: isFocused)
         .onChange(of: code) { sanitize($0) }
+        .onChange(of: errorMessage) { newValue in
+            guard newValue != nil, let delay = clearsOnErrorAfter else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { code = "" }
+        }
         .onChange(of: isFocused) { focused in
             if let focusBinding, focusBinding.wrappedValue != focused { focusBinding.wrappedValue = focused }
         }
@@ -152,6 +157,10 @@ public struct KitoCodeField: View {
     public func alphanumeric(_ enabled: Bool = true) -> KitoCodeField { mutating { $0.allowsLetters = enabled } }
     /// Error shown under the boxes (e.g. "Incorrect code").
     public func errorMessage(_ message: String?) -> KitoCodeField { mutating { $0.errorMessage = message } }
+    /// Clears the entered code automatically `delay` seconds after `errorMessage` is set, once the
+    /// shake has played. Without this, clearing the wrong code back out is on you (as in earlier
+    /// versions of this field).
+    public func clearsOnError(after delay: TimeInterval = 0.6) -> KitoCodeField { mutating { $0.clearsOnErrorAfter = delay } }
     public func onComplete(_ handler: @escaping (String) -> Void) -> KitoCodeField { mutating { $0.onComplete = handler } }
     public func focused(_ binding: Binding<Bool>) -> KitoCodeField { mutating { $0.focusBinding = binding } }
 
