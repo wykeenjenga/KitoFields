@@ -277,6 +277,36 @@ closure instead: `.kitoFormField(Field.name, form: form) { isNameFocused = true 
 
 Presets: `KitoFieldTheme.default`, `.soft`, `.capsule`, `.sharp`, `.underline`.
 
+### Custom fonts, set once at launch
+
+Most custom fonts (Inter, Poppins, your own brand typeface) ship as separate files per weight —
+`"Inter-Regular"`, `"Inter-SemiBold"` — not one name SwiftUI can re-weight with `.weight()`.
+`KitoFontFamily` takes the actual PostScript name for each weight you have, and `.custom(_:)`
+builds a full theme from it — field text, labels, helper and error text — at Dynamic-Type-aware
+sizes. Set it once, e.g. in your `App`'s `init()`, and every field picks it up without wrapping a
+single screen in a modifier:
+
+```swift
+@main
+struct MyApp: App {
+    init() {
+        KitoFieldTheme.default = .custom(KitoFontFamily(
+            regular: "Inter-Regular",
+            medium: "Inter-Medium",
+            semibold: "Inter-SemiBold",
+            bold: "Inter-Bold"
+        ))
+    }
+    var body: some Scene { WindowGroup { ContentView() } }
+}
+```
+
+An explicit `.kitoFieldTheme(...)` anywhere in your view hierarchy — including the built-in
+`.soft`/`.capsule`/`.sharp`/`.underline` presets, none of which carry a custom font — still
+overrides this for that subtree. If you want both a preset's shape and your custom font, build
+from `.default` after setting it (`KitoFieldTheme.default.shape = .capsule`) or pass it as the
+`base:` to `.custom(_:base:)` rather than reaching for a preset directly.
+
 ### Custom style
 
 Implement `KitoFieldStyle` to control layout completely. The configuration hands you the label, placeholder, input, accessories, footer, error messages and state; reuse `KitoFieldRow`, `KitoFieldStack`, `KitoFieldMessages` and `.kitoFieldChrome(...)` or draw everything yourself.

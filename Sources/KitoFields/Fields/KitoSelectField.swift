@@ -196,7 +196,7 @@ public struct KitoSelectField: View, KitoFieldConfigurable {
                                     if let symbol = option.systemImage { Image(systemName: symbol).frame(width: 24) }
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(option.title).foregroundColor(.primary)
-                                        if let subtitle = option.subtitle { Text(subtitle).font(.caption).foregroundColor(.secondary) }
+                                        if let subtitle = option.subtitle { Text(subtitle).font(theme.helperFont).foregroundColor(.secondary) }
                                     }
                                     Spacer()
                                     if option == selection { Image(systemName: "checkmark").font(.body.weight(.semibold)).foregroundColor(.accentColor) }

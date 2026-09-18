@@ -106,7 +106,44 @@ public struct KitoFieldTheme: Sendable {
 
     public init() {}
 
-    public static let `default` = KitoFieldTheme()
+    /// The theme every field falls back to when nothing in its view hierarchy sets
+    /// `.kitoFieldTheme(...)`. Set this **once**, e.g. in your `App`'s `init()`, to apply a look
+    /// (a custom font, a brand tint) app-wide without wrapping every screen in a modifier:
+    ///
+    /// ```swift
+    /// @main
+    /// struct MyApp: App {
+    ///     init() { KitoFieldTheme.default = .custom(myBrandFont) }
+    ///     var body: some Scene { WindowGroup { ContentView() } }
+    /// }
+    /// ```
+    ///
+    /// An explicit `.kitoFieldTheme(...)` anywhere in the view hierarchy still overrides this for
+    /// that subtree — including the built-in `.soft`/`.capsule`/`.sharp`/`.underline` presets,
+    /// none of which carry a custom font. Build from `.default` instead of a preset if you need
+    /// both: `KitoFieldTheme.default.shape = .capsule` (after setting `.default`), or start a
+    /// per-screen override from `KitoFieldTheme.default` rather than `.capsule` directly.
+    public static var `default` = KitoFieldTheme()
+
+    /// Builds a theme where every text role — field text, labels, helper and error text — uses
+    /// `family`, at the size/weight this theme would otherwise use for that role. Dynamic Type
+    /// still scales, via `relativeTo:`.
+    ///
+    /// ```swift
+    /// KitoFieldTheme.default = .custom(KitoFontFamily(regular: "Inter-Regular", semibold: "Inter-SemiBold"))
+    /// ```
+    public static func custom(_ family: KitoFontFamily, base: KitoFieldTheme = KitoFieldTheme()) -> KitoFieldTheme {
+        var theme = base
+        theme.font = family.font(size: 17, relativeTo: .body)
+        theme.labelFont = family.font(size: 15, weight: .medium, relativeTo: .subheadline)
+        theme.helperFont = family.font(size: 12, relativeTo: .caption)
+        theme.errorFont = family.font(size: 13, relativeTo: .footnote)
+        theme.errorIconFont = family.font(size: 12, relativeTo: .footnote)
+        #if canImport(UIKit)
+        theme.uiFont = family.uiFont(size: 17)
+        #endif
+        return theme
+    }
 
     /// Rounded, subtle shadow, no visible border until focused.
     public static var soft: KitoFieldTheme {

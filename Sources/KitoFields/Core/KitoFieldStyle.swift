@@ -126,7 +126,9 @@ private struct KitoFieldStyleKey: EnvironmentKey {
 }
 
 private struct KitoFieldThemeKey: EnvironmentKey {
-    static let defaultValue = KitoFieldTheme.default
+    // Computed, not `let`: re-reads `KitoFieldTheme.default` on every fallback so setting it once
+    // at launch (before any field's environment is first read) takes effect everywhere.
+    static var defaultValue: KitoFieldTheme { KitoFieldTheme.default }
 }
 
 public extension EnvironmentValues {
