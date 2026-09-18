@@ -27,14 +27,14 @@ Professional, fully customisable SwiftUI form inputs: text, email, password, pho
 
 1. File ▸ Add Package Dependencies…
 2. Paste `https://github.com/wykeenjenga/KitoFields.git`
-3. Dependency rule: *Up to Next Major Version* from `1.4.0`
+3. Dependency rule: *Up to Next Major Version* from `1.5.0`
 4. Add the `KitoFields` product to your app target
 
 **In `Package.swift`**
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.4.0")
+    .package(url: "https://github.com/wykeenjenga/KitoFields.git", from: "1.5.0")
 ],
 targets: [
     .target(name: "MyApp", dependencies: ["KitoFields"])
