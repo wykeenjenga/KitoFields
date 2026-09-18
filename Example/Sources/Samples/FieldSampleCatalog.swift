@@ -142,7 +142,19 @@ enum FieldSampleCatalog {
         FieldSample("One-time code · 6 digits", "Boxes backed by one hidden field.", category: .choice, code: "KitoCodeField(code: $code, length: 6)") { Stateful { KitoCodeField(code: $0, length: 6) } },
         FieldSample("One-time code · 4 secure", "Masked digits, error on wrong code (try 1234).", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .secure()\n    .errorMessage(wrong ? \"Incorrect code\" : nil)") { CodeSample() },
         FieldSample("Alphanumeric code", "Letters and digits, uppercased.", category: .choice, code: "KitoCodeField(code: $code, length: 5).alphanumeric()") { Stateful { KitoCodeField(code: $0, length: 5).alphanumeric() } },
+        FieldSample("Large boxes · no caret", "Big grey boxes, focus shown by the border only.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .boxSize(CGSize(width: 64, height: 72))\n    .spacing(20)\n    .showsCaret(false)\n    .digitFont(.system(size: 28, weight: .semibold))\n    .kitoFieldTheme(largeBoxTheme)") { Stateful { KitoCodeField(code: $0, length: 4).boxSize(CGSize(width: 64, height: 72)).spacing(20).showsCaret(false).digitFont(.system(size: 28, weight: .semibold)).kitoFieldTheme(FieldSampleCatalog.largeBoxTheme) } },
     ]
+
+    static var largeBoxTheme: KitoFieldTheme {
+        var theme = KitoFieldTheme()
+        theme.shape = .roundedRectangle(cornerRadius: 14)
+        theme.backgroundColor = Color(.systemGray6)
+        theme.borderColor = Color(.systemGray4)
+        theme.borderWidth = 1
+        theme.focusedBorderColor = Color(.systemGray)
+        theme.focusedBorderWidth = 2
+        return theme
+    }
 
     // MARK: Error presentation
 

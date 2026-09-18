@@ -343,6 +343,9 @@ KitoCodeField(code: $code, length: 6)
     .secure()
     .errorMessage(wrongCode ? "Incorrect code" : nil)
     .onComplete { code in verify(code) }
+    .boxSize(CGSize(width: 80, height: 90)).spacing(38)   // large boxes
+    .showsCaret(false)                                    // focus shown by the border only
+    .digitFont(.system(size: 28, weight: .semibold))
 ```
 
 ## Example app
