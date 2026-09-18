@@ -94,6 +94,7 @@ public struct KitoSelectField: View, KitoFieldConfigurable {
             report()
         }
         .onChange(of: showsSheet) { open in if !open { presentation.didBlur() } }
+        .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear(perform: report)
         .sheet(isPresented: $showsSheet) { OptionsSheet(selection: $selection, choices: choices, searchable: searchable, title: options.label ?? "").kitoFieldTheme(theme) }
         .accessibilityElement(children: .combine)
