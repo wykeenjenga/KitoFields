@@ -143,7 +143,19 @@ enum FieldSampleCatalog {
         FieldSample("One-time code · 4 secure", "Masked digits, error on wrong code (try 1234).", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .secure()\n    .errorMessage(wrong ? \"Incorrect code\" : nil)") { CodeSample() },
         FieldSample("Alphanumeric code", "Letters and digits, uppercased.", category: .choice, code: "KitoCodeField(code: $code, length: 5).alphanumeric()") { Stateful { KitoCodeField(code: $0, length: 5).alphanumeric() } },
         FieldSample("One-time code + resend", "KitoResendCodeButton disables itself and counts down after each tap.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\nKitoResendCodeButton(cooldown: 30) { resend() }") { CodeWithResendSample() },
+        FieldSample("Large boxes · no caret", "Big grey boxes, focus shown by the border only.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .boxSize(CGSize(width: 64, height: 72))\n    .spacing(20)\n    .showsCaret(false)\n    .digitFont(.system(size: 28, weight: .semibold))\n    .kitoFieldTheme(largeBoxTheme)") { Stateful { KitoCodeField(code: $0, length: 4).boxSize(CGSize(width: 64, height: 72)).spacing(20).showsCaret(false).digitFont(.system(size: 28, weight: .semibold)).kitoFieldTheme(FieldSampleCatalog.largeBoxTheme) } },
     ]
+
+    static var largeBoxTheme: KitoFieldTheme {
+        var theme = KitoFieldTheme()
+        theme.shape = .roundedRectangle(cornerRadius: 14)
+        theme.backgroundColor = Color(.systemGray6)
+        theme.borderColor = Color(.systemGray4)
+        theme.borderWidth = 1
+        theme.focusedBorderColor = Color(.systemGray)
+        theme.focusedBorderWidth = 2
+        return theme
+    }
 
     // MARK: Error presentation
 
@@ -202,6 +214,7 @@ enum FieldSampleCatalog {
 
     static let forms: [FieldSample] = [
         FieldSample("Sign-up form", "Name, email, phone, password, confirm.", category: .forms, code: "See SignUpFormDemo in the example app.") { SignUpFormDemo().frame(height: 640) },
+        FieldSample("Sign-up form (KitoForm)", "One controller validates every field and jumps focus to the first failure.", category: .forms, code: "KitoTextField(...).kitoFormField(.name, form: form, focus: $focus, equals: .name)\n// ... one field per case ...\nButton(\"Create account\") { guard form.validate() else { return } }") { KitoFormDemo().frame(height: 700) },
         FieldSample("Checkout", "Card, expiry, CVV, name, country.", category: .forms, code: "KitoCardNumberField(number: $card)\nHStack { KitoCardExpiryField(text: $exp); KitoCVVField(text: $cvv) }\nKitoNameField(\"Name on card\", text: $name)\nKitoCountryField(\"Billing country\", selection: $country)") {
             VStack(spacing: 14) {
                 Stateful { KitoCardNumberField(number: $0) }

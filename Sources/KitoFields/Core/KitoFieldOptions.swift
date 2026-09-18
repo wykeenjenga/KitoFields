@@ -62,6 +62,9 @@ public struct KitoFieldOptions {
     public var transform: ((String) -> String)?
     public var focusBinding: Binding<Bool>?
     public var isValidBinding: Binding<Bool>?
+    /// Bumped from outside (by `KitoFormController`) to force this field to reveal its errors now,
+    /// regardless of `validationTrigger`. Wired by `.kitoFormField(...)`.
+    public var revealTrigger: Binding<Int>?
     public var onValidationChange: ((KitoValidationState) -> Void)?
     public var onSubmit: (() -> Void)?
     public var onFocusChange: ((Bool) -> Void)?
@@ -187,6 +190,42 @@ public extension KitoFieldConfigurable {
     }
     /// Continuously written with the field's validity (handy for enabling a submit button).
     func isValid(_ binding: Binding<Bool>) -> Self { mutating { $0.isValidBinding = binding } }
+
+    /// Registers this field with a `KitoFormController`. `form.validate()` then reveals every
+    /// registered field's errors and, if any field is invalid, calls `focus` for the first one
+    /// in registration order — so a submit button can validate the whole form and jump straight
+    /// to the first problem.
+    ///
+    /// ```swift
+    /// @StateObject private var form = KitoFormController()
+    /// @FocusState private var focus: Field?
+    ///
+    /// KitoEmailField(text: $email)
+    ///     .required()
+    ///     .kitoFormField("email", form: form) { focus = .email }
+    /// ```
+    @MainActor
+    func kitoFormField<ID: Hashable>(_ id: ID, form: KitoFormController, focus: @escaping () -> Void = {}) -> Self {
+        let bindings = form.bindings(for: id, focus: focus)
+        return mutating {
+            $0.isValidBinding = bindings.isValid
+            $0.revealTrigger = bindings.revealTrigger
+        }
+    }
+
+    /// `.kitoFormField(_:form:focus:)` that also wires this field's actual SwiftUI focus to a
+    /// screen-wide `@FocusState`, so registering with the form and enabling focus-jumping is one call.
+    ///
+    /// ```swift
+    /// KitoEmailField(text: $email)
+    ///     .required()
+    ///     .kitoFormField("email", form: form, focus: $focus, equals: .email)
+    /// ```
+    @MainActor
+    func kitoFormField<ID: Hashable, V: Hashable>(_ id: ID, form: KitoFormController, focus: FocusState<V?>.Binding, equals value: V) -> Self {
+        kitoFormField(id, form: form) { focus.wrappedValue = value }
+            .focused(focus, equals: value)
+    }
 
     func onValidationChange(_ handler: ((KitoValidationState) -> Void)?) -> Self { mutating { $0.onValidationChange = handler } }
     func onSubmit(_ handler: (() -> Void)?) -> Self { mutating { $0.onSubmit = handler } }

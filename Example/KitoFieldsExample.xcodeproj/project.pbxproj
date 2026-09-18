@@ -19,9 +19,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		018C89A5E0822DA0907BEB7D /* wt-otp-resolve */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-otp-resolve"; path = ..; sourceTree = SOURCE_ROOT; };
 		30B7158D979F11E4AFC9E510 /* KitoFieldsExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KitoFieldsExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E7802652DDF7F749EBA9C94 /* InputsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputsScreen.swift; sourceTree = "<group>"; };
-		40C90F6736933047C0E88F21 /* wt-otp-polish */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "wt-otp-polish"; path = ..; sourceTree = SOURCE_ROOT; };
 		5D1A41F650FCE2302A77586C /* KitoFieldsExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KitoFieldsExampleApp.swift; sourceTree = "<group>"; };
 		5E8CEF4AEB2C51317FC478E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6D56BF9E7CAA65F81E73312B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -80,7 +80,7 @@
 		A90EA08C754C72F173BBF83E /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				40C90F6736933047C0E88F21 /* wt-otp-polish */,
+				018C89A5E0822DA0907BEB7D /* wt-otp-resolve */,
 			);
 			name = Packages;
 			sourceTree = "<group>";

@@ -189,6 +189,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         .onChange(of: nationalBinding?.wrappedValue) { syncFromNational($0) }
         .onChange(of: countryBinding?.wrappedValue) { if let c = $0, c != country { country = c } }
         .onChange(of: options.focusBinding?.wrappedValue) { if let f = $0, f != isFocused { isFocused = f } }
+        .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear(perform: initialSync)
         .sheet(isPresented: $showsPicker) { picker }
         .accessibilityElement(children: .contain)

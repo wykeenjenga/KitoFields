@@ -117,6 +117,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
             guard let requested, requested != isFocused else { return }
             setFocus(requested)
         }
+        .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear {
             report(validationState)
             if options.focusBinding?.wrappedValue == true { setFocus(true) }
