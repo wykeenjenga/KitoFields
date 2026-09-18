@@ -66,16 +66,19 @@ public struct KitoFlag: View {
         }
     }
 
-    /// Emoji flags are wider than tall; scale up and clip so the shape is fully covered.
+    /// Emoji flag glyphs carry their own internal padding and don't fill their font's em-box, so a
+    /// modest scale-up (as before) still leaves a visible ring of `background` inside the shape.
+    /// Render well oversized, crop once to a still-oversized square, then crop again down to the
+    /// final `size × size` shape — two crops guarantee full bleed with no gaps on any platform.
     private func clipped<S: Shape>(_ shape: S) -> some View {
         ZStack {
             shape.fill(background)
             Text(country.flag)
-                .font(.system(size: size * 1.35))
-                .frame(width: size * 1.1, height: size * 1.1)
+                .font(.system(size: size * 2.2))
+                .frame(width: size * 1.8, height: size * 1.8)
                 .clipped()
         }
-        .frame(width: size * 1.1, height: size * 1.1)
+        .frame(width: size, height: size)
         .clipShape(shape)
         .accessibilityHidden(true)
     }
