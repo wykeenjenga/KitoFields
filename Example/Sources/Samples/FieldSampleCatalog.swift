@@ -213,6 +213,7 @@ enum FieldSampleCatalog {
 
     static let forms: [FieldSample] = [
         FieldSample("Sign-up form", "Name, email, phone, password, confirm.", category: .forms, code: "See SignUpFormDemo in the example app.") { SignUpFormDemo().frame(height: 640) },
+        FieldSample("Sign-up form (KitoForm)", "One controller validates every field and jumps focus to the first failure.", category: .forms, code: "KitoTextField(...).kitoFormField(.name, form: form, focus: $focus, equals: .name)\n// ... one field per case ...\nButton(\"Create account\") { guard form.validate() else { return } }") { KitoFormDemo().frame(height: 700) },
         FieldSample("Checkout", "Card, expiry, CVV, name, country.", category: .forms, code: "KitoCardNumberField(number: $card)\nHStack { KitoCardExpiryField(text: $exp); KitoCVVField(text: $cvv) }\nKitoNameField(\"Name on card\", text: $name)\nKitoCountryField(\"Billing country\", selection: $country)") {
             VStack(spacing: 14) {
                 Stateful { KitoCardNumberField(number: $0) }

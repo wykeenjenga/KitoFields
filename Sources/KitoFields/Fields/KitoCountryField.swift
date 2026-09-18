@@ -122,6 +122,7 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
             report(validationState)
         }
         .onChange(of: showsPicker) { open in if !open { presentation.didBlur() } }
+        .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear { report(validationState) }
         .sheet(isPresented: $showsPicker) {
             KitoCountryPicker(

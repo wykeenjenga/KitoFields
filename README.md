@@ -202,6 +202,47 @@ Rule presets: `.strongPassword()`, `.strictPassword()`, `.notCommonPassword()`, 
 
 Rules other than `.required` pass on empty input, so optional fields stay quiet until the user types.
 
+### Validate a whole form
+
+Wiring one `@State var xValid` per field and disabling a button is fine for two or three fields, but
+gets old fast on a real sign-up screen. `KitoFormController` does that bookkeeping for you: register
+each field once, then validate every field and jump to the first failure with a single call.
+
+```swift
+private enum Field: Hashable { case name, email, password }
+
+@StateObject private var form = KitoFormController()
+@FocusState private var focus: Field?
+
+KitoTextField("Full name", text: $name)
+    .required()
+    .kitoFormField(Field.name, form: form, focus: $focus, equals: .name)
+
+KitoEmailField(text: $email)
+    .required()
+    .kitoFormField(Field.email, form: form, focus: $focus, equals: .email)
+
+KitoPasswordField(text: $password)
+    .required()
+    .requirements(.strongPassword())
+    .kitoFormField(Field.password, form: form, focus: $focus, equals: .password)
+
+Button("Create account") {
+    guard form.validate() else { return }   // reveals every field's errors, focuses the first failure
+    submit()
+}
+```
+
+`form.validate()` never re-runs your validation rules; each field already reports its own validity
+(the same thing `.isValid(_:)` reports), so `validate()` only reveals what the fields already know and
+focuses the first one, in the order they appear on screen. `form.isValid` reads live without revealing
+anything or moving focus (handy for disabling the submit button), and `form.reset()` clears recorded
+invalidity for a fresh form. Works with any field that has an `.isValid(_:)`/`.focused(_:)` — text,
+email, password, phone, select, country and the presets built on them.
+
+If you'd rather not wire a `@FocusState` yourself, drop the `focus`/`equals` arguments and pass a plain
+closure instead: `.kitoFormField(Field.name, form: form) { isNameFocused = true }`.
+
 ## Styles and shapes
 
 ```swift
