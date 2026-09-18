@@ -142,6 +142,7 @@ enum FieldSampleCatalog {
         FieldSample("One-time code · 6 digits", "Boxes backed by one hidden field.", category: .choice, code: "KitoCodeField(code: $code, length: 6)") { Stateful { KitoCodeField(code: $0, length: 6) } },
         FieldSample("One-time code · 4 secure", "Masked digits, error on wrong code (try 1234).", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .secure()\n    .errorMessage(wrong ? \"Incorrect code\" : nil)") { CodeSample() },
         FieldSample("Alphanumeric code", "Letters and digits, uppercased.", category: .choice, code: "KitoCodeField(code: $code, length: 5).alphanumeric()") { Stateful { KitoCodeField(code: $0, length: 5).alphanumeric() } },
+        FieldSample("One-time code + resend", "KitoResendCodeButton disables itself and counts down after each tap.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\nKitoResendCodeButton(cooldown: 30) { resend() }") { CodeWithResendSample() },
     ]
 
     // MARK: Error presentation
@@ -314,12 +315,27 @@ private struct CodeSample: View {
     @State private var code = ""
     @State private var wrong = false
     var body: some View {
-        KitoCodeField(code: $code, length: 4).secure().errorMessage(wrong ? "Incorrect code (try 1234)" : nil)
+        KitoCodeField(code: $code, length: 4)
+            .secure()
+            .errorMessage(wrong ? "Incorrect code (try 1234)" : nil)
+            .clearsOnError()   // shakes, then clears the boxes for you — no DispatchQueue needed
             .onChange(of: code) { value in
                 guard value.count == 4 else { wrong = false; return }
                 wrong = value != "1234"
-                if wrong { DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { code = "" } }
             }
+    }
+}
+
+private struct CodeWithResendSample: View {
+    @State private var code = ""
+    @State private var sentCount = 1
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            KitoCodeField(code: $code, length: 4)
+            KitoResendCodeButton(cooldown: 8) { sentCount += 1 }
+            Text("Sent \(sentCount) time\(sentCount == 1 ? "" : "s") · cooldown shortened to 8s for this demo")
+                .font(.caption2).foregroundColor(.secondary)
+        }
     }
 }
 

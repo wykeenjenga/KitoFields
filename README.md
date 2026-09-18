@@ -342,7 +342,20 @@ preferred countries and then A–Z sections. Configure with `.countryPicker { $0
 KitoCodeField(code: $code, length: 6)
     .secure()
     .errorMessage(wrongCode ? "Incorrect code" : nil)
+    .clearsOnError()             // shakes, then clears the boxes for you after a wrong code
     .onComplete { code in verify(code) }
+```
+
+`.showsCaret(false)` hides the blinking bar in the active box (useful when a design shows focus
+through the border alone) and `.digitFont(_:)` sets the font for entered digits.
+
+Pair it with `KitoResendCodeButton` for the "Resend code" link underneath — it disables itself and
+counts down on its own, so you don't need a timer in the screen that hosts the field:
+
+```swift
+KitoResendCodeButton(cooldown: 30) {
+    resendCode()
+}
 ```
 
 ## Example app
