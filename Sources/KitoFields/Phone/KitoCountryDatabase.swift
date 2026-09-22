@@ -183,7 +183,7 @@ public enum KitoCountryDatabase {
         c("GN", "224", "Guinea", ["### ## ## ##"], lengths: 8...9, example: "601123456"),
         c("GQ", "240", "Equatorial Guinea", ["### ### ###"], lengths: 9...9, example: "222123456"),
         c("GW", "245", "Guinea-Bissau", ["### ### ###"], lengths: 7...9, example: "955012345"),
-        c("KE", "254", "Kenya", ["### ######"], lengths: 9...10, trunk: "0", example: "712123456"),
+        c("KE", "254", "Kenya", ["### ### ###"], lengths: 9...9, trunk: "0", example: "712345678"),
         c("KM", "269", "Comoros", ["### ## ##"], lengths: 7...7, example: "3212345"),
         c("LR", "231", "Liberia", ["## ### ####"], lengths: 7...9, trunk: "0", example: "770123456"),
         c("LS", "266", "Lesotho", ["#### ####"], lengths: 8...8, example: "50123456"),
