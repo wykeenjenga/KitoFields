@@ -73,3 +73,4 @@
 "password.sequences" = "No sequences like abcd or 1234";
 "password.containsPersonal" = "Must not contain your name or email";
 "field.optionalIndicator" = "(optional)";
+"code.digitPosition" = "Digit %d of %d";

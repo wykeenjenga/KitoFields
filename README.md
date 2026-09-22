@@ -312,6 +312,7 @@ closure instead: `.kitoFormField(Field.name, form: form) { isNameFocused = true 
     theme.errorDisplay = .all              // .first / .all / .none
     theme.errorIcon = "exclamationmark.circle" // nil hides it
     theme.errorFont = .system(size: 13); theme.errorIconFont = .system(size: 12)
+    theme.successBorderColor = .mint       // KitoCodeField boxes under .showsSuccess(_:); nil uses successColor
     theme.shadow = KitoShadow()
 }
 ```
@@ -528,6 +529,82 @@ KitoCodeField(code: $code, length: 6).separator(after: 2) { Divider() }
 An error message shakes the field every time it's set, even if you set the exact same message
 twice in a row — the trigger is a counter, not the message text, so a retry that fails with an
 identical error still replays the animation.
+
+### Box appearance
+
+`.activeBox(...)` and `.errorBox(...)` mirror `.filledBox(...)` for the focused and error states.
+Precedence runs error → success → active → filled → idle, and anything left nil falls back to the
+theme, so a field that sets none of them renders exactly as it always has.
+
+```swift
+KitoCodeField(code: $code, length: 6)
+    .boxStyle(.underline)                          // .outlined (default) / .filled / .underline
+    .boxShape(.capsule)                            // overrides the theme's shape for the boxes
+    .activeBox(borderColor: .accentColor, borderWidth: 2)
+    .errorBox(fill: .red.opacity(0.06), borderColor: .red)
+    .digitColor(filled: .primary, active: .accentColor)
+```
+
+### Fitting any screen
+
+```swift
+KitoCodeField(code: $code, length: 6)
+    .boxSize(CGSize(width: 58, height: 64))
+    .distribution(.fill)        // claim the full width; shrink boxes proportionally to fit
+    .minimumBoxWidth(36)        // …but never below this
+    .alignment(.leading)        // where the row sits when it has width to spare
+```
+
+`.distribution(.fixedSpacing)` (the default) keeps the row hugging its content at `boxSize`, as
+before. A scalable `.digitFont(_:)` also grows the boxes with Dynamic Type, capped at 1.3×.
+
+### Input behaviour
+
+```swift
+KitoCodeField(code: $code, length: 6)
+    .characterSet(.alphanumeric)                   // .digits (default) / .alphanumeric / .custom(CharacterSet)
+    .uppercases(false)
+    .selectAllOnFocus()                            // refocusing a filled field starts a fresh code
+    .focused($focusedField, equals: .code)         // shares one @FocusState enum with your other fields
+```
+
+Pasting strips spaces and dashes and truncates to `length`; typing into an already-full field
+replaces the last character rather than dropping the new one, and backspace moves the active box
+back one with no separate cursor state to keep in sync.
+
+### Secure entry, success and feedback
+
+```swift
+KitoCodeField(code: $code, length: 6)
+    .secure()
+    .revealLastEntered(for: 0.8)                   // show a digit briefly before masking it
+    .maskCharacter("•")
+    .showsSuccess($verified)                       // recolours with theme.successBorderColor
+    .successAnimation(.tick)                       // .pulse / .tick / .none
+    .haptics(onDigit: true, onComplete: true, onError: true)
+    .resendButton(after: 30) { resendCode() }      // places KitoResendCodeButton under the boxes
+```
+
+Each focus move announces "Digit N of M" to VoiceOver.
+
+### Custom box chrome
+
+`KitoCodeFieldStyle` replaces the box chrome entirely while the field keeps owning input, paste,
+focus and masking. `KitoCodeUnderlineBoxStyle` and `KitoCodePillBoxStyle` ship as worked examples.
+
+```swift
+struct DiceBoxStyle: KitoCodeFieldStyle {
+    func makeBox(_ configuration: KitoCodeBoxStyleConfiguration) -> some View {
+        Text(configuration.character.map(String.init) ?? "")
+            .font(.title.bold())
+            .frame(width: configuration.boxSize.width, height: configuration.boxSize.height)
+            .background(RoundedRectangle(cornerRadius: 6).fill(.white))
+            .rotationEffect(configuration.isActive ? .degrees(-4) : .zero)
+    }
+}
+
+KitoCodeField(code: $code, length: 6).style(DiceBoxStyle())
+```
 
 ## Example app
 

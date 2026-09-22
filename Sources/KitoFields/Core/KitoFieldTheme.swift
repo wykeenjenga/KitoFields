@@ -52,6 +52,8 @@ public struct KitoFieldTheme: Sendable {
     public var errorColor: Color = .red
     public var successColor: Color = .green
     public var highlightsSuccessBorder: Bool = false
+    /// Border colour for a `KitoCodeField` box while `.showsSuccess(_:)` is true; nil uses `successColor`.
+    public var successBorderColor: Color? = nil
     public var textColor: Color = .primary
     public var placeholderColor: Color = Color.secondary.opacity(0.7)
     public var labelColor: Color = .secondary
