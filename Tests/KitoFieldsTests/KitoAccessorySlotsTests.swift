@@ -173,3 +173,25 @@ final class KitoPhoneCustomSelectorTests: XCTestCase {
         XCTAssertEqual(field.phone.prefixPlacement, .trailing)
     }
 }
+
+final class KitoCurrencySymbolTests: XCTestCase {
+    /// The symbol is drawn as an accessory, so the formatted text must not repeat it — otherwise
+    /// an unfocused field reads "$ $1,250.50".
+    func testCurrencyFormatterOmitsTheSymbol() {
+        let field = KitoNumberField("Amount", value: .constant(1250.5)).currency("USD")
+        let text = field.formatter.string(from: 1250.5 as NSNumber) ?? ""
+        XCTAssertFalse(text.contains("$"), "got \(text)")
+        XCTAssertTrue(text.contains("1"), "the number itself must still be formatted: got \(text)")
+        XCTAssertEqual(text.trimmingCharacters(in: .whitespaces), text, "no stray padding where the symbol used to be: got \(text)")
+    }
+
+    func testCurrencyFormatterKeepsTwoFractionDigits() {
+        let field = KitoNumberField("Amount", value: .constant(1250.5)).currency("USD")
+        XCTAssertTrue((field.formatter.string(from: 1250.5 as NSNumber) ?? "").hasSuffix("50"))
+    }
+
+    func testPlainNumberFieldIsUnaffected() {
+        let field = KitoNumberField("Count", value: .constant(1250.5))
+        XCTAssertEqual(field.formatter.numberStyle, .decimal)
+    }
+}

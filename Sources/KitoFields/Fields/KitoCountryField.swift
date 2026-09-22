@@ -140,7 +140,8 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(options.accessibilityLabel ?? options.label ?? KitoLocalization.string("country.accessibilityLabel", "Country"))
         .accessibilityValue(selection?.localizedName ?? "")
-        .accessibilityAddTraits(.isButton)
+        // .locked renders a plain label with nothing to tap, so it must not claim the button trait.
+        .accessibilityAddTraits(config.selectionMode == .locked ? [] : .isButton)
     }
 
     private var pickerConfiguration: KitoCountryPickerConfiguration {

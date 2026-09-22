@@ -200,6 +200,12 @@ Rule presets: `.strongPassword()`, `.strictPassword()`, `.notCommonPassword()`, 
 .accessibilityIdentifier("checkout.details.amount")   // app.textFields["…"] finds it in XCUITest
 ```
 
+The identifier lands on the control XCUITest actually drives — the inner `TextField`/`SecureField`
+for text, number and currency fields, the trigger for select and country fields, and a companion
+`"<id>.country"` on the phone field's prefix. `KitoCodeField` is the one exception: its boxes are
+merged into a single accessibility element so VoiceOver reads the code once instead of box by box,
+so query it as `app.otherElements["…"]`, then tap and `typeText`.
+
 ### Accessory slots
 
 `.leadingAccessory(_:)`/`.trailingAccessory(_:)` put content inside the field row. `.accessory(_:placement:)`

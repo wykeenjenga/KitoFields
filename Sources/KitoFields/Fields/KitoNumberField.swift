@@ -71,12 +71,22 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         options.keyboard = .decimalPad
     }
 
-    private var formatter: NumberFormatter {
+    // Internal, not private: the currency-symbol suppression below is asserted directly in tests.
+    var formatter: NumberFormatter {
         let f = NumberFormatter()
         f.locale = locale
         if let currencyCode {
             f.numberStyle = .currency
             f.currencyCode = currencyCode
+            // The symbol is drawn as a leading/trailing accessory (or deliberately suppressed with
+            // .none), so the formatted text must not repeat it — otherwise an unfocused field
+            // reads "$ $1,250.50". Currency style is still what sets the grouping and fraction
+            // rules for the code.
+            f.currencySymbol = ""
+            f.positivePrefix = f.positivePrefix.trimmingCharacters(in: .whitespaces)
+            f.negativePrefix = f.negativePrefix.trimmingCharacters(in: .whitespaces)
+            f.positiveSuffix = f.positiveSuffix.trimmingCharacters(in: .whitespaces)
+            f.negativeSuffix = f.negativeSuffix.trimmingCharacters(in: .whitespaces)
         } else {
             f.numberStyle = .decimal
         }

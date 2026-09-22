@@ -58,8 +58,9 @@ public struct KitoPhoneFieldConfiguration {
     public var prefixPlacement: KitoPrefixPlacement = .leading
     /// Font for the dial code in the prefix control; nil uses `theme.font`.
     public var prefixFont: Font?
-    /// Spacing between the flag, dial code and chevron in the prefix control; nil uses
-    /// `theme.accessorySpacing` (which also governs spacing between the prefix and the divider).
+    /// Spacing between the flag, dial code and chevron *inside* the prefix control; nil uses 6pt.
+    /// Deliberately tighter than `theme.accessorySpacing`, which governs the gaps *around* the
+    /// prefix (to the divider and the input) so the prefix reads as one group.
     public var prefixSpacing: CGFloat?
     public var formatsAsYouType = true
     public var limitsToMaxLength = true
@@ -273,6 +274,9 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
 
     @ViewBuilder private var countrySelector: some View {
         HStack(spacing: theme.accessorySpacing) {
+            // The divider always sits between the prefix and the input, so it swaps sides with
+            // the prefix itself.
+            if phone.showsDivider, phone.prefixPlacement == .trailing { selectorDivider }
             switch phone.selectionMode {
             case .sheet, .custom:
                 Button { showsPicker = true } label: { selectorLabel }
@@ -300,15 +304,17 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             case .locked:
                 selectorLabel
             }
-            if phone.showsDivider {
-                Rectangle()
-                    .fill(theme.borderColor)
-                    .frame(width: 1, height: theme.iconSize + 6)
-            }
+            if phone.showsDivider, phone.prefixPlacement == .leading { selectorDivider }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(KitoLocalization.format("phone.countryAccessibility", "Country: %@, %@", country.localizedName, country.formattedDialCode))
         .accessibilityAddTraits(phone.selectionMode == .locked ? [] : .isButton)
+    }
+
+    private var selectorDivider: some View {
+        Rectangle()
+            .fill(theme.borderColor)
+            .frame(width: 1, height: theme.iconSize + 6)
     }
 
     private var selectorLabel: some View {

@@ -99,6 +99,9 @@ public struct KitoCodeField: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(KitoLocalization.string("code.accessibilityLabel", "Verification code"))
         .accessibilityValue(code.map(String.init).joined(separator: " "))
+        // On the merged element, not the hidden TextField: the boxes are one accessibility
+        // element (children: .ignore), so an identifier on a child inside it is unreachable.
+        .kitoAccessibilityIdentifier(accessibilityIdentifier)
     }
 
     private var hiddenField: some View {
@@ -113,7 +116,6 @@ public struct KitoCodeField: View {
             .frame(maxWidth: .infinity)
             .frame(height: boxSize.height)
             .opacity(0.02)
-            .kitoAccessibilityIdentifier(accessibilityIdentifier)
             .accessibilityHidden(true)
     }
 
@@ -307,8 +309,10 @@ public struct KitoCodeField: View {
     public func clearsOnError(after delay: TimeInterval = 0.6) -> KitoCodeField { mutating { $0.clearsOnErrorAfter = delay } }
     public func onComplete(_ handler: @escaping (String) -> Void) -> KitoCodeField { mutating { $0.onComplete = handler } }
     public func focused(_ binding: Binding<Bool>) -> KitoCodeField { mutating { $0.focusBinding = binding } }
-    /// Applied to the hidden text field that actually receives typing, so `app.textFields["id"]`
-    /// finds it in XCUITest.
+    /// Applied to the field as a whole. The boxes are deliberately merged into one accessibility
+    /// element so VoiceOver reads the code once rather than box by box, which also means the
+    /// hidden text field behind them isn't individually addressable — so in XCUITest this is
+    /// `app.otherElements["id"]`, not `app.textFields["id"]`. Tap it and `typeText` as usual.
     public func accessibilityIdentifier(_ id: String) -> KitoCodeField { mutating { $0.accessibilityIdentifier = id } }
 
     private struct Blink: ViewModifier {

@@ -188,12 +188,18 @@ public struct KitoAccessory {
     /// 44×44pt tappable regardless of how small the label itself renders. Parameter order matches
     /// SwiftUI's own `Menu` only loosely on purpose: call with explicit `label:`/`content:` labels
     /// (trailing-closure sugar reads backwards here since `label` is first, `content` second).
+    ///
+    /// - Important: SwiftUI has no `Menu` on watchOS, and needs tvOS 17 for it. On those
+    ///   platforms this renders `label()` as plain, non-interactive content — the menu cannot be
+    ///   opened and nothing can be selected. If your app ships there, drive the same choice with
+    ///   `.button(...)` and your own presentation instead of `.menu(...)`.
     public static func menu<Label: View, Content: View>(@ViewBuilder label: @escaping () -> Label, @ViewBuilder content: @escaping () -> Content) -> KitoAccessory {
         KitoAccessory { _ in
             #if os(watchOS)
-            // Menu is unavailable on watchOS; the label shows without menu behaviour. Build a
-            // custom trigger with .button(...) or .reactive(...) plus your own presentation there.
-            AnyView(label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle()))
+            // Menu is unavailable on watchOS; the label shows as plain, non-interactive content —
+            // no hit area, so it doesn't advertise a tap that would do nothing. Build a custom
+            // trigger with .button(...) plus your own presentation there.
+            AnyView(label().frame(minWidth: 44, minHeight: 44).allowsHitTesting(false))
             #else
             if #available(tvOS 17.0, *) {
                 AnyView(
@@ -202,8 +208,8 @@ public struct KitoAccessory {
                         .contentShape(Rectangle())
                 )
             } else {
-                // Menu needs tvOS 17. Same fallback as watchOS below that version.
-                AnyView(label().frame(minWidth: 44, minHeight: 44).contentShape(Rectangle()))
+                // Menu needs tvOS 17. Same non-interactive fallback as watchOS below that version.
+                AnyView(label().frame(minWidth: 44, minHeight: 44).allowsHitTesting(false))
             }
             #endif
         }
