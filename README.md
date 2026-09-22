@@ -440,6 +440,21 @@ KitoCodeField(code: $code, length: 6)
     .filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2))
 ```
 
+Group the boxes with a separator — a themed dash or dot, or your own view:
+
+```swift
+KitoCodeField(code: $code, length: 6).groups([3, 3])                    // "123 - 456"
+KitoCodeField(code: $code, length: 6).groups([3, 3], separator: .dot)
+KitoCodeField(code: $code, length: 6).groups([3, 3]) { Text("·").bold() }
+
+// A one-off separator instead of (or alongside) groups:
+KitoCodeField(code: $code, length: 6).separator(after: 2) { Divider() }
+```
+
+An error message shakes the field every time it's set, even if you set the exact same message
+twice in a row — the trigger is a counter, not the message text, so a retry that fails with an
+identical error still replays the animation.
+
 ## Example app
 
 `Example/KitoFieldsExample.xcodeproj` (in this repository) demonstrates every field, style, shape, theme and motion preset: sign-up form, text field options, phone, password, one-time code, style gallery and an animations screen. Regenerate the project with `xcodegen generate` after editing `Example/project.yml`.

@@ -106,4 +106,23 @@ final class KitoCodeFieldTests: XCTestCase {
         XCTAssertEqual(filledNoOverrideIdle.borderColor, theme.borderColor)
         XCTAssertEqual(filledNoOverrideIdle.borderWidth, theme.borderWidth)
     }
+
+    func testGroupBoundariesPlacesASeparatorAfterEachGroupExceptTheLast() {
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [3, 3], length: 6), [2])
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [2, 2, 2], length: 6), [1, 3])
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [1, 2, 3], length: 6), [0, 2])
+    }
+
+    func testGroupBoundariesIsEmptyForNilOrSingleGroup() {
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: nil, length: 6), [])
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [6], length: 6), [])
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [], length: 6), [])
+    }
+
+    /// A boundary past the field's own length (a misconfigured `sizes` that doesn't sum to
+    /// `length`) must not produce an out-of-range index.
+    func testGroupBoundariesIgnoresIndexesAtOrBeyondLength() {
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [3, 3, 3], length: 6), [2], "the boundary after the (nonexistent) third group falls outside the field and must be dropped")
+        XCTAssertEqual(KitoCodeField.groupBoundaries(sizes: [10, 2], length: 6), [], "a boundary at or past the last valid index must be dropped, not clamped onto the last box")
+    }
 }

@@ -8,6 +8,12 @@
 
 import SwiftUI
 
+/// A separator's default look, used at group boundaries set by `.groups(_:separator:)`. For
+/// anything else, pass a view directly to `.groups(_:separator:)` or `.separator(after:view:)`.
+public enum KitoCodeSeparatorStyle: Sendable {
+    case dash, dot, none
+}
+
 /// One-time-code entry rendered as individual boxes, backed by a single hidden text field so
 /// paste and SMS autofill work.
 ///
@@ -28,12 +34,17 @@ public struct KitoCodeField: View {
     var filledBorderColor: Color?
     var filledBorderWidth: CGFloat?
     var filledShadow: KitoShadow?
+    private var groupSizes: [Int]?
+    private var groupSeparatorStyle: KitoCodeSeparatorStyle = .dash
+    private var groupSeparatorView: (() -> AnyView)?
+    private var customSeparators: [Int: () -> AnyView] = [:]
     private var errorMessage: String?
     private var clearsOnErrorAfter: TimeInterval?
     private var onComplete: ((String) -> Void)?
     private var focusBinding: Binding<Bool>?
 
     @FocusState private var isFocused: Bool
+    @State private var shakeTrigger = 0
     @Environment(\.kitoFieldTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -46,16 +57,17 @@ public struct KitoCodeField: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: theme.helperSpacing) {
             ZStack {
-                HStack(spacing: spacing) {
-                    ForEach(0..<length, id: \.self) { index in
-                        box(at: index)
+                HStack(spacing: 0) {
+                    ForEach(Array(rowItems.enumerated()), id: \.element.id) { offset, item in
+                        rowItemView(item)
+                            .padding(.trailing, offset == rowItems.count - 1 ? 0 : spacing)
                     }
                 }
                 hiddenField
             }
             .contentShape(Rectangle())
             .modifier(FocusOnTap { isFocused = true })
-            .kitoFieldShake(trigger: reduceMotion ? nil : errorMessage, animation: theme.motion.shake)
+            .kitoFieldShake(trigger: reduceMotion ? 0 : shakeTrigger, animation: theme.motion.shake)
             if let errorMessage {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     if let icon = theme.errorIcon {
@@ -71,7 +83,9 @@ public struct KitoCodeField: View {
         .animation(reduceMotion ? .easeOut(duration: 0.1) : theme.animation, value: isFocused)
         .onChange(of: code) { sanitize($0) }
         .onChange(of: errorMessage) { newValue in
-            guard newValue != nil, let delay = clearsOnErrorAfter else { return }
+            guard newValue != nil else { return }
+            shakeTrigger += 1
+            guard let delay = clearsOnErrorAfter else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { code = "" }
         }
         .onChange(of: isFocused) { focused in
@@ -142,6 +156,63 @@ public struct KitoCodeField: View {
         ))
     }
 
+    private enum RowItem {
+        case box(Int)
+        case separator(Int, AnyView)
+        var id: String {
+            switch self {
+            case .box(let index): return "box-\(index)"
+            case .separator(let index, _): return "separator-\(index)"
+            }
+        }
+    }
+
+    static func groupBoundaries(sizes: [Int]?, length: Int) -> Set<Int> {
+        guard let sizes, sizes.count > 1 else { return [] }
+        var boundaries = Set<Int>()
+        var index = -1
+        for size in sizes.dropLast() {
+            index += size
+            if index >= 0, index < length - 1 { boundaries.insert(index) }
+        }
+        return boundaries
+    }
+
+    private var rowItems: [RowItem] {
+        let boundaries = Self.groupBoundaries(sizes: groupSizes, length: length)
+        var items: [RowItem] = []
+        for index in 0..<length {
+            items.append(.box(index))
+            if let custom = customSeparators[index] {
+                items.append(.separator(index, custom()))
+            } else if boundaries.contains(index) {
+                let view = groupSeparatorView?() ?? AnyView(defaultSeparator(groupSeparatorStyle))
+                items.append(.separator(index, view))
+            }
+        }
+        return items
+    }
+
+    @ViewBuilder
+    private func rowItemView(_ item: RowItem) -> some View {
+        switch item {
+        case .box(let index): box(at: index)
+        case .separator(_, let view): view
+        }
+    }
+
+    @ViewBuilder
+    private func defaultSeparator(_ style: KitoCodeSeparatorStyle) -> some View {
+        switch style {
+        case .dash:
+            Rectangle().fill(theme.borderColor).frame(width: 8, height: 2)
+        case .dot:
+            Circle().fill(theme.borderColor).frame(width: 5, height: 5)
+        case .none:
+            EmptyView()
+        }
+    }
+
     static func boxAppearance(
         hasError: Bool,
         hasValue: Bool,
@@ -207,6 +278,22 @@ public struct KitoCodeField: View {
             $0.filledBorderWidth = borderWidth
             $0.filledShadow = shadow
         }
+    }
+    /// Splits the boxes into groups, e.g. `.groups([3, 3])` on a 6-digit code renders "123 - 456".
+    /// The last group has no trailing separator. `style` defaults to a themed dash.
+    public func groups(_ sizes: [Int], separator style: KitoCodeSeparatorStyle = .dash) -> KitoCodeField {
+        mutating { $0.groupSizes = sizes; $0.groupSeparatorStyle = style; $0.groupSeparatorView = nil }
+    }
+    /// Same as `groups(_:separator:)`, but with your own view at every group boundary instead of
+    /// one of the built-in styles.
+    public func groups<V: View>(_ sizes: [Int], @ViewBuilder separator view: @escaping () -> V) -> KitoCodeField {
+        mutating { $0.groupSizes = sizes; $0.groupSeparatorView = { AnyView(view()) } }
+    }
+    /// A one-off separator after the box at `index` (0-based), e.g. `.separator(after: 2) { Text("-") }`
+    /// on a 6-digit code places it between the 3rd and 4th boxes. Takes priority over a separator
+    /// from `.groups(_:separator:)` at the same index.
+    public func separator<V: View>(after index: Int, @ViewBuilder view: @escaping () -> V) -> KitoCodeField {
+        mutating { $0.customSeparators[index] = { AnyView(view()) } }
     }
     /// Accepts letters as well as digits (uppercased).
     public func alphanumeric(_ enabled: Bool = true) -> KitoCodeField { mutating { $0.allowsLetters = enabled } }
