@@ -12,7 +12,7 @@ import SwiftUI
 public enum KitoFlagStyle: Hashable, Sendable {
     /// Regional-indicator emoji flag, as-is.
     case emoji
-    /// Emoji flag clipped to a filled circle.
+    /// Emoji flag clipped to a filled circle. The default everywhere.
     case circle
     /// Emoji flag clipped to a rounded rectangle.
     case rounded
@@ -24,14 +24,21 @@ public enum KitoFlagStyle: Hashable, Sendable {
     case hidden
 }
 
+/// Precedence for how a flag is drawn: what the field was asked for, else the theme's app-wide
+/// choice, else the package default — a filled circle. Kept as a free function so the precedence
+/// is testable on its own.
+public func kitoResolvedFlagStyle(_ override: KitoFlagStyle?, themeStyle: KitoFlagStyle?) -> KitoFlagStyle {
+    override ?? themeStyle ?? .circle
+}
+
 public struct KitoFlag: View {
     public var country: KitoCountry
-    public var style: KitoFlagStyle = .emoji
+    public var style: KitoFlagStyle = .circle
     public var size: CGFloat = 22
     /// Background used by `.tile`, and behind `.circle` / `.rounded` where the emoji has gaps.
     public var background: Color = Color.secondary.opacity(0.15)
 
-    public init(country: KitoCountry, style: KitoFlagStyle = .emoji, size: CGFloat = 22, background: Color = Color.secondary.opacity(0.15)) {
+    public init(country: KitoCountry, style: KitoFlagStyle = .circle, size: CGFloat = 22, background: Color = Color.secondary.opacity(0.15)) {
         self.country = country
         self.style = style
         self.size = size

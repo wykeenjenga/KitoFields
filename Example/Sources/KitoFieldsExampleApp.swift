@@ -98,10 +98,12 @@ final class AppearanceModel: ObservableObject {
     @Published var tint: Color = .black
     @Published var showsBorder = true
     @Published var showsShadow = false
+    @Published var emojiFlags = false
 
     var fieldTheme: KitoFieldTheme {
         var theme = KitoFieldTheme()
         theme.shape = shape.fieldShape
+        theme.flagStyle = emojiFlags ? .emoji : nil
         theme.showsBorder = showsBorder
         theme.focusedBorderColor = tint
         theme.shadow = showsShadow ? KitoShadow() : nil
@@ -171,6 +173,7 @@ struct AppearanceScreen: View {
                         ForEach(AppearanceModel.Shape.allCases) { Text($0.rawValue.capitalized).tag($0) }
                     }.pickerStyle(.segmented)
                     Toggle("Show border", isOn: $appearance.showsBorder)
+                    Toggle("Emoji flags", isOn: $appearance.emojiFlags)
                     Toggle("Drop shadow", isOn: $appearance.showsShadow)
                 }
                 Section("Motion preset") {

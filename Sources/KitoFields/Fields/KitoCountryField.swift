@@ -15,7 +15,8 @@ public struct KitoCountryFieldConfiguration {
     public var showsDialCode = false
     public var showsCurrency = false
     public var showsChevron = true
-    public var flagStyle: KitoFlagStyle = .emoji
+    /// Overrides `theme.flagStyle` for this field; nil follows the theme (and `.emoji` when it too is unset).
+    public var flagStyle: KitoFlagStyle? = nil
     public var selectionMode: KitoCountrySelection = .sheet
     public var allowedCountries: Set<String>? = nil
     public var excludedCountries: Set<String> = []
@@ -182,7 +183,7 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
         HStack(spacing: 8) {
             if let country = selection {
                 if config.showsFlag {
-                    KitoFlag(country: country, style: config.flagStyle, size: theme.iconSize + 5)
+                    KitoFlag(country: country, style: kitoResolvedFlagStyle(config.flagStyle, themeStyle: theme.flagStyle), size: theme.iconSize + 5)
                         .id(country.isoCode)
                         .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }

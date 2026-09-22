@@ -53,7 +53,8 @@ public struct KitoPhoneFieldConfiguration {
     public var showsDialCode = true
     public var showsChevron = true
     public var showsDivider = true
-    public var flagStyle: KitoFlagStyle = .emoji
+    /// Overrides `theme.flagStyle` for this field; nil follows the theme (and `.emoji` when it too is unset).
+    public var flagStyle: KitoFlagStyle? = nil
     public var selectionMode: KitoCountrySelection = .sheet
     public var prefixPlacement: KitoPrefixPlacement = .leading
     /// Font for the dial code in the prefix control; nil uses `theme.font`.
@@ -320,7 +321,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     private var selectorLabel: some View {
         HStack(spacing: phone.prefixSpacing ?? 6) {
             if phone.showsFlag {
-                KitoFlag(country: country, style: phone.flagStyle, size: theme.iconSize + 5)
+                KitoFlag(country: country, style: kitoResolvedFlagStyle(phone.flagStyle, themeStyle: theme.flagStyle), size: theme.iconSize + 5)
                     .id(country.isoCode)
                     .transition(.scale(scale: 0.5).combined(with: .opacity))
             }
