@@ -8,6 +8,14 @@
 
 import SwiftUI
 
+/// `override` is a double-optional: outer nil means "`.optional(_:)` was never called, follow the
+/// theme"; inner nil (from an explicit `.optional(nil)`) means "hide it even if the theme shows
+/// one elsewhere". A free function (rather than a method on the generic `KitoFieldCore`) so it's
+/// unit-testable without specifying that type's generic parameters.
+func kitoResolvedOptionalIndicator(override: String??, themeIndicator: String?) -> String? {
+    override ?? themeIndicator
+}
+
 /// Internal assembler: turns a field's parts plus its options into a style configuration and
 /// hands it to the current style.
 struct KitoFieldCore<Input: View, Footer: View>: View {
@@ -46,7 +54,12 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
             isSuccess: isSuccess,
             theme: theme,
             reducesMotion: reduceMotion,
-            errorPresentation: options.errorPresentation
+            errorPresentation: options.errorPresentation,
+            above: aboveSlot,
+            aboveAlignment: options.aboveAlignment,
+            below: belowSlot,
+            belowAlignment: options.belowAlignment,
+            overlayCenter: overlayCenterSlot
         )
     }
 
@@ -54,11 +67,21 @@ struct KitoFieldCore<Input: View, Footer: View>: View {
         guard let label = options.label else { return nil }
         var text = Text(label)
         if options.isRequired, let indicator = theme.requiredIndicator {
-            text = text + Text(" \(indicator)").foregroundColor(theme.requiredIndicatorColor)
-        } else if !options.isRequired, let optional = theme.optionalIndicator {
-            text = text + Text(" \(optional)").font(theme.helperFont).foregroundColor(theme.helperColor)
+            text = text + Text(" \(indicator)")
+                .font(theme.requiredIndicatorFont ?? theme.labelFont)
+                .foregroundColor(theme.requiredIndicatorColor)
+        } else if !options.isRequired, let optional = kitoResolvedOptionalIndicator(override: options.optionalText, themeIndicator: theme.optionalIndicator) {
+            text = text + Text(" \(optional)")
+                .font(theme.optionalIndicatorFont ?? theme.helperFont)
+                .foregroundColor(theme.optionalIndicatorColor ?? theme.helperColor)
         }
         return KitoFieldSlot(text)
+    }
+
+    private var aboveSlot: KitoFieldSlot? { options.above.map { KitoFieldSlot($0.view(accessoryContext)) } }
+    private var belowSlot: KitoFieldSlot? { options.below.map { KitoFieldSlot($0.view(accessoryContext)) } }
+    private var overlayCenterSlot: KitoFieldSlot? {
+        options.overlayCenter.map { KitoFieldSlot($0.view(accessoryContext).allowsHitTesting(false)) }
     }
 
     private var accessoryContext: KitoAccessoryContext {

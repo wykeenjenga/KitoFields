@@ -96,8 +96,14 @@ public struct KitoFieldTheme: Sendable {
     /// Appended to the label of required fields. Set to nil to hide.
     public var requiredIndicator: String? = "*"
     public var requiredIndicatorColor: Color = .red
+    /// Font for the required indicator; nil uses the label's own font.
+    public var requiredIndicatorFont: Font? = nil
     /// Appended to the label of fields that are not required (e.g. "Optional"). Nil hides it.
     public var optionalIndicator: String? = nil
+    /// Font for the optional indicator; nil uses `helperFont`.
+    public var optionalIndicatorFont: Font? = nil
+    /// Colour for the optional indicator; nil uses `helperColor`.
+    public var optionalIndicatorColor: Color? = nil
     public var showsFocusHighlight: Bool = true
 
     // MARK: Motion

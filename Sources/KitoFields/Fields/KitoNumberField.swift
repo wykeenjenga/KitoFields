@@ -8,6 +8,39 @@
 
 import SwiftUI
 
+/// Where the currency symbol sits relative to the formatted value.
+public enum KitoCurrencyPosition: Sendable { case prefix, suffix, none }
+
+/// One currency a `currencySelector(_:selected:)` menu offers.
+public struct KitoCurrencyOption: Identifiable, Equatable, Sendable {
+    public let code: String
+    public let symbol: String?
+
+    public init(code: String, symbol: String? = nil) {
+        self.code = code
+        self.symbol = symbol
+    }
+
+    public var id: String { code }
+
+    /// This option's currency symbol, falling back to a lookup by ISO code, then the code itself.
+    public var resolvedSymbol: String {
+        symbol ?? KitoCountryDatabase.all.first { $0.currencyCode == code }?.currencySymbol ?? code
+    }
+}
+
+/// Default label for a `currencySelector(_:selected:)` menu: the ISO code with a chevron.
+private struct KitoDefaultCurrencyLabel: View {
+    let option: KitoCurrencyOption
+    @Environment(\.kitoFieldTheme) private var theme
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(option.code).font(theme.font).foregroundColor(theme.textColor)
+            Image(systemName: "chevron.down").font(.system(size: theme.iconSize * 0.6, weight: .semibold)).foregroundColor(theme.iconColor)
+        }
+    }
+}
+
 /// Numeric input bound to a `Double?`. Accepts the locale's decimal separator, formats with
 /// grouping on blur, and validates an optional range.
 ///
@@ -28,6 +61,7 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
     private var step: Double?
     private var locale: Locale = .autoupdatingCurrent
     private var currencyCode: String?
+    private var currencyPosition: KitoCurrencyPosition = .prefix
     private var unitSuffix: String?
 
     public init(_ label: String? = nil, value: Binding<Double?>, prompt: String? = "0") {
@@ -37,12 +71,22 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         options.keyboard = .decimalPad
     }
 
-    private var formatter: NumberFormatter {
+    // Internal, not private: the currency-symbol suppression below is asserted directly in tests.
+    var formatter: NumberFormatter {
         let f = NumberFormatter()
         f.locale = locale
         if let currencyCode {
             f.numberStyle = .currency
             f.currencyCode = currencyCode
+            // The symbol is drawn as a leading/trailing accessory (or deliberately suppressed with
+            // .none), so the formatted text must not repeat it — otherwise an unfocused field
+            // reads "$ $1,250.50". Currency style is still what sets the grouping and fraction
+            // rules for the code.
+            f.currencySymbol = ""
+            f.positivePrefix = f.positivePrefix.trimmingCharacters(in: .whitespaces)
+            f.negativePrefix = f.negativePrefix.trimmingCharacters(in: .whitespaces)
+            f.positiveSuffix = f.positiveSuffix.trimmingCharacters(in: .whitespaces)
+            f.negativeSuffix = f.negativeSuffix.trimmingCharacters(in: .whitespaces)
         } else {
             f.numberStyle = .decimal
         }
@@ -86,9 +130,13 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         if let range { rules += KitoRule.range(range, locale: locale) }
         rules.append(KitoRule(id: "inputkit.number", message: KitoLocalization.string("number.invalid", "Enter a valid number")) { [editingFormatter] in editingFormatter.number(from: $0) != nil })
         field.options.rules = rules
-        if let currencyCode, options.leading == nil {
+        if let currencyCode {
             let symbol = KitoCountryDatabase.all.first { $0.currencyCode == currencyCode }?.currencySymbol ?? currencyCode
-            field.options.leading = .text(symbol)
+            switch currencyPosition {
+            case .prefix: if options.leading == nil { field.options.leading = .text(symbol) }
+            case .suffix: if options.trailing == nil { field.options.trailing = .text(symbol) }
+            case .none: break
+            }
         }
         if let unitSuffix, options.trailing == nil { field.options.trailing = .text(unitSuffix) }
         if let step, options.trailing == nil, unitSuffix == nil {
@@ -148,6 +196,8 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
     /// Formats as currency when not editing and shows the symbol as the leading accessory.
     public func currency(_ code: String) -> KitoNumberField { mutating { $0.currencyCode = code; $0.fractionDigits = 2...2 } }
     public func currency(of country: KitoCountry) -> KitoNumberField { currency(country.currencyCode ?? "USD") }
+    /// Where the currency symbol sits; `.prefix` (the default) matches `currency(_:)`'s own accessory.
+    public func currencyPosition(_ position: KitoCurrencyPosition) -> KitoNumberField { mutating { $0.currencyPosition = position } }
     /// Unit shown after the value, e.g. "kg".
     public func unit(_ suffix: String) -> KitoNumberField { mutating { $0.unitSuffix = suffix } }
 }
@@ -165,7 +215,74 @@ public struct KitoCurrencyField: View, KitoFieldConfigurable {
         self.init(label, value: value, currencyCode: country.currencyCode ?? "USD", prompt: prompt)
     }
 
+    /// Keeps the raw amount as a formatted string in your own binding (e.g. a view model that
+    /// stores amounts as text rather than `Double`) instead of a `Double?`. Round-trips through
+    /// the same locale-aware formatter the field itself displays with.
+    public init(_ label: String? = "Amount", text: Binding<String>, currencyCode: String = "USD", prompt: String? = "0.00") {
+        let formatter = Self.bridgeFormatter()
+        base = KitoNumberField(label, value: Self.bridge(text, formatter: formatter), prompt: prompt).currency(currencyCode)
+    }
+
+    static func bridgeFormatter() -> NumberFormatter {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.locale = .autoupdatingCurrent
+        f.usesGroupingSeparator = true
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f
+    }
+
+    /// Bridges a `Binding<String>` to the `Binding<Double?>` `KitoNumberField` itself needs,
+    /// parsing/formatting with `formatter` on every read/write. Extracted so the round-trip
+    /// (string → double → string) is unit-testable without hosting a view.
+    static func bridge(_ text: Binding<String>, formatter: NumberFormatter) -> Binding<Double?> {
+        Binding<Double?>(
+            get: { formatter.number(from: text.wrappedValue)?.doubleValue },
+            set: { text.wrappedValue = $0.map { formatter.string(from: $0 as NSNumber) ?? "" } ?? "" }
+        )
+    }
+
     public var body: some View { base }
 
     public func range(_ range: ClosedRange<Double>) -> KitoCurrencyField { var c = self; c.base = c.base.range(range); return c }
+
+    /// A currency-picker menu in any slot (trailing by default) — a flag + code + chevron, or
+    /// your own label per option.
+    ///
+    /// ```swift
+    /// KitoCurrencyField(text: $amount, currencyCode: currency)
+    ///     .currencySelector(options, selected: $currency) { option in
+    ///         MyCurrencyFlagLabel(option: option)
+    ///     }
+    /// ```
+    public func currencySelector<Label: View>(_ options: [KitoCurrencyOption], selected: Binding<String>, placement: KitoAccessoryPlacement = .trailing, @ViewBuilder label: @escaping (KitoCurrencyOption) -> Label) -> KitoCurrencyField {
+        var c = self
+        c.base = c.base.accessory(Self.currencyMenu(options, selected: selected, label: label), placement: placement)
+        return c
+    }
+
+    /// `currencySelector(_:selected:placement:label:)` with a built-in "code, chevron" label.
+    public func currencySelector(_ options: [KitoCurrencyOption], selected: Binding<String>, placement: KitoAccessoryPlacement = .trailing) -> KitoCurrencyField {
+        currencySelector(options, selected: selected, placement: placement) { option in KitoDefaultCurrencyLabel(option: option) }
+    }
+
+    private static func currencyMenu<Label: View>(_ options: [KitoCurrencyOption], selected: Binding<String>, @ViewBuilder label: @escaping (KitoCurrencyOption) -> Label) -> KitoAccessory {
+        .menu(
+            label: {
+                if let current = options.first(where: { $0.code == selected.wrappedValue }) {
+                    label(current)
+                } else {
+                    Text(selected.wrappedValue)
+                }
+            },
+            content: {
+                ForEach(options) { option in
+                    Button { selected.wrappedValue = option.code } label: {
+                        Text("\(option.resolvedSymbol) \(option.code)")
+                    }
+                }
+            }
+        )
+    }
 }

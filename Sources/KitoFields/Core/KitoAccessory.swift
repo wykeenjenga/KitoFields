@@ -31,6 +31,41 @@ public struct KitoAccessoryContext {
     }
 }
 
+/// Horizontal alignment for an `.above`/`.below` accessory.
+public enum KitoAccessoryAlignment: Sendable, Equatable {
+    case leading, center, trailing
+
+    var frameAlignment: Alignment {
+        switch self {
+        case .leading: return .leading
+        case .center: return .center
+        case .trailing: return .trailing
+        }
+    }
+}
+
+/// Where an accessory sits relative to the field.
+public enum KitoAccessoryPlacement: Sendable {
+    /// Inside the field row, before the input.
+    case leading
+    /// Inside the field row, after the input.
+    case trailing
+    /// Above the field, outside its chrome.
+    case above(alignment: KitoAccessoryAlignment = .leading)
+    /// Below the field (above any helper/error text), outside its chrome.
+    case below(alignment: KitoAccessoryAlignment = .leading)
+    /// Overlaid centered inside the input area. Display-only: it does not receive touches, so it
+    /// never blocks typing.
+    case center
+}
+
+/// Background behind an accessory, applied with `.background(_:)`.
+public enum KitoAccessoryBackground: Sendable {
+    case none
+    case capsule(Color)
+    case roundedRectangle(Color, radius: CGFloat)
+}
+
 /// How an animated icon reacts when the field gains focus.
 public enum KitoIconMotion: Sendable {
     /// Crossfade/scale between the idle and focused symbol.
@@ -127,6 +162,128 @@ public struct KitoAccessory {
     /// Arbitrary content that can read the field state (focus, error, success, emptiness).
     public static func reactive<V: View>(@ViewBuilder _ content: @escaping (KitoAccessoryContext) -> V) -> KitoAccessory {
         KitoAccessory { ctx in AnyView(content(ctx)) }
+    }
+
+    /// A tappable label with a title and an optional leading icon, e.g. "Paste". At least
+    /// 44×44pt tappable regardless of how small the label itself renders.
+    public static func button(title: String, systemImage: String? = nil, role: ButtonRole? = nil, color: Color? = nil, action: @escaping () -> Void) -> KitoAccessory {
+        KitoAccessory { ctx in
+            AnyView(
+                Button(role: role, action: action) {
+                    HStack(spacing: 4) {
+                        if let systemImage { Image(systemName: systemImage) }
+                        Text(title)
+                    }
+                    .font(ctx.theme.helperFont)
+                    .foregroundColor(color ?? ctx.theme.tintColor ?? ctx.iconColor)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            )
+        }
+    }
+
+    /// A `Menu` in the field's chrome — a currency or unit chooser, for example. At least
+    /// 44×44pt tappable regardless of how small the label itself renders. Parameter order matches
+    /// SwiftUI's own `Menu` only loosely on purpose: call with explicit `label:`/`content:` labels
+    /// (trailing-closure sugar reads backwards here since `label` is first, `content` second).
+    ///
+    /// - Important: SwiftUI has no `Menu` on watchOS, and needs tvOS 17 for it. On those
+    ///   platforms this renders `label()` as plain, non-interactive content — the menu cannot be
+    ///   opened and nothing can be selected. If your app ships there, drive the same choice with
+    ///   `.button(...)` and your own presentation instead of `.menu(...)`.
+    public static func menu<Label: View, Content: View>(@ViewBuilder label: @escaping () -> Label, @ViewBuilder content: @escaping () -> Content) -> KitoAccessory {
+        KitoAccessory { _ in
+            #if os(watchOS)
+            // Menu is unavailable on watchOS; the label shows as plain, non-interactive content —
+            // no hit area, so it doesn't advertise a tap that would do nothing. Build a custom
+            // trigger with .button(...) plus your own presentation there.
+            AnyView(label().frame(minWidth: 44, minHeight: 44).allowsHitTesting(false))
+            #else
+            if #available(tvOS 17.0, *) {
+                AnyView(
+                    Menu(content: content, label: label)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                )
+            } else {
+                // Menu needs tvOS 17. Same non-interactive fallback as watchOS below that version.
+                AnyView(label().frame(minWidth: 44, minHeight: 44).allowsHitTesting(false))
+            }
+            #endif
+        }
+    }
+
+    /// A tappable text toggle, e.g. a "Show"/"Hide" control. At least 44×44pt tappable regardless
+    /// of how small the label itself renders.
+    public static func toggle(isOn: Binding<Bool>, on: String, off: String, color: Color? = nil) -> KitoAccessory {
+        KitoAccessory { ctx in
+            AnyView(
+                Button { isOn.wrappedValue.toggle() } label: {
+                    Text(isOn.wrappedValue ? on : off)
+                        .font(ctx.theme.helperFont)
+                        .foregroundColor(color ?? ctx.theme.tintColor ?? ctx.iconColor)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(.isButton)
+            )
+        }
+    }
+
+    /// A vertical rule the height of the field's content, e.g. between a prefix control and the
+    /// input. Already used by `KitoPhoneField.showsDivider(_:)`; available for any field.
+    public static var divider: KitoAccessory {
+        KitoAccessory { ctx in
+            AnyView(
+                Rectangle()
+                    .fill(ctx.theme.borderColor)
+                    .frame(width: 1)
+                    .padding(.vertical, 6)
+            )
+        }
+    }
+
+    /// An arbitrary view you already own, with no Kito theming applied.
+    public static func view(_ view: AnyView) -> KitoAccessory {
+        KitoAccessory { _ in view }
+    }
+
+    /// `.view(_:)` without needing to erase the view yourself.
+    public static func view<V: View>(@ViewBuilder _ view: @escaping () -> V) -> KitoAccessory {
+        KitoAccessory { _ in AnyView(view()) }
+    }
+
+    /// Insets this accessory within its slot.
+    public func padding(_ insets: EdgeInsets) -> KitoAccessory {
+        let original = builder
+        return KitoAccessory { ctx in AnyView(original(ctx).padding(insets)) }
+    }
+    /// Insets this accessory by the same amount on every edge.
+    public func padding(_ length: CGFloat) -> KitoAccessory {
+        padding(EdgeInsets(top: length, leading: length, bottom: length, trailing: length))
+    }
+
+    /// Draws a background behind this accessory, e.g. a pill-shaped prefix control.
+    public func background(_ background: KitoAccessoryBackground) -> KitoAccessory {
+        let original = builder
+        return KitoAccessory { ctx in AnyView(original(ctx).modifier(KitoAccessoryBackgroundModifier(background: background))) }
+    }
+}
+
+private struct KitoAccessoryBackgroundModifier: ViewModifier {
+    let background: KitoAccessoryBackground
+    func body(content: Content) -> some View {
+        switch background {
+        case .none:
+            content
+        case .capsule(let color):
+            content.background(Capsule().fill(color))
+        case .roundedRectangle(let color, let radius):
+            content.background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(color))
+        }
     }
 }
 

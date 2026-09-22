@@ -106,6 +106,7 @@ public struct KitoSelectField: View, KitoFieldConfigurable {
     @ViewBuilder private var input: some View {
         #if os(watchOS) || os(tvOS)
         Button { showsSheet = true } label: { valueLabel }.buttonStyle(.plain)
+            .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
         #else
         if usesMenu {
             Menu {
@@ -115,8 +116,10 @@ public struct KitoSelectField: View, KitoFieldConfigurable {
                     }
                 }
             } label: { valueLabel }
+            .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
         } else {
             Button { showsSheet = true } label: { valueLabel }.buttonStyle(.plain).disabled(!isEnabled)
+                .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
         }
         #endif
     }

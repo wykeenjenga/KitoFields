@@ -72,4 +72,5 @@
 "password.repeats" = "Hakuna herufi inayorudiwa mara %d mfululizo";
 "password.sequences" = "Hakuna mfuatano kama abcd au 1234";
 "password.containsPersonal" = "Isijumuishe jina lako au barua pepe";
+"field.optionalIndicator" = "(hiari)";
 "code.digitPosition" = "Tarakimu %d kati ya %d";
