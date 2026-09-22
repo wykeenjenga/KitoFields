@@ -147,6 +147,14 @@ enum FieldSampleCatalog {
         FieldSample("Filled box · tinted", "A typed box turns white with a tinted border and shadow; empty boxes stay grey.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2))\n    .kitoFieldTheme(filledBoxTheme)") { Stateful { KitoCodeField(code: $0, length: 4).filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2)).kitoFieldTheme(FieldSampleCatalog.filledBoxTheme) } },
         FieldSample("Grouped · \"123 - 456\"", "groups([3, 3]) places a themed dash between the two halves.", category: .choice, code: "KitoCodeField(code: $code, length: 6).groups([3, 3])") { Stateful { KitoCodeField(code: $0, length: 6).groups([3, 3]) } },
         FieldSample("Grouped · dot", "groups(_:separator:) also takes .dot, or your own view.", category: .choice, code: "KitoCodeField(code: $code, length: 6).groups([3, 3], separator: .dot)") { Stateful { KitoCodeField(code: $0, length: 6).groups([3, 3], separator: .dot) } },
+        FieldSample("Underline boxes", "boxStyle(.underline) drops the box and leaves one line per digit.", category: .choice, code: "KitoCodeField(code: $code, length: 6)\n    .boxStyle(.underline)") { Stateful { KitoCodeField(code: $0, length: 6).boxStyle(.underline) } },
+        FieldSample("Filled boxes · no border", "boxStyle(.filled) fills each box and drops the idle border.", category: .choice, code: "KitoCodeField(code: $code, length: 6)\n    .boxStyle(.filled)\n    .boxShape(.capsule)") { Stateful { KitoCodeField(code: $0, length: 6).boxStyle(.filled).boxShape(.capsule) } },
+        FieldSample("Six wide boxes on any phone", "distribution(.fill) shrinks 58pt boxes proportionally instead of running off a small screen.", category: .choice, code: "KitoCodeField(code: $code, length: 6)\n    .boxSize(CGSize(width: 58, height: 64))\n    .distribution(.fill)\n    .minimumBoxWidth(36)") { Stateful { KitoCodeField(code: $0, length: 6).boxSize(CGSize(width: 58, height: 64)).distribution(.fill).minimumBoxWidth(36) } },
+        FieldSample("Per-state box styling", "activeBox and errorBox mirror filledBox for the focused and error states.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .filledBox(fill: .white)\n    .activeBox(borderColor: .accentColor, borderWidth: 2)\n    .errorBox(fill: .red.opacity(0.06), borderColor: .red)\n    .digitColor(filled: .primary, active: .accentColor)") { CodeStateStylingSample() },
+        FieldSample("Reveal the last digit", "secure() + revealLastEntered shows a digit briefly before masking it, like the system passcode field.", category: .choice, code: "KitoCodeField(code: $code, length: 6)\n    .secure()\n    .revealLastEntered(for: 0.8)\n    .maskCharacter(\"•\")") { Stateful { KitoCodeField(code: $0, length: 6).secure().revealLastEntered(for: 0.8).maskCharacter("•") } },
+        FieldSample("Success tick", "showsSuccess recolours the boxes; successAnimation(.tick) fades a checkmark over them.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .showsSuccess($verified)\n    .successAnimation(.tick)\n    .haptics(onDigit: true, onComplete: true)") { CodeSuccessSample() },
+        FieldSample("Built-in resend", "resendButton(after:) places a KitoResendCodeButton under the boxes for you.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .resendButton(after: 8) { resend() }") { CodeBuiltInResendSample() },
+        FieldSample("Custom box style", "KitoCodeFieldStyle replaces the chrome entirely; KitoCodePillBoxStyle ships as a worked example.", category: .choice, code: "KitoCodeField(code: $code, length: 5)\n    .style(KitoCodePillBoxStyle())") { Stateful { KitoCodeField(code: $0, length: 5).style(KitoCodePillBoxStyle()) } },
     ]
 
     static var largeBoxTheme: KitoFieldTheme {
@@ -358,6 +366,53 @@ private struct CodeWithResendSample: View {
         VStack(alignment: .leading, spacing: 10) {
             KitoCodeField(code: $code, length: 4)
             KitoResendCodeButton(cooldown: 8) { sentCount += 1 }
+            Text("Sent \(sentCount) time\(sentCount == 1 ? "" : "s") · cooldown shortened to 8s for this demo")
+                .font(.caption2).foregroundColor(.secondary)
+        }
+    }
+}
+
+private struct CodeStateStylingSample: View {
+    @State private var code = ""
+    @State private var wrong = false
+    var body: some View {
+        KitoCodeField(code: $code, length: 4)
+            .filledBox(fill: .white)
+            .activeBox(borderColor: .accentColor, borderWidth: 2)
+            .errorBox(fill: .red.opacity(0.06), borderColor: .red)
+            .digitColor(filled: .primary, active: .accentColor)
+            .errorMessage(wrong ? "Incorrect code (try 1234)" : nil)
+            .clearsOnError()
+            .onChange(of: code) { value in
+                guard value.count == 4 else { wrong = false; return }
+                wrong = value != "1234"
+            }
+    }
+}
+
+private struct CodeSuccessSample: View {
+    @State private var code = ""
+    @State private var verified = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            KitoCodeField(code: $code, length: 4)
+                .showsSuccess($verified)
+                .successAnimation(.tick)
+                .haptics(onDigit: true, onComplete: true)
+                .onChange(of: code) { verified = $0 == "1234" }
+            Text("Enter 1234 to see the success state.")
+                .font(.caption2).foregroundColor(.secondary)
+        }
+    }
+}
+
+private struct CodeBuiltInResendSample: View {
+    @State private var code = ""
+    @State private var sentCount = 1
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            KitoCodeField(code: $code, length: 4)
+                .resendButton(after: 8) { sentCount += 1 }
             Text("Sent \(sentCount) time\(sentCount == 1 ? "" : "s") · cooldown shortened to 8s for this demo")
                 .font(.caption2).foregroundColor(.secondary)
         }

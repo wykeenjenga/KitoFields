@@ -25,6 +25,7 @@ public struct KitoResendCodeButton: View {
     private var font: Font?
     private var tint: Color?
     private var disabledTint: Color?
+    private var titleOverride: ((Int) -> String)?
 
     @State private var remaining: Int
     @State private var countdownTask: Task<Void, Never>?
@@ -66,7 +67,8 @@ public struct KitoResendCodeButton: View {
     }
 
     private var title: String {
-        remaining > 0
+        if let titleOverride { return titleOverride(remaining) }
+        return remaining > 0
             ? KitoLocalization.format("code.resendIn", "Resend in %ds", remaining)
             : KitoLocalization.string("code.resend", "Resend code")
     }
@@ -102,4 +104,6 @@ public struct KitoResendCodeButton: View {
     public func tint(_ color: Color) -> KitoResendCodeButton { mutating { $0.tint = color } }
     /// Colour while counting down; defaults to the theme's helper colour.
     public func disabledTint(_ color: Color) -> KitoResendCodeButton { mutating { $0.disabledTint = color } }
+    /// Overrides the built-in localized title, given seconds remaining (0 once re-enabled).
+    public func title(_ override: @escaping (Int) -> String) -> KitoResendCodeButton { mutating { $0.titleOverride = override } }
 }
