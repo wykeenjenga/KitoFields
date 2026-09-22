@@ -51,10 +51,10 @@ final class PhoneNumberTests: XCTestCase {
     func testFormats() {
         let number = KitoPhoneNumber(country: ke, nationalNumber: "0712123456")
         XCTAssertEqual(number.e164, "+254712123456")
-        XCTAssertEqual(number.international, "+254 712 123456")
-        XCTAssertEqual(number.national, "712 123456")
-        XCTAssertEqual(number.formatted(.nationalWithTrunkPrefix), "0712 123456")
-        XCTAssertEqual(number.rfc3966, "tel:+254-712-123456")
+        XCTAssertEqual(number.international, "+254 712 123 456")
+        XCTAssertEqual(number.national, "712 123 456")
+        XCTAssertEqual(number.formatted(.nationalWithTrunkPrefix), "0712 123 456")
+        XCTAssertEqual(number.rfc3966, "tel:+254-712-123-456")
         XCTAssertEqual(number.url?.absoluteString, "tel:+254712123456")
         XCTAssertTrue(number.isValid)
     }
@@ -84,6 +84,28 @@ final class PhoneNumberTests: XCTestCase {
         let jersey = KitoCountryDatabase.country(isoCode: "JE")!
         XCTAssertEqual(v.validate(nationalNumber: "7400123456", country: jersey), .invalid(.invalidLeadingDigits))
         XCTAssertEqual(v.validate(nationalNumber: "7797712345", country: jersey), .valid)
+    }
+
+    /// Kenyan national numbers are nine digits after the trunk zero, so a tenth digit is too long
+    /// — the field used to accept "703 2850700" because the region allowed 9...10.
+    func testKenyaAcceptsExactlyNineNationalDigits() {
+        let v = KitoPhoneValidator()
+        XCTAssertEqual(v.validate(nationalNumber: "703285070", country: ke), .valid)
+        XCTAssertEqual(v.validate(nationalNumber: "7032850700", country: ke), .invalid(.tooLong))
+        XCTAssertEqual(v.validate(nationalNumber: "70328507", country: ke), .incomplete)
+    }
+
+    /// A number typed or pasted with the trunk zero ("0703285070") is stripped to nine digits
+    /// before it reaches the validator, which is why the field accepts it.
+    func testKenyaTrunkZeroIsStrippedBeforeValidation() {
+        let formatter = KitoPhoneFormatter()
+        let stripped = formatter.stripTrunkPrefix("0703285070", country: ke)
+        XCTAssertEqual(stripped, "703285070")
+        XCTAssertEqual(KitoPhoneValidator().validate(nationalNumber: stripped, country: ke), .valid)
+    }
+
+    func testKenyaFormatsInThreeGroupsOfThree() {
+        XCTAssertEqual(KitoPhoneFormatter().formatNational("703285070", country: ke), "703 285 070")
     }
 
     func testCustomRule() {
