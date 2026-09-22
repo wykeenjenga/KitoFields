@@ -72,3 +72,4 @@
 "password.repeats" = "No character repeated %d times in a row";
 "password.sequences" = "No sequences like abcd or 1234";
 "password.containsPersonal" = "Must not contain your name or email";
+"code.digitPosition" = "Digit %d of %d";
