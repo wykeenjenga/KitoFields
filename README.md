@@ -407,7 +407,7 @@ KitoPhoneField(country: $country, nationalNumber: $digits)
     .countries(allowed: ["KE", "UG"], excluded: [], preferred: ["KE"])
     .defaultCountry("KE")          // default is "US"; .defaultCountry(.deviceRegion) follows the device
     .countrySelection(.sheet)      // .menu / .locked
-    .flagStyle(.emoji)             // .isoCode / .hidden
+    .flagStyle(.emoji)             // flags are filled circles by default; .rounded / .tile / .isoCode / .hidden
     .showsDialCode(true).showsChevron(true).showsDivider(true)
     .formatsAsYouType(true).limitsToMaxLength(true).detectsInternationalInput(true)
     .countryPicker { $0.strings.title = "Choose a country" }
@@ -459,7 +459,7 @@ KitoCurrencyField("Amount", text: $amountText, currencyCode: currency)
 KitoCountryField("Country", selection: $country)          // Binding<KitoCountry?>
 KitoCountryField("Country", isoCode: $isoCode)             // Binding<String>, "" when empty
     .shows(flag: true, name: true, dialCode: true, currency: true)
-    .flagStyle(.circle)                                    // .emoji / .circle / .rounded / .tile / .isoCode / .hidden
+    .flagStyle(.emoji)                                     // circle by default; .rounded / .tile / .isoCode / .hidden
     .countries(preferred: ["KE", "US", "GB"])
     .required()
     .onCountryChange { country in
@@ -473,7 +473,15 @@ KitoCountryField("Country", isoCode: $isoCode)             // Binding<String>, "
     }
 ```
 
-The phone field's `.onCountryChange` hands back the same `KitoCountry`, and `.flagStyle(.circle)` works there too.
+The phone field's `.onCountryChange` hands back the same `KitoCountry`, and `.flagStyle(_:)` works there too.
+
+Flags render as filled circles everywhere by default — the prefix, the country field, the picker
+list and its "recent" chips. Change that for one field with `.flagStyle(_:)`, or app-wide in one
+line:
+
+```swift
+KitoFieldTheme.default.flagStyle = .emoji   // or .rounded / .tile / .isoCode / .hidden
+```
 
 ### Country picker
 

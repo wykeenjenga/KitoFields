@@ -149,3 +149,40 @@ final class KitoDefaultCountryTests: XCTestCase {
         XCTAssertEqual(config.resolvedDefaultCountry().isoCode, "KE")
     }
 }
+
+final class KitoFlagStyleTests: XCTestCase {
+    var ke: KitoCountry { KitoCountryDatabase.country(isoCode: "KE")! }
+
+    func testNothingSetGivesACircle() {
+        XCTAssertEqual(kitoResolvedFlagStyle(nil, themeStyle: nil), .circle, "circles are the package default")
+    }
+
+    func testThemeAppliesWhenTheFieldSaysNothing() {
+        XCTAssertEqual(kitoResolvedFlagStyle(nil, themeStyle: .emoji), .emoji)
+    }
+
+    func testAFieldsOwnStyleBeatsTheTheme() {
+        XCTAssertEqual(kitoResolvedFlagStyle(.isoCode, themeStyle: .emoji), .isoCode)
+    }
+
+    /// A single field can opt out of the default without touching the theme.
+    func testAFieldCanAskForEmojiExplicitly() {
+        XCTAssertEqual(kitoResolvedFlagStyle(.emoji, themeStyle: nil), .emoji)
+    }
+
+    func testKitoFlagItselfDefaultsToCircle() {
+        XCTAssertEqual(KitoFlag(country: ke).style, .circle)
+    }
+
+    func testFieldsDefaultToFollowingTheTheme() {
+        XCTAssertNil(KitoPhoneField(phoneNumber: .constant(nil)).phone.flagStyle)
+        XCTAssertNil(KitoCountryField(selection: .constant(nil)).config.flagStyle)
+        XCTAssertNil(KitoFieldTheme().flagStyle)
+    }
+
+    func testPhoneFieldModifierSetsBothTheFieldAndItsPicker() {
+        let field = KitoPhoneField(phoneNumber: .constant(nil)).flagStyle(.isoCode)
+        XCTAssertEqual(field.phone.flagStyle, .isoCode)
+        XCTAssertEqual(field.phone.picker.flagStyle, .isoCode, "the picker must match, or the sheet would disagree with the prefix")
+    }
+}

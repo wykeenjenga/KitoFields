@@ -82,6 +82,11 @@ public struct KitoFieldTheme: Sendable {
     /// Font (size/weight) for the error icon; nil matches the error text.
     public var errorIconFont: Font? = nil
     public var iconSize: CGFloat = 17
+    /// How country flags are drawn everywhere — the phone prefix, the country field and the
+    /// picker, including its "recent" chips. nil uses the package default, a filled `.circle`;
+    /// set it once, e.g. `KitoFieldTheme.default.flagStyle = .emoji` in your `App`'s `init()`, to
+    /// change that app-wide. A field's own `.flagStyle(_:)` still wins for that field.
+    public var flagStyle: KitoFlagStyle? = nil
 
     // MARK: Layout
     public var accessorySpacing: CGFloat = 10

@@ -121,7 +121,7 @@ public struct KitoCountryPicker: View {
                 ForEach(items) { chip in
                     Button(action: chip.action) {
                         HStack(spacing: 6) {
-                            if let flag = chip.flag { KitoFlag(country: flag, style: configuration.flagStyle == .hidden ? .hidden : .emoji, size: 16) }
+                            if let flag = chip.flag { KitoFlag(country: flag, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: 16) }
                             if let symbol = chip.symbol { Image(systemName: symbol).font(.caption) }
                             Text(chip.label).font(theme.labelFont).lineLimit(1)
                         }
@@ -272,7 +272,7 @@ public struct KitoCountryRow: View {
 
     public var body: some View {
         HStack(spacing: 12) {
-            KitoFlag(country: country, style: configuration.flagStyle, size: 24)
+            KitoFlag(country: country, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: 24)
             VStack(alignment: .leading, spacing: 2) {
                 highlighted(country.localizedName(in: configuration.locale ?? .autoupdatingCurrent))
                     .foregroundColor(.primary)
@@ -376,7 +376,8 @@ public struct KitoCountryPickerStrings: Sendable {
 public struct KitoCountryPickerConfiguration: Sendable {
     public var showsSearch = true
     public var showsDialCodes = true
-    public var flagStyle: KitoFlagStyle = .emoji
+    /// Overrides `theme.flagStyle` for this field; nil follows the theme (and `.emoji` when it too is unset).
+    public var flagStyle: KitoFlagStyle? = nil
     public var sortsByLocalizedName = true
     /// Locale for country names; nil uses the device locale.
     public var locale: Locale? = nil
