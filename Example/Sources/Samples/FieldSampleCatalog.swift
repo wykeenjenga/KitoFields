@@ -144,6 +144,7 @@ enum FieldSampleCatalog {
         FieldSample("Alphanumeric code", "Letters and digits, uppercased.", category: .choice, code: "KitoCodeField(code: $code, length: 5).alphanumeric()") { Stateful { KitoCodeField(code: $0, length: 5).alphanumeric() } },
         FieldSample("One-time code + resend", "KitoResendCodeButton disables itself and counts down after each tap.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\nKitoResendCodeButton(cooldown: 30) { resend() }") { CodeWithResendSample() },
         FieldSample("Large boxes · no caret", "Big grey boxes, focus shown by the border only.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .boxSize(CGSize(width: 64, height: 72))\n    .spacing(20)\n    .showsCaret(false)\n    .digitFont(.system(size: 28, weight: .semibold))\n    .kitoFieldTheme(largeBoxTheme)") { Stateful { KitoCodeField(code: $0, length: 4).boxSize(CGSize(width: 64, height: 72)).spacing(20).showsCaret(false).digitFont(.system(size: 28, weight: .semibold)).kitoFieldTheme(FieldSampleCatalog.largeBoxTheme) } },
+        FieldSample("Filled box · tinted", "A typed box turns white with a tinted border and shadow; empty boxes stay grey.", category: .choice, code: "KitoCodeField(code: $code, length: 4)\n    .filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2))\n    .kitoFieldTheme(filledBoxTheme)") { Stateful { KitoCodeField(code: $0, length: 4).filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2)).kitoFieldTheme(FieldSampleCatalog.filledBoxTheme) } },
     ]
 
     static var largeBoxTheme: KitoFieldTheme {
@@ -154,6 +155,15 @@ enum FieldSampleCatalog {
         theme.borderWidth = 1
         theme.focusedBorderColor = Color(.systemGray)
         theme.focusedBorderWidth = 2
+        return theme
+    }
+
+    static var filledBoxTheme: KitoFieldTheme {
+        var theme = KitoFieldTheme()
+        theme.shape = .roundedRectangle(cornerRadius: 12)
+        theme.backgroundColor = Color(.systemGray6)
+        theme.borderColor = .clear
+        theme.borderWidth = 1
         return theme
     }
 

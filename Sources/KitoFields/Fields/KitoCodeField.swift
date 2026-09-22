@@ -24,6 +24,10 @@ public struct KitoCodeField: View {
     private var allowsLetters = false
     private var showsCaret = true
     private var digitFont: Font?
+    var filledFill: Color?
+    var filledBorderColor: Color?
+    var filledBorderWidth: CGFloat?
+    var filledShadow: KitoShadow?
     private var errorMessage: String?
     private var clearsOnErrorAfter: TimeInterval?
     private var onComplete: ((String) -> Void)?
@@ -53,9 +57,13 @@ public struct KitoCodeField: View {
             .modifier(FocusOnTap { isFocused = true })
             .kitoFieldShake(trigger: reduceMotion ? nil : errorMessage, animation: theme.motion.shake)
             if let errorMessage {
-                Label(errorMessage, systemImage: "exclamationmark.circle.fill")
-                    .font(theme.helperFont)
-                    .foregroundColor(theme.errorColor)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    if let icon = theme.errorIcon {
+                        Image(systemName: icon).font(theme.errorIconFont ?? theme.errorFont ?? theme.helperFont)
+                    }
+                    Text(errorMessage).font(theme.errorFont ?? theme.helperFont)
+                }
+                .foregroundColor(theme.errorColor)
             }
         }
         .opacity(isEnabled ? 1 : theme.disabledOpacity)
@@ -98,8 +106,18 @@ public struct KitoCodeField: View {
         let hasValue = index < characters.count
         let isActive = isFocused && (index == characters.count || (characters.count == length && index == length - 1))
         let hasError = errorMessage != nil
-        let borderColor: Color = hasError ? theme.errorColor : (isActive ? theme.focusedBorderColor : theme.borderColor)
-        let borderWidth: CGFloat = (isActive || hasError) ? theme.focusedBorderWidth : theme.borderWidth
+        let baseFill = theme.backgroundColor == .clear ? theme.filledBackgroundColor : theme.backgroundColor
+        let appearance = Self.boxAppearance(
+            hasError: hasError,
+            hasValue: hasValue,
+            isActive: isActive,
+            baseFill: baseFill,
+            filledFill: filledFill,
+            filledBorderColor: filledBorderColor,
+            filledBorderWidth: filledBorderWidth,
+            filledShadow: filledShadow,
+            theme: theme
+        )
 
         return ZStack {
             if hasValue {
@@ -117,11 +135,39 @@ public struct KitoCodeField: View {
         .frame(width: boxSize.width, height: boxSize.height)
         .modifier(KitoFieldChrome(
             shape: theme.shape,
-            fill: theme.backgroundColor == .clear ? theme.filledBackgroundColor : theme.backgroundColor,
-            borderColor: borderColor,
-            borderWidth: theme.showsBorder ? borderWidth : 0,
-            shadow: theme.shadow
+            fill: appearance.fill,
+            borderColor: appearance.borderColor,
+            borderWidth: theme.showsBorder ? appearance.borderWidth : 0,
+            shadow: appearance.shadow
         ))
+    }
+
+    static func boxAppearance(
+        hasError: Bool,
+        hasValue: Bool,
+        isActive: Bool,
+        baseFill: Color,
+        filledFill: Color?,
+        filledBorderColor: Color?,
+        filledBorderWidth: CGFloat?,
+        filledShadow: KitoShadow?,
+        theme: KitoFieldTheme
+    ) -> (fill: Color, borderColor: Color, borderWidth: CGFloat, shadow: KitoShadow?) {
+        if hasError {
+            return (baseFill, theme.errorColor, theme.focusedBorderWidth, theme.shadow)
+        }
+        if hasValue, filledFill != nil || filledBorderColor != nil || filledBorderWidth != nil || filledShadow != nil {
+            return (
+                filledFill ?? baseFill,
+                filledBorderColor ?? (isActive ? theme.focusedBorderColor : theme.borderColor),
+                filledBorderWidth ?? (isActive ? theme.focusedBorderWidth : theme.borderWidth),
+                filledShadow ?? theme.shadow
+            )
+        }
+        if isActive {
+            return (baseFill, theme.focusedBorderColor, theme.focusedBorderWidth, theme.shadow)
+        }
+        return (baseFill, theme.borderColor, theme.borderWidth, theme.shadow)
     }
 
     private func sanitize(_ value: String) {
@@ -153,6 +199,15 @@ public struct KitoCodeField: View {
     public func showsCaret(_ enabled: Bool) -> KitoCodeField { mutating { $0.showsCaret = enabled } }
     /// Font for the entered digits; defaults to the theme font at semibold.
     public func digitFont(_ font: Font) -> KitoCodeField { mutating { $0.digitFont = font } }
+    /// Styling for a box that already holds a character. Anything left nil falls back to the theme.
+    public func filledBox(fill: Color? = nil, borderColor: Color? = nil, borderWidth: CGFloat? = nil, shadow: KitoShadow? = nil) -> KitoCodeField {
+        mutating {
+            $0.filledFill = fill
+            $0.filledBorderColor = borderColor
+            $0.filledBorderWidth = borderWidth
+            $0.filledShadow = shadow
+        }
+    }
     /// Accepts letters as well as digits (uppercased).
     public func alphanumeric(_ enabled: Bool = true) -> KitoCodeField { mutating { $0.allowsLetters = enabled } }
     /// Error shown under the boxes (e.g. "Incorrect code").

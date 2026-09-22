@@ -432,6 +432,14 @@ KitoResendCodeButton(cooldown: 30) {
 }
 ```
 
+Give a box that already holds a digit its own look with `.filledBox(...)` — anything you leave nil
+falls back to the theme:
+
+```swift
+KitoCodeField(code: $code, length: 6)
+    .filledBox(fill: .white, borderColor: .accentColor, shadow: KitoShadow(color: .accentColor.opacity(0.2), radius: 8, y: 2))
+```
+
 ## Example app
 
 `Example/KitoFieldsExample.xcodeproj` (in this repository) demonstrates every field, style, shape, theme and motion preset: sign-up form, text field options, phone, password, one-time code, style gallery and an animations screen. Regenerate the project with `xcodegen generate` after editing `Example/project.yml`.
