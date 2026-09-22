@@ -22,6 +22,7 @@ struct KitoNativeTextField: UIViewRepresentable {
     var textColor: Color
     var tint: Color
     var accessibilityLabel: String
+    var accessibilityIdentifier: String?
     /// Receives the proposed text after an edit and returns what should be displayed.
     var onEdit: (String) -> String
     var onSubmit: () -> Void
@@ -53,6 +54,7 @@ struct KitoNativeTextField: UIViewRepresentable {
         field.keyboardType = keyboard
         field.textContentType = contentType
         field.accessibilityLabel = accessibilityLabel
+        field.accessibilityIdentifier = accessibilityIdentifier
         if isFocused, !field.isFirstResponder, field.window != nil {
             DispatchQueue.main.async { field.becomeFirstResponder() }
         } else if !isFocused, field.isFirstResponder {

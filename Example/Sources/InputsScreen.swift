@@ -23,6 +23,7 @@ struct InputsScreen: View {
                 NavigationLink("One-time code") { OTPDemo() }
                 NavigationLink("Style gallery") { StyleGalleryDemo() }
                 NavigationLink("Animations") { AnimationsDemo() }
+                NavigationLink("Accessory slots & identifiers") { AccessorySlotsDemo() }
             }
             .navigationTitle("KitoFields")
             .toolbar {

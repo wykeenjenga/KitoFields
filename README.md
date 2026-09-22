@@ -194,7 +194,39 @@ Rule presets: `.strongPassword()`, `.strictPassword()`, `.notCommonPassword()`, 
 .focused($focus, equals: .name) // FocusState<Field?>.Binding, like SwiftUI's own modifier
 .isValid($nameIsValid)          // continuously written, handy for enabling a submit button
 .onValidationChange { state in } .onSubmit { } .onFocusChange { focused in }
+.optional()                     // shows the theme's optional indicator for just this field
+.optional("(not required)")     // ...with your own text
+.optional(nil)                  // ...or hides it even if the theme shows one elsewhere
+.accessibilityIdentifier("checkout.details.amount")   // app.textFields["…"] finds it in XCUITest
 ```
+
+### Accessory slots
+
+`.leadingAccessory(_:)`/`.trailingAccessory(_:)` put content inside the field row. `.accessory(_:placement:)`
+reaches every slot: `.leading`, `.trailing`, `.above`/`.below` the field (each with its own
+`.leading`/`.center`/`.trailing` alignment), and `.center` — overlaid inside the input area,
+display-only, so it never blocks typing.
+
+```swift
+KitoTextField("Amount", text: $amount)
+    .accessory(.text("USD"), placement: .leading)
+    .accessory(.reactive { ctx in Text(ctx.isFocused ? "Enter an amount" : "").font(.caption) }, placement: .above(alignment: .trailing))
+```
+
+Beyond icons and text, `KitoAccessory` builds interactive controls, each themed through the same
+`KitoAccessoryContext` (focus/error/success/empty state) and at least 44×44pt tappable regardless
+of how small they render:
+
+```swift
+.button(title: "Paste", systemImage: "doc.on.clipboard") { pasteFromClipboard() }
+.menu(label: { Text("USD") }, content: { ForEach(codes) { Button($0) { currency = $0 } } })
+.toggle(isOn: $showsAdvanced, on: "Hide", off: "Show")
+.divider                        // vertical rule the height of the field's content
+.view(myOwnView)                // or .view { MyOwnView() } — no Kito theming applied
+```
+
+Style any accessory with `.padding(_:)` and `.background(.capsule(.gray.opacity(0.1)))` /
+`.background(.roundedRectangle(color, radius: 8))`.
 
 ### Validation rules
 
@@ -267,7 +299,10 @@ closure instead: `.kitoFormField(Field.name, form: form) { isNameFocused = true 
     theme.font = .system(.body, design: .rounded)
     theme.uiFont = .systemFont(ofSize: 17, weight: .regular)   // iOS only: font for the UIKit-backed phone input
     theme.requiredIndicator = "*"          // nil to hide
+    theme.requiredIndicatorFont = .body.weight(.bold)   // nil uses the label's own font
     theme.optionalIndicator = "(optional)" // nil to hide
+    theme.optionalIndicatorFont = .caption
+    theme.optionalIndicatorColor = .secondary           // nil uses helperColor
     theme.errorDisplay = .all              // .first / .all / .none
     theme.errorIcon = "exclamationmark.circle" // nil hides it
     theme.errorFont = .system(size: 13); theme.errorIconFont = .system(size: 12)
@@ -372,11 +407,44 @@ KitoPhoneField(country: $country, nationalNumber: $digits)
     .phoneValidator(KitoPhoneValidator { number in number.nationalNumber.hasPrefix("7") ? nil : .custom("Mobile numbers only") })
     .phoneErrorMessages { error in localized(error) }
     .onPhoneNumberChange { number in } .onCountryChange { country in }
+    .prefixPlacement(.trailing)    // flag/dial-code prefix on the right, for RTL-style designs
+    .prefixFont(.body.weight(.semibold)).prefixSpacing(8)
+```
+
+Keep Kito's own prefix control but present your own picker when it's tapped — the app's sheet, not
+Kito's built-in one, with the current country handed to you and a closure to call back with the
+one the user picked:
+
+```swift
+KitoPhoneField(country: $country, nationalNumber: $digits)
+    .countrySelector { current, choose in
+        MyCountryPickerView(selected: current, onPick: choose)   // dismisses automatically once you call choose
+    }
 ```
 
 `KitoPhoneNumber` gives you `e164`, `international`, `national`, `formatted(.nationalWithTrunkPrefix)`, `rfc3966`, `url`, `isValid`, and is `Codable` as `{ isoCode, nationalNumber }`. Parse anything with `KitoPhoneNumber(parsing: "+44 7400 123456")` or `KitoPhoneNumber(e164:)`.
 
 `KitoCountryDatabase` exposes all regions with flags, localized names, dial codes, formats and example numbers. Shared dial codes (+1, +7, +44, +61, …) are resolved by area or leading digits.
+
+## Numbers and currency
+
+```swift
+KitoNumberField("Quantity", value: $quantity).integer().range(1...99).stepper()
+KitoCurrencyField("Amount", value: $amount, currencyCode: "KES")     // Binding<Double?>
+KitoCurrencyField("Amount", text: $amountText, currencyCode: "KES")  // Binding<String>, e.g. "1,250.50"
+    .currencyPosition(.suffix)     // .prefix (default) / .none
+```
+
+A currency picker menu in any slot (trailing by default), with a default "code, chevron" label or
+your own:
+
+```swift
+KitoCurrencyField("Amount", text: $amountText, currencyCode: currency)
+    .currencySelector([.init(code: "USD"), .init(code: "KES", symbol: "KSh")], selected: $currency)
+    .currencySelector(options, selected: $currency, placement: .leading) { option in
+        MyCurrencyFlagLabel(option: option)
+    }
+```
 
 ## Country field and country data
 

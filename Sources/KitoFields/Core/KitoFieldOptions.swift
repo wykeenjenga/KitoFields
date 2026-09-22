@@ -40,6 +40,17 @@ public struct KitoFieldOptions {
     public var externalError: String?
     public var leading: KitoAccessory?
     public var trailing: KitoAccessory?
+    public var above: KitoAccessory?
+    public var aboveAlignment: KitoAccessoryAlignment = .leading
+    public var below: KitoAccessory?
+    public var belowAlignment: KitoAccessoryAlignment = .leading
+    public var overlayCenter: KitoAccessory?
+    /// Applied to the field's own inner control (`TextField`/`SecureField`/hidden field), so
+    /// `app.textFields["id"]` (or `app.buttons["id"]` for a select/country/OTP field) finds it in
+    /// XCUITest.
+    public var accessibilityIdentifier: String?
+    /// Overrides the theme's optional indicator for just this field. Set via `.optional(_:)`.
+    public var optionalText: String??
     public var showsClearButton = false
     public var characterLimit: Int?
     public var showsCharacterCounter = false
@@ -112,6 +123,29 @@ public extension KitoFieldConfigurable {
 
     func leadingAccessory(_ accessory: KitoAccessory?) -> Self { mutating { $0.leading = accessory } }
     func trailingAccessory(_ accessory: KitoAccessory?) -> Self { mutating { $0.trailing = accessory } }
+    /// Places `accessory` in any slot: `.leading`, `.trailing`, `.above`/`.below` the field (with
+    /// their own horizontal alignment), or `.center` (overlaid inside the input area, for
+    /// display-only content such as a watermark icon).
+    func accessory(_ accessory: KitoAccessory?, placement: KitoAccessoryPlacement) -> Self {
+        mutating {
+            switch placement {
+            case .leading: $0.leading = accessory
+            case .trailing: $0.trailing = accessory
+            case .above(let alignment): $0.above = accessory; $0.aboveAlignment = alignment
+            case .below(let alignment): $0.below = accessory; $0.belowAlignment = alignment
+            case .center: $0.overlayCenter = accessory
+            }
+        }
+    }
+    /// Overrides the theme's optional indicator for just this field. `.optional()` shows the
+    /// default "(optional)" text regardless of the theme; `.optional(nil)` hides it even when the
+    /// theme shows one elsewhere. Not calling this at all follows the theme, as before.
+    func optional(_ text: String? = KitoLocalization.string("field.optionalIndicator", "(optional)")) -> Self {
+        mutating { $0.optionalText = .some(text) }
+    }
+    /// Applied to this field's own inner control, so `app.textFields["id"]` (or `app.buttons["id"]`
+    /// for a select/country/code field) finds it in XCUITest.
+    func accessibilityIdentifier(_ id: String) -> Self { mutating { $0.accessibilityIdentifier = id } }
     /// Shortcut for a leading SF Symbol.
     func leadingIcon(_ systemName: String) -> Self { leadingAccessory(.systemImage(systemName)) }
     /// Shortcut for a trailing SF Symbol.
@@ -236,6 +270,17 @@ public extension KitoFieldConfigurable {
 // MARK: - Platform mapping
 
 extension View {
+    /// Applies `.accessibilityIdentifier(_:)` only when `id` is non-nil, so an unset field never
+    /// picks up an empty-string identifier that would confuse an `app.textFields[""]` query.
+    @ViewBuilder
+    func kitoAccessibilityIdentifier(_ id: String?) -> some View {
+        if let id {
+            self.accessibilityIdentifier(id)
+        } else {
+            self
+        }
+    }
+
     @ViewBuilder
     func kitoKeyboard(_ keyboard: KitoKeyboard) -> some View {
         #if os(iOS) || os(visionOS)

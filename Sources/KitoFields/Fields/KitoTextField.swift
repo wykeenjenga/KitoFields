@@ -139,6 +139,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                     .accessibilityHidden(!revealed)
                 SecureField("", text: $text)
                     .modifier(CommonTextStyling(options: options, theme: theme, contentTypeOverride: nil))
+                    .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
                     .focused($focusedField, equals: .secure)
                     .onSubmit(handleSubmit)
                     .opacity(revealed ? 0 : 1)
@@ -163,6 +164,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
             }
         }
         .modifier(CommonTextStyling(options: options, theme: theme, contentTypeOverride: nil))
+        .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
         .onSubmit(handleSubmit)
     }
 
@@ -177,6 +179,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
             textColor: theme.textColor,
             tint: theme.tintColor ?? theme.focusedBorderColor,
             accessibilityLabel: options.accessibilityLabel ?? options.label ?? options.placeholder ?? "",
+            accessibilityIdentifier: options.accessibilityIdentifier,
             onEdit: { proposed in
                 var digits = proposed.asciiDigits
                 if let mask = options.mask {

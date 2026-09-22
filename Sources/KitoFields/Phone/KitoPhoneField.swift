@@ -9,14 +9,33 @@
 import SwiftUI
 
 /// How the user changes the selected region.
-public enum KitoCountrySelection: Sendable {
+public enum KitoCountrySelection {
     /// Full-screen/sheet picker with search. Default.
     case sheet
     /// A compact `Menu` (best with a short allowed-country list, or on macOS).
     case menu
     /// The region is fixed; the selector is display-only.
     case locked
+    /// The prefix control stays Kito's, but tapping it presents your own picker view. Your view
+    /// receives the current country and a closure to call with the one the user picked; the sheet
+    /// dismisses automatically once you call it.
+    case custom((KitoCountry, @escaping (KitoCountry) -> Void) -> AnyView)
 }
+
+extension KitoCountrySelection: Equatable {
+    /// `.custom` selectors compare equal to each other regardless of the closure they carry — a
+    /// closure has no notion of equality, so this only distinguishes which *mode* is active, the
+    /// same thing every existing `selectionMode == .locked` check in this file relies on.
+    public static func == (lhs: KitoCountrySelection, rhs: KitoCountrySelection) -> Bool {
+        switch (lhs, rhs) {
+        case (.sheet, .sheet), (.menu, .menu), (.locked, .locked), (.custom, .custom): return true
+        default: return false
+        }
+    }
+}
+
+/// Which side of the field the phone field's flag/dial-code prefix sits on.
+public enum KitoPrefixPlacement: Sendable, Equatable { case leading, trailing }
 
 /// Where the phone field's initial region comes from.
 public enum KitoDefaultCountry: Sendable, Equatable {
@@ -36,6 +55,12 @@ public struct KitoPhoneFieldConfiguration {
     public var showsDivider = true
     public var flagStyle: KitoFlagStyle = .emoji
     public var selectionMode: KitoCountrySelection = .sheet
+    public var prefixPlacement: KitoPrefixPlacement = .leading
+    /// Font for the dial code in the prefix control; nil uses `theme.font`.
+    public var prefixFont: Font?
+    /// Spacing between the flag, dial code and chevron in the prefix control; nil uses
+    /// `theme.accessorySpacing` (which also governs spacing between the prefix and the divider).
+    public var prefixSpacing: CGFloat?
     public var formatsAsYouType = true
     public var limitsToMaxLength = true
     public var detectsCountryFromInternationalInput = true
@@ -176,8 +201,8 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             isEmpty: displayText.isEmpty,
             errors: displayedErrors,
             isSuccess: options.showsSuccessIndicator && validationState == .valid,
-            leadingOverride: AnyView(countrySelector),
-            trailingExtras: trailingExtras,
+            leadingOverride: phone.prefixPlacement == .leading ? AnyView(countrySelector) : nil,
+            trailingExtras: phone.prefixPlacement == .trailing ? [AnyView(countrySelector)] + trailingExtras : trailingExtras,
             input: textField,
             footer: EmptyView?.none
         )
@@ -191,7 +216,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         .onChange(of: options.focusBinding?.wrappedValue) { if let f = $0, f != isFocused { isFocused = f } }
         .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear(perform: initialSync)
-        .sheet(isPresented: $showsPicker) { picker }
+        .sheet(isPresented: $showsPicker) { pickerContent }
         .accessibilityElement(children: .contain)
     }
 
@@ -206,6 +231,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             textColor: theme.textColor,
             tint: theme.tintColor ?? theme.focusedBorderColor,
             accessibilityLabel: options.accessibilityLabel ?? options.label ?? KitoLocalization.string("phone.accessibilityLabel", "Phone number"),
+            accessibilityIdentifier: options.accessibilityIdentifier,
             onEdit: { proposed in process(proposed) },
             onSubmit: { presentation.didSubmit(); options.onSubmit?() }
         )
@@ -218,6 +244,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             .foregroundColor(theme.textColor)
             .accentColor(theme.tintColor ?? theme.focusedBorderColor)
             .disableAutocorrection(true)
+            .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
             .onSubmit { presentation.didSubmit(); options.onSubmit?() }
             .onChange(of: displayText) { newValue in
                 let formatted = process(newValue)
@@ -247,14 +274,16 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     @ViewBuilder private var countrySelector: some View {
         HStack(spacing: theme.accessorySpacing) {
             switch phone.selectionMode {
-            case .sheet:
+            case .sheet, .custom:
                 Button { showsPicker = true } label: { selectorLabel }
                     .buttonStyle(.plain)
+                    .kitoAccessibilityIdentifier(options.accessibilityIdentifier.map { "\($0).country" })
             case .menu:
                 #if os(watchOS) || os(tvOS)
                 // Menu is unavailable on watchOS and needs tvOS 17; use the sheet there.
                 Button { showsPicker = true } label: { selectorLabel }
                     .buttonStyle(.plain)
+                    .kitoAccessibilityIdentifier(options.accessibilityIdentifier.map { "\($0).country" })
                 #else
                 Menu {
                     ForEach(phone.preferred + phone.availableCountries.filter { !phone.preferred.contains($0) }) { c in
@@ -266,6 +295,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
                     }
                 } label: { selectorLabel }
                 .fixedSize()
+                .kitoAccessibilityIdentifier(options.accessibilityIdentifier.map { "\($0).country" })
                 #endif
             case .locked:
                 selectorLabel
@@ -282,7 +312,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     }
 
     private var selectorLabel: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: phone.prefixSpacing ?? 6) {
             if phone.showsFlag {
                 KitoFlag(country: country, style: phone.flagStyle, size: theme.iconSize + 5)
                     .id(country.isoCode)
@@ -290,7 +320,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
             }
             if phone.showsDialCode {
                 Text(country.formattedDialCode)
-                    .font(theme.font)
+                    .font(phone.prefixFont ?? theme.font)
                     .foregroundColor(theme.textColor)
                     .monospacedDigit()
                     .id(country.dialCode)
@@ -304,6 +334,14 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
         }
         .contentShape(Rectangle())
         .animation((reduceMotion ? KitoFieldMotion.subtle : theme.motion).pop, value: country)
+    }
+
+    @ViewBuilder private var pickerContent: some View {
+        if case .custom(let builder) = phone.selectionMode {
+            builder(country) { chosen in country = chosen; showsPicker = false }
+        } else {
+            picker
+        }
     }
 
     private var picker: some View {
@@ -516,6 +554,25 @@ public extension KitoPhoneField {
         }
     }
     func countrySelection(_ mode: KitoCountrySelection) -> KitoPhoneField { mutatingPhone { $0.selectionMode = mode } }
+    /// Keeps Kito's own flag/dial-code prefix control, but presents your own view when it's
+    /// tapped instead of the built-in sheet. Your view receives the current country and a closure
+    /// to call with the chosen one; the presentation dismisses automatically once you call it.
+    ///
+    /// ```swift
+    /// KitoPhoneField(country: $country, nationalNumber: $number)
+    ///     .countrySelector { current, choose in
+    ///         MyCountryPickerView(selected: current, onPick: choose)
+    ///     }
+    /// ```
+    func countrySelector<V: View>(@ViewBuilder _ view: @escaping (KitoCountry, @escaping (KitoCountry) -> Void) -> V) -> KitoPhoneField {
+        mutatingPhone { $0.selectionMode = .custom { country, choose in AnyView(view(country, choose)) } }
+    }
+    /// Puts the flag/dial-code prefix on the trailing edge instead of leading, for RTL-style designs.
+    func prefixPlacement(_ placement: KitoPrefixPlacement) -> KitoPhoneField { mutatingPhone { $0.prefixPlacement = placement } }
+    /// Font for the dial code in the prefix control; nil (the default) uses the theme's field font.
+    func prefixFont(_ font: Font?) -> KitoPhoneField { mutatingPhone { $0.prefixFont = font } }
+    /// Spacing between the flag, dial code and chevron in the prefix control.
+    func prefixSpacing(_ spacing: CGFloat) -> KitoPhoneField { mutatingPhone { $0.prefixSpacing = spacing } }
     func showsFlag(_ shows: Bool) -> KitoPhoneField { mutatingPhone { $0.showsFlag = shows } }
     func showsDialCode(_ shows: Bool) -> KitoPhoneField { mutatingPhone { $0.showsDialCode = shows } }
     func showsChevron(_ shows: Bool) -> KitoPhoneField { mutatingPhone { $0.showsChevron = shows } }

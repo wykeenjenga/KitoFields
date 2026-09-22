@@ -42,6 +42,7 @@ public struct KitoCodeField: View {
     private var clearsOnErrorAfter: TimeInterval?
     private var onComplete: ((String) -> Void)?
     private var focusBinding: Binding<Bool>?
+    private var accessibilityIdentifier: String?
 
     @FocusState private var isFocused: Bool
     @State private var shakeTrigger = 0
@@ -112,6 +113,7 @@ public struct KitoCodeField: View {
             .frame(maxWidth: .infinity)
             .frame(height: boxSize.height)
             .opacity(0.02)
+            .kitoAccessibilityIdentifier(accessibilityIdentifier)
             .accessibilityHidden(true)
     }
 
@@ -305,6 +307,9 @@ public struct KitoCodeField: View {
     public func clearsOnError(after delay: TimeInterval = 0.6) -> KitoCodeField { mutating { $0.clearsOnErrorAfter = delay } }
     public func onComplete(_ handler: @escaping (String) -> Void) -> KitoCodeField { mutating { $0.onComplete = handler } }
     public func focused(_ binding: Binding<Bool>) -> KitoCodeField { mutating { $0.focusBinding = binding } }
+    /// Applied to the hidden text field that actually receives typing, so `app.textFields["id"]`
+    /// finds it in XCUITest.
+    public func accessibilityIdentifier(_ id: String) -> KitoCodeField { mutating { $0.accessibilityIdentifier = id } }
 
     private struct Blink: ViewModifier {
         @State private var visible = true

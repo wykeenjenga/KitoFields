@@ -109,6 +109,9 @@ public struct KitoFieldRow: View {
             ZStack(alignment: .leading) {
                 if showsPlaceholder { KitoFieldPlaceholder(configuration) }
                 configuration.input
+                if let overlay = configuration.overlayCenter {
+                    overlay.frame(maxWidth: .infinity, alignment: .center)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if let trailing = configuration.trailing { trailing }
@@ -171,9 +174,19 @@ public struct KitoFieldStack<Content: View>: View {
                     .foregroundColor(configuration.labelColor)
                     .padding(.bottom, theme.labelSpacing)
             }
+            if let above = configuration.above {
+                above
+                    .frame(maxWidth: .infinity, alignment: configuration.aboveAlignment.frameAlignment)
+                    .padding(.bottom, theme.labelSpacing)
+            }
             content
                 .scaleEffect(configuration.isFocused ? motion.focusScale : 1)
                 .modifier(KitoFieldShakeEffect(shakes: shakes))
+            if let below = configuration.below {
+                below
+                    .frame(maxWidth: .infinity, alignment: configuration.belowAlignment.frameAlignment)
+                    .padding(.top, theme.helperSpacing)
+            }
             KitoFieldMessages(configuration)
                 .padding(.top, (configuration.inlineErrors.isEmpty && configuration.helperText == nil) ? 0 : theme.helperSpacing)
             if let footer = configuration.footer {
@@ -260,6 +273,9 @@ public struct KitoFloatingLabelFieldStyle: KitoFieldStyle {
                     ZStack(alignment: .leading) {
                         if floating { KitoFieldPlaceholder(c) }
                         c.input
+                        if let overlay = c.overlayCenter {
+                            overlay.frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
                     .offset(y: c.label == nil ? 0 : 9)
                 }

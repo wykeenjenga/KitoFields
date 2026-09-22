@@ -72,3 +72,4 @@
 "password.repeats" = "Pas de caractère répété %d fois de suite";
 "password.sequences" = "Pas de suites comme abcd ou 1234";
 "password.containsPersonal" = "Ne doit pas contenir votre nom ni votre e-mail";
+"field.optionalIndicator" = "(facultatif)";

@@ -26,6 +26,14 @@ public struct KitoFieldStyleConfiguration {
     public let input: KitoFieldSlot
     public let leading: KitoFieldSlot?
     public let trailing: KitoFieldSlot?
+    /// Above the field, outside its chrome. Rendered by `KitoFieldStack` (every built-in style).
+    public let above: KitoFieldSlot?
+    public let aboveAlignment: KitoAccessoryAlignment
+    /// Below the field (above helper/error text), outside its chrome.
+    public let below: KitoFieldSlot?
+    public let belowAlignment: KitoAccessoryAlignment
+    /// Overlaid centered inside the input area, display-only (never receives touches).
+    public let overlayCenter: KitoFieldSlot?
     /// Extra content under the field (password strength, requirement checklist, counters).
     public let footer: KitoFieldSlot?
     public let helperText: String?
@@ -43,13 +51,16 @@ public struct KitoFieldStyleConfiguration {
     /// Where this field shows its errors (options override the theme).
     public let errorPresentation: KitoErrorPresentation
 
-    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme, reducesMotion: Bool = false, errorPresentation: KitoErrorPresentation? = nil) {
+    public init(label: KitoFieldSlot?, placeholder: String?, input: KitoFieldSlot, leading: KitoFieldSlot?, trailing: KitoFieldSlot?, footer: KitoFieldSlot?, helperText: String?, errorMessages: [String], isFocused: Bool, isEnabled: Bool, isEmpty: Bool, isSuccess: Bool, theme: KitoFieldTheme, reducesMotion: Bool = false, errorPresentation: KitoErrorPresentation? = nil, above: KitoFieldSlot? = nil, aboveAlignment: KitoAccessoryAlignment = .leading, below: KitoFieldSlot? = nil, belowAlignment: KitoAccessoryAlignment = .leading, overlayCenter: KitoFieldSlot? = nil) {
         self.label = label; self.placeholder = placeholder; self.input = input
         self.leading = leading; self.trailing = trailing; self.footer = footer
         self.helperText = helperText; self.errorMessages = errorMessages
         self.isFocused = isFocused; self.isEnabled = isEnabled; self.isEmpty = isEmpty
         self.isSuccess = isSuccess; self.theme = theme; self.reducesMotion = reducesMotion
         self.errorPresentation = errorPresentation ?? theme.errorPresentation
+        self.above = above; self.aboveAlignment = aboveAlignment
+        self.below = below; self.belowAlignment = belowAlignment
+        self.overlayCenter = overlayCenter
     }
 
     /// The theme's motion, or `KitoFieldMotion.subtle` when Reduce Motion is enabled.

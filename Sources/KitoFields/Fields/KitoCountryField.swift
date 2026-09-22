@@ -125,13 +125,17 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
         .onChange(of: options.revealTrigger?.wrappedValue) { _ in presentation.didSubmit() }
         .onAppear { report(validationState) }
         .sheet(isPresented: $showsPicker) {
-            KitoCountryPicker(
-                selection: Binding(get: { selection ?? KitoCountryDatabase.current }, set: { selection = $0 }),
-                countries: config.availableCountries,
-                preferred: config.preferred,
-                configuration: pickerConfiguration
-            )
-            .kitoFieldTheme(theme)
+            if case .custom(let builder) = config.selectionMode {
+                builder(selection ?? KitoCountryDatabase.current) { chosen in selection = chosen; showsPicker = false }
+            } else {
+                KitoCountryPicker(
+                    selection: Binding(get: { selection ?? KitoCountryDatabase.current }, set: { selection = $0 }),
+                    countries: config.availableCountries,
+                    preferred: config.preferred,
+                    configuration: pickerConfiguration
+                )
+                .kitoFieldTheme(theme)
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(options.accessibilityLabel ?? options.label ?? KitoLocalization.string("country.accessibilityLabel", "Country"))
@@ -160,11 +164,15 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
                     Button { selection = country } label: { Text("\(country.flag) \(country.localizedName)  \(country.formattedDialCode)") }
                 }
             } label: { valueLabel }
+            .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
             #endif
-        case .sheet, .locked:
-            Button { if config.selectionMode == .sheet { showsPicker = true } } label: { valueLabel }
+        case .sheet, .custom:
+            Button { showsPicker = true } label: { valueLabel }
                 .buttonStyle(.plain)
                 .disabled(!isEnabled)
+                .kitoAccessibilityIdentifier(options.accessibilityIdentifier)
+        case .locked:
+            valueLabel
         }
     }
 
