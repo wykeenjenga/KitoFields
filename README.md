@@ -507,6 +507,7 @@ line:
 
 ```swift
 KitoFieldTheme.default.flagStyle = .emoji   // or .rounded / .tile / .isoCode / .hidden
+KitoFieldTheme.default.flagSize = 22        // 26pt by default
 ```
 
 ### Country picker

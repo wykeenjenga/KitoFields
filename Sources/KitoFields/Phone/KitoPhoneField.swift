@@ -321,7 +321,7 @@ public struct KitoPhoneField: View, KitoFieldConfigurable {
     private var selectorLabel: some View {
         HStack(spacing: phone.prefixSpacing ?? 6) {
             if phone.showsFlag {
-                KitoFlag(country: country, style: kitoResolvedFlagStyle(phone.flagStyle, themeStyle: theme.flagStyle), size: theme.iconSize + 5)
+                KitoFlag(country: country, style: kitoResolvedFlagStyle(phone.flagStyle, themeStyle: theme.flagStyle), size: theme.flagSize)
                     .id(country.isoCode)
                     .transition(.scale(scale: 0.5).combined(with: .opacity))
             }

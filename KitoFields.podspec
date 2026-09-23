@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'KitoFields'
-  s.version          = '1.9.0'
+  s.version          = '1.9.1'
   s.summary          = 'Customisable SwiftUI form inputs: text, email, password, phone with country picker, OTP.'
   s.description      = <<-DESC
     KitoFields is a pure-SwiftUI form toolkit. Text, email, password (reveal, strength meter,
@@ -22,5 +22,5 @@ Pod::Spec.new do |s|
   s.swift_versions   = ['5.9']
   s.frameworks       = 'SwiftUI'
   s.source_files     = 'Sources/KitoFields/**/*.swift'
-  s.resource_bundles = { 'KitoFields' => ['Sources/KitoFields/Resources/**/*.lproj'] }
+  s.resource_bundles = { 'KitoFields' => ['Sources/KitoFields/Resources/**/*.lproj', 'Sources/KitoFields/Resources/PrivacyInfo.xcprivacy'] }
 end

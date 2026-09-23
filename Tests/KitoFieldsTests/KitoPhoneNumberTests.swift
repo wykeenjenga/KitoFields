@@ -182,6 +182,21 @@ final class KitoFlagStyleTests: XCTestCase {
         XCTAssertEqual(kitoResolvedFlagStyle(.emoji, themeStyle: nil), .emoji)
     }
 
+    func testFlagsAreDrawnAt26PointsByDefault() {
+        XCTAssertEqual(KitoFieldTheme().flagSize, 26)
+    }
+
+    /// Apps that use the country picker ship this in their bundle; App Store Connect rejects
+    /// uploads whose SDKs read UserDefaults without declaring why.
+    func testThePrivacyManifestShipsWithThePackage() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
+        let plist = try XCTUnwrap(NSDictionary(contentsOf: url))
+        XCTAssertEqual(plist["NSPrivacyTracking"] as? Bool, false)
+        let apis = try XCTUnwrap(plist["NSPrivacyAccessedAPITypes"] as? [[String: Any]])
+        let defaults = apis.first { $0["NSPrivacyAccessedAPIType"] as? String == "NSPrivacyAccessedAPICategoryUserDefaults" }
+        XCTAssertEqual(defaults?["NSPrivacyAccessedAPITypeReasons"] as? [String], ["CA92.1"])
+    }
+
     func testKitoFlagItselfDefaultsToCircle() {
         XCTAssertEqual(KitoFlag(country: ke).style, .circle)
     }
