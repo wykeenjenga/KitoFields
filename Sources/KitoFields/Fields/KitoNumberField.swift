@@ -143,7 +143,7 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         }
         if let unitSuffix, options.trailing == nil { field.options.trailing = .text(unitSuffix) }
         if let step, options.trailing == nil, unitSuffix == nil {
-            field.options.trailing = .custom { stepper(step) }
+            field.options.trailing = .custom { stepperButtons(step) }
         }
         return field
             .onFocusChange { isFocused in
@@ -281,7 +281,7 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         return cleaned
     }
 
-    private func stepper(_ step: Double) -> some View {
+    private func stepperButtons(_ step: Double) -> some View {
         HStack(spacing: 2) {
             Button { adjust(-step) } label: { Image(systemName: "minus").frame(width: 28, height: 28) }
             Button { adjust(step) } label: { Image(systemName: "plus").frame(width: 28, height: 28) }
