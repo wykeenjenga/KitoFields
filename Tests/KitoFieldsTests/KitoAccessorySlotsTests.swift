@@ -90,46 +90,50 @@ final class KitoAccessibilityIdentifierOptionTests: XCTestCase {
 }
 
 final class KitoCurrencyFieldBridgeTests: XCTestCase {
-    func testStringBindingRoundTripsThroughTheFormatter() {
-        let formatter = KitoCurrencyField.bridgeFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        var text = "1,250.50"
-        let binding = KitoCurrencyField.bridge(
-            Binding(get: { text }, set: { text = $0 }),
-            formatter: formatter
-        )
-        XCTAssertEqual(binding.wrappedValue, 1250.5)
-
-        binding.wrappedValue = 42
-        XCTAssertEqual(text, formatter.string(from: 42 as NSNumber))
+    private func boundString(_ value: Double?) -> String {
+        var text = ""
+        let binding = KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: KitoCurrencyField.bridgeFormatter())
+        binding.wrappedValue = value
+        return text
     }
 
-    /// The field writes this binding on every keystroke, so a typed "1" must stay "1" — forcing
-    /// two decimals put "1.00" in the caller's view model mid-typing.
-    func testTypedDigitsAreNotPaddedWithDecimals() {
-        let formatter = KitoCurrencyField.bridgeFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        var text = ""
-        let binding = KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: formatter)
-
-        binding.wrappedValue = 1
-        XCTAssertEqual(text, "1")
-
-        binding.wrappedValue = 1250
-        XCTAssertEqual(text, "1,250")
+    private func parsed(_ seed: String) -> Double? {
+        var text = seed
+        return KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: KitoCurrencyField.bridgeFormatter()).wrappedValue
     }
 
-    func testDecimalsStillComeThroughOnceTyped() {
+    /// What the user sees is not what gets sent: the field displays "1,200.00", but the bound
+    /// string — the value the app sends — is the plain "1200.00".
+    func testTheBoundStringIsThePlainSendableForm() {
+        XCTAssertEqual(boundString(1200), "1200.00")
+        XCTAssertEqual(boundString(1250.5), "1250.50")
+        XCTAssertEqual(boundString(1_234_567.89), "1234567.89")
+        XCTAssertEqual(boundString(0.5), "0.50")
+        XCTAssertEqual(boundString(nil), "")
+    }
+
+    func testTheBoundStringNeverContainsGrouping() {
+        for amount in [1000.0, 20000, 1_250_000.75] {
+            XCTAssertFalse(boundString(amount).contains(","), "\(boundString(amount)) must not carry display grouping")
+        }
+    }
+
+    /// The bound string used to follow the device locale, so in de_DE it read "1.200" — which a
+    /// backend parses as 1.2. It must be identical whatever the user's region.
+    func testTheBoundStringIsLocaleIndependent() {
         let formatter = KitoCurrencyField.bridgeFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        var text = ""
-        let binding = KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: formatter)
+        XCTAssertEqual(formatter.locale.identifier, "en_US_POSIX")
+        XCTAssertEqual(formatter.decimalSeparator, ".")
+        XCTAssertFalse(formatter.usesGroupingSeparator)
+    }
 
-        binding.wrappedValue = 1250.5
-        XCTAssertEqual(text, "1,250.5")
-
-        binding.wrappedValue = 1250.75
-        XCTAssertEqual(text, "1,250.75")
+    /// Reads are lenient, so whatever the app seeds the field with still parses.
+    func testSeedValuesParseInAnyReasonableForm() {
+        XCTAssertEqual(parsed("1200.00"), 1200)
+        XCTAssertEqual(parsed("1200"), 1200)
+        XCTAssertEqual(parsed("1,200.00"), 1200, "an older grouped value must not be misread as 1.2")
+        XCTAssertEqual(parsed("100000.00"), 100000)
+        XCTAssertNil(parsed(""))
     }
 
     /// A `.currencySelector(...)` already names the currency, so the plain symbol has to be

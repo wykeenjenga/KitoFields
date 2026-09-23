@@ -104,6 +104,18 @@ final class PhoneNumberTests: XCTestCase {
         XCTAssertEqual(KitoPhoneValidator().validate(nationalNumber: stripped, country: ke), .valid)
     }
 
+    /// What the user sees is not what gets sent. The field shows "703 285 070", but the value
+    /// behind it — what the nationalNumber and e164 bindings carry — is bare digits with the
+    /// trunk zero removed, however the number was typed.
+    func testTheSentValueCarriesNoDisplayFormatting() {
+        for typed in ["0703 285 070", "0703285070", "703-285-070", "(0703) 285 070", "703 285 070"] {
+            let number = KitoPhoneNumber(country: ke, nationalNumber: typed)
+            XCTAssertEqual(number.nationalNumber, "703285070", "\(typed) must send bare digits")
+            XCTAssertEqual(number.e164, "+254703285070", "\(typed) must send clean E.164")
+        }
+        XCTAssertEqual(KitoPhoneNumber(country: ke, nationalNumber: "703285070").national, "703 285 070", "display keeps its grouping")
+    }
+
     func testKenyaFormatsInThreeGroupsOfThree() {
         XCTAssertEqual(KitoPhoneFormatter().formatNational("703285070", country: ke), "703 285 070")
     }
