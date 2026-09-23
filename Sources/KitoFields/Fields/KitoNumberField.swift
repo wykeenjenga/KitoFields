@@ -61,7 +61,8 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
     private var step: Double?
     private var locale: Locale = .autoupdatingCurrent
     private var currencyCode: String?
-    private var currencyPosition: KitoCurrencyPosition = .prefix
+    // Internal, not private: asserted directly in tests.
+    var currencyPosition: KitoCurrencyPosition = .prefix
     private var unitSuffix: String?
 
     public init(_ label: String? = nil, value: Binding<Double?>, prompt: String? = "0") {
@@ -204,7 +205,8 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
 
 /// Currency preset of `KitoNumberField`: two decimals, symbol prefix, grouping.
 public struct KitoCurrencyField: View, KitoFieldConfigurable {
-    private var base: KitoNumberField
+    // Internal, not private: asserted directly in tests.
+    var base: KitoNumberField
     public var options: KitoFieldOptions { get { base.options } set { base.options = newValue } }
 
     public init(_ label: String? = "Amount", value: Binding<Double?>, currencyCode: String = "USD", prompt: String? = "0.00") {
@@ -228,7 +230,10 @@ public struct KitoCurrencyField: View, KitoFieldConfigurable {
         f.numberStyle = .decimal
         f.locale = .autoupdatingCurrent
         f.usesGroupingSeparator = true
-        f.minimumFractionDigits = 2
+        // No minimum: the field writes this binding on every keystroke, so forcing two decimals
+        // would put "1.00" in your view model the moment someone typed "1". Two digits still come
+        // through once they're typed, since maximumFractionDigits allows them.
+        f.minimumFractionDigits = 0
         f.maximumFractionDigits = 2
         return f
     }
@@ -246,6 +251,15 @@ public struct KitoCurrencyField: View, KitoFieldConfigurable {
     public var body: some View { base }
 
     public func range(_ range: ClosedRange<Double>) -> KitoCurrencyField { var c = self; c.base = c.base.range(range); return c }
+    /// Where the plain currency symbol sits, or `.none` to drop it. Reach for `.none` when a
+    /// `.currencySelector(...)` already names the currency, so it isn't shown twice.
+    public func currencyPosition(_ position: KitoCurrencyPosition) -> KitoCurrencyField { var c = self; c.base = c.base.currencyPosition(position); return c }
+    /// Overrides the 2...2 fraction digits `currency(_:)` sets, e.g. `0...0` for whole-shilling amounts.
+    public func fractionDigits(_ digits: ClosedRange<Int>) -> KitoCurrencyField { var c = self; c.base = c.base.fractionDigits(digits); return c }
+    public func groupsThousands(_ enabled: Bool) -> KitoCurrencyField { var c = self; c.base = c.base.groupsThousands(enabled); return c }
+    public func locale(_ locale: Locale) -> KitoCurrencyField { var c = self; c.base = c.base.locale(locale); return c }
+    /// Switches which currency the plain symbol and formatting use, after init.
+    public func currency(_ code: String) -> KitoCurrencyField { var c = self; c.base = c.base.currency(code); return c }
 
     /// A currency-picker menu in any slot (trailing by default) — a flag + code + chevron, or
     /// your own label per option.

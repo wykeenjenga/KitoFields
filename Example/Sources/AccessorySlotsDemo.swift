@@ -38,6 +38,7 @@ struct AccessorySlotsDemo: View {
                 Text("Amount — currency menu in the trailing slot (default placement).")
                     .font(.footnote).foregroundColor(.secondary).frame(maxWidth: .infinity, alignment: .leading)
                 KitoCurrencyField("Amount", text: $amountText, currencyCode: currencyTrailing)
+                    .currencyPosition(.none)
                     .currencySelector(currencies, selected: $currencyTrailing)
                     .accessibilityIdentifier("checkout.details.amount")
 
