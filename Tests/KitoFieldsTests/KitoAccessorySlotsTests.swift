@@ -104,6 +104,50 @@ final class KitoCurrencyFieldBridgeTests: XCTestCase {
         XCTAssertEqual(text, formatter.string(from: 42 as NSNumber))
     }
 
+    /// The field writes this binding on every keystroke, so a typed "1" must stay "1" — forcing
+    /// two decimals put "1.00" in the caller's view model mid-typing.
+    func testTypedDigitsAreNotPaddedWithDecimals() {
+        let formatter = KitoCurrencyField.bridgeFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        var text = ""
+        let binding = KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: formatter)
+
+        binding.wrappedValue = 1
+        XCTAssertEqual(text, "1")
+
+        binding.wrappedValue = 1250
+        XCTAssertEqual(text, "1,250")
+    }
+
+    func testDecimalsStillComeThroughOnceTyped() {
+        let formatter = KitoCurrencyField.bridgeFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        var text = ""
+        let binding = KitoCurrencyField.bridge(Binding(get: { text }, set: { text = $0 }), formatter: formatter)
+
+        binding.wrappedValue = 1250.5
+        XCTAssertEqual(text, "1,250.5")
+
+        binding.wrappedValue = 1250.75
+        XCTAssertEqual(text, "1,250.75")
+    }
+
+    /// A `.currencySelector(...)` already names the currency, so the plain symbol has to be
+    /// suppressible — otherwise the field shows it twice.
+    func testCurrencyPositionIsReachableOnTheCurrencyField() {
+        let field = KitoCurrencyField("Amount", text: .constant(""), currencyCode: "KES")
+        XCTAssertEqual(field.base.currencyPosition, .prefix, "currency(_:) still defaults to a leading symbol")
+
+        let suppressed = field.currencyPosition(.none)
+        XCTAssertEqual(suppressed.base.currencyPosition, .none)
+        XCTAssertEqual(field.currencyPosition(.suffix).base.currencyPosition, .suffix)
+    }
+
+    func testFractionDigitsAreReachableOnTheCurrencyField() {
+        let whole = KitoCurrencyField("Amount", text: .constant(""), currencyCode: "KES").fractionDigits(0...0)
+        XCTAssertEqual(whole.base.formatter.maximumFractionDigits, 0, "currency(_:) pins 2...2; the override has to win")
+    }
+
     func testUnparsableStringYieldsNilRatherThanCrashing() {
         let formatter = KitoCurrencyField.bridgeFormatter()
         var text = "not a number"

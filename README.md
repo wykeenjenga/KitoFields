@@ -447,11 +447,16 @@ your own:
 
 ```swift
 KitoCurrencyField("Amount", text: $amountText, currencyCode: currency)
+    .currencyPosition(.none)       // the selector already names the currency — don't show it twice
     .currencySelector([.init(code: "USD"), .init(code: "KES", symbol: "KSh")], selected: $currency)
     .currencySelector(options, selected: $currency, placement: .leading) { option in
         MyCurrencyFlagLabel(option: option)
     }
 ```
+
+Pair a selector with `.currencyPosition(.none)`: `currency(_:)` adds a plain leading symbol of its
+own, so without it the field shows both `KSh` and the selector's `KES`. The `text:` binding is
+written on every keystroke and holds exactly what was typed — `"1"` stays `"1"`, not `"1.00"`.
 
 ## Country field and country data
 
