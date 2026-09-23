@@ -64,6 +64,8 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
     // Internal, not private: asserted directly in tests.
     var currencyPosition: KitoCurrencyPosition = .prefix
     private var unitSuffix: String?
+    // Internal, not private: asserted directly in tests.
+    var formatsAsYouTypeValue = false
 
     public init(_ label: String? = nil, value: Binding<Double?>, prompt: String? = "0") {
         _value = value
@@ -110,17 +112,26 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         var field = KitoTextField(options.label, text: $text, prompt: options.placeholder)
         field.options = options
         field.options.keyboard = fractionDigits.upperBound == 0 ? .numberPad : .decimalPad
-        field.options.transform = { [editingFormatter, locale, fractionDigits] raw in
-            Self.normalizeNumericInput(
-                raw,
-                decimalSeparator: editingFormatter.decimalSeparator ?? ".",
-                groupingSeparator: locale.groupingSeparator ?? ",",
-                maximumFractionDigits: fractionDigits.upperBound
-            )
+        field.options.transform = { [editingFormatter, formatter, locale, fractionDigits, focused, formatsAsYouTypeValue] raw in
+            let decimal = editingFormatter.decimalSeparator ?? "."
+            let grouping = locale.groupingSeparator ?? ","
+            let normalized = Self.normalizeNumericInput(raw, decimalSeparator: decimal, groupingSeparator: grouping, maximumFractionDigits: fractionDigits.upperBound)
+            // This field's own grouped display form is a fixed point: leave it exactly as written.
+            // Deciding by `focused` alone doesn't work, because on blur the display text is written
+            // in the same pass that flips `focused`, while this closure still holds the old value —
+            // so it would sanitise the grouping straight back out.
+            if Self.isDisplayForm(raw, normalized: normalized, display: formatter, editing: editingFormatter) { return raw }
+            guard focused else { return raw }
+            return formatsAsYouTypeValue ? Self.groupIntegerPart(normalized, decimalSeparator: decimal, groupingSeparator: grouping) : normalized
         }
         var rules = options.rules
         if let range { rules += KitoRule.range(range, locale: locale) }
-        rules.append(KitoRule(id: "inputkit.number", message: KitoLocalization.string("number.invalid", "Enter a valid number")) { [editingFormatter] in editingFormatter.number(from: $0) != nil })
+        // Grouping-aware: the text is the grouped display form whenever the field is unfocused,
+        // which a grouping-off formatter would reject as invalid.
+        rules.append(KitoRule(id: "inputkit.number", message: KitoLocalization.string("number.invalid", "Enter a valid number")) { [editingFormatter, locale, fractionDigits] text in
+            let normalized = Self.normalizeNumericInput(text, decimalSeparator: editingFormatter.decimalSeparator ?? ".", groupingSeparator: locale.groupingSeparator ?? ",", maximumFractionDigits: fractionDigits.upperBound)
+            return editingFormatter.number(from: normalized) != nil
+        })
         field.options.rules = rules
         if let currencyCode {
             let symbol = KitoCountryDatabase.all.first { $0.currencyCode == currencyCode }?.currencySymbol ?? currencyCode
@@ -137,24 +148,81 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         return field
             .onFocusChange { isFocused in
                 focused = isFocused
-                if !isFocused { reformat() }
+                // Focused: plain editable digits, so the formatter never fights typing.
+                // Unfocused: the grouped display form.
+                if let value { text = Self.text(for: value, focused: isFocused, display: formatter, editing: editingFormatter) }
                 options.onFocusChange?(isFocused)
             }
             .onChange(of: text) { newText in
-                let parsed = editingFormatter.number(from: newText)?.doubleValue
+                // Only the user's own typing drives the value. Programmatic display text (grouped,
+                // written below) must never feed back into it.
+                guard focused else { return }
+                let parsed = parse(newText)
                 if parsed != value { value = parsed }
             }
             .onChange(of: value) { newValue in
-                let parsed = editingFormatter.number(from: text)?.doubleValue
-                if newValue != parsed { text = newValue.map { editingFormatter.string(from: $0 as NSNumber) ?? "" } ?? "" }
+                if focused {
+                    // Don't reformat under someone's cursor unless the value genuinely moved.
+                    guard newValue != parse(text) else { return }
+                    text = newValue.map { editingFormatter.string(from: $0 as NSNumber) ?? "" } ?? ""
+                } else {
+                    text = newValue.map { formatter.string(from: $0 as NSNumber) ?? "" } ?? ""
+                }
             }
-            .onAppear { if let value { text = focused ? (editingFormatter.string(from: value as NSNumber) ?? "") : (formatter.string(from: value as NSNumber) ?? "") } }
+            .onAppear { if let value { text = Self.text(for: value, focused: focused, display: formatter, editing: editingFormatter) } }
+    }
+
+    /// Parses either form the field can hold — raw editing digits or the grouped display — back to
+    /// a number. Grouping-aware, so a grouped string can never be misread as a smaller amount.
+    private func parse(_ text: String) -> Double? {
+        let normalized = Self.normalizeNumericInput(
+            text,
+            decimalSeparator: editingFormatter.decimalSeparator ?? ".",
+            groupingSeparator: locale.groupingSeparator ?? ",",
+            maximumFractionDigits: fractionDigits.upperBound
+        )
+        return editingFormatter.number(from: normalized)?.doubleValue
+    }
+
+    /// The text to show for `value`: the plain editing form while focused, the grouped display
+    /// form otherwise. Extracted so both forms are testable without hosting a view.
+    static func text(for value: Double, focused: Bool, display: NumberFormatter, editing: NumberFormatter) -> String {
+        let formatter = focused ? editing : display
+        return (formatter.string(from: value as NSNumber) ?? "").trimmingCharacters(in: .whitespaces)
+    }
+
+    /// Whether `raw` is exactly what the display formatter would write for the number it holds —
+    /// i.e. this field's own grouped form rather than something the user typed.
+    static func isDisplayForm(_ raw: String, normalized: String, display: NumberFormatter, editing: NumberFormatter) -> Bool {
+        guard !raw.isEmpty, let value = editing.number(from: normalized) else { return false }
+        return (display.string(from: value) ?? "").trimmingCharacters(in: .whitespaces) == raw
+    }
+
+    /// Inserts grouping separators into the integer part only, leaving any fraction — including a
+    /// bare trailing decimal separator mid-typing ("1234.") — exactly as typed.
+    static func groupIntegerPart(_ normalized: String, decimalSeparator: String, groupingSeparator: String) -> String {
+        guard !groupingSeparator.isEmpty else { return normalized }
+        let negative = normalized.hasPrefix("-")
+        let unsigned = negative ? String(normalized.dropFirst()) : normalized
+        let parts = unsigned.split(separator: Character(decimalSeparator), maxSplits: 1, omittingEmptySubsequences: false)
+        let integer = String(parts.first ?? "")
+        guard integer.count > 3 else { return normalized }
+
+        var grouped = ""
+        for (offset, digit) in integer.reversed().enumerated() {
+            if offset > 0, offset % 3 == 0 { grouped.append(contentsOf: groupingSeparator.reversed()) }
+            grouped.append(digit)
+        }
+        var result = String(grouped.reversed())
+        if parts.count > 1 { result += decimalSeparator + parts[1] }
+        return (negative ? "-" : "") + result
     }
 
     /// Cleans raw input down to a single-decimal-separator number the editing formatter can parse.
     ///
     /// Grouping separators have to be recognised as grouping rather than folded into the decimal
-    /// separator: `reformat()` writes a grouped string on blur ("20,000.00"), and mapping every
+    /// separator: grouped text ("20,000.00") can reach it — pasted, or typed with
+    /// `formatsAsYouType(true)` — and mapping every
     /// "." and "," to the decimal separator turned that into "20.00" — silently changing 20,000
     /// into 20. A separator is treated as grouping when a decimal separator is also present, or
     /// when every group after it is exactly three digits; otherwise it is still read as a decimal
@@ -213,13 +281,6 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         return cleaned
     }
 
-    private func reformat() {
-        guard let value else { return }
-        text = formatter.string(from: value as NSNumber) ?? text
-        // Editing again: strip grouping/currency so the raw number is editable.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {}
-    }
-
     private func stepper(_ step: Double) -> some View {
         HStack(spacing: 2) {
             Button { adjust(-step) } label: { Image(systemName: "minus").frame(width: 28, height: 28) }
@@ -254,6 +315,10 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
     public func currencyPosition(_ position: KitoCurrencyPosition) -> KitoNumberField { mutating { $0.currencyPosition = position } }
     /// Unit shown after the value, e.g. "kg".
     public func unit(_ suffix: String) -> KitoNumberField { mutating { $0.unitSuffix = suffix } }
+    /// Regroups the integer part after every keystroke ("1234" shows as "1,234") instead of only
+    /// once the field loses focus. The fraction is left exactly as typed, including a trailing
+    /// decimal separator mid-entry. Off by default.
+    public func formatsAsYouType(_ enabled: Bool = true) -> KitoNumberField { mutating { $0.formatsAsYouTypeValue = enabled } }
 }
 
 /// Currency preset of `KitoNumberField`: two decimals, symbol prefix, grouping.
@@ -278,25 +343,35 @@ public struct KitoCurrencyField: View, KitoFieldConfigurable {
         base = KitoNumberField(label, value: Self.bridge(text, formatter: formatter), prompt: prompt).currency(currencyCode)
     }
 
+    /// Formats the bound string — the value your app *sends*, not what the user sees. It is always
+    /// a plain, locale-independent number: no grouping, "." for decimals, two fraction digits
+    /// ("1200.00"), so it can go straight to an API. The grouped, localised form ("1,200.00", or
+    /// "1.200,00" in de_DE) is display-only and never reaches your binding.
     static func bridgeFormatter() -> NumberFormatter {
         let f = NumberFormatter()
         f.numberStyle = .decimal
-        f.locale = .autoupdatingCurrent
-        f.usesGroupingSeparator = true
-        // No minimum: the field writes this binding on every keystroke, so forcing two decimals
-        // would put "1.00" in your view model the moment someone typed "1". Two digits still come
-        // through once they're typed, since maximumFractionDigits allows them.
-        f.minimumFractionDigits = 0
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.usesGroupingSeparator = false
+        f.minimumFractionDigits = 2
         f.maximumFractionDigits = 2
         return f
     }
 
-    /// Bridges a `Binding<String>` to the `Binding<Double?>` `KitoNumberField` itself needs,
-    /// parsing/formatting with `formatter` on every read/write. Extracted so the round-trip
-    /// (string → double → string) is unit-testable without hosting a view.
+    /// Bridges a `Binding<String>` to the `Binding<Double?>` `KitoNumberField` itself needs.
+    /// Writes the canonical form from `bridgeFormatter()`; reads leniently, so a string your app
+    /// seeds the field with parses whether it is "1200.00", "1200" or an older grouped
+    /// "1,200.00". Extracted so the round-trip is unit-testable without hosting a view.
     static func bridge(_ text: Binding<String>, formatter: NumberFormatter) -> Binding<Double?> {
         Binding<Double?>(
-            get: { formatter.number(from: text.wrappedValue)?.doubleValue },
+            get: {
+                let normalized = KitoNumberField.normalizeNumericInput(
+                    text.wrappedValue,
+                    decimalSeparator: formatter.decimalSeparator ?? ".",
+                    groupingSeparator: formatter.groupingSeparator ?? ",",
+                    maximumFractionDigits: formatter.maximumFractionDigits
+                )
+                return formatter.number(from: normalized)?.doubleValue
+            },
             set: { text.wrappedValue = $0.map { formatter.string(from: $0 as NSNumber) ?? "" } ?? "" }
         )
     }
@@ -311,6 +386,8 @@ public struct KitoCurrencyField: View, KitoFieldConfigurable {
     public func fractionDigits(_ digits: ClosedRange<Int>) -> KitoCurrencyField { var c = self; c.base = c.base.fractionDigits(digits); return c }
     public func groupsThousands(_ enabled: Bool) -> KitoCurrencyField { var c = self; c.base = c.base.groupsThousands(enabled); return c }
     public func locale(_ locale: Locale) -> KitoCurrencyField { var c = self; c.base = c.base.locale(locale); return c }
+    /// Regroups the amount after every keystroke instead of only on blur. Off by default.
+    public func formatsAsYouType(_ enabled: Bool = true) -> KitoCurrencyField { var c = self; c.base = c.base.formatsAsYouType(enabled); return c }
     /// Switches which currency the plain symbol and formatting use, after init.
     public func currency(_ code: String) -> KitoCurrencyField { var c = self; c.base = c.base.currency(code); return c }
 

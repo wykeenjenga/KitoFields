@@ -455,8 +455,29 @@ KitoCurrencyField("Amount", text: $amountText, currencyCode: currency)
 ```
 
 Pair a selector with `.currencyPosition(.none)`: `currency(_:)` adds a plain leading symbol of its
-own, so without it the field shows both `KSh` and the selector's `KES`. The `text:` binding is
-written on every keystroke and holds exactly what was typed — `"1"` stays `"1"`, not `"1.00"`.
+own, so without it the field shows both `KSh` and the selector's `KES`.
+
+**What the user sees is not what you send.** The field *displays* the grouped, localised form, but
+the `text:` binding always holds a plain, locale-independent number you can send straight to an
+API — no grouping, `.` for decimals, two fraction digits:
+
+| | Field shows | `text:` binding holds |
+| --- | --- | --- |
+| Unfocused | `1,200.00` (`1.200,00` in de_DE) | `"1200.00"` |
+| Focused, typing | `1200` | `"1200.00"` |
+
+Seed it with whatever your API returns — `"1200.00"`, `"1200"`, even an older grouped `"1,200.00"`
+all parse. Phone fields follow the same rule: the field shows `703 285 070`, while `nationalNumber:`
+holds `"703285070"` and `e164:` holds `"+254703285070"`.
+
+Unfocused number and currency fields always show the grouped form — including a value that was
+set before the field was ever focused, or changed from outside while it wasn't. To regroup while
+typing too ("1234" shows as "1,234" as you type):
+
+```swift
+KitoCurrencyField("Amount", text: $amount, currencyCode: "USD")
+    .formatsAsYouType()
+```
 
 ## Country field and country data
 

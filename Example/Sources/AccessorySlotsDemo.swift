@@ -41,6 +41,9 @@ struct AccessorySlotsDemo: View {
                     .currencyPosition(.none)
                     .currencySelector(currencies, selected: $currencyTrailing)
                     .accessibilityIdentifier("checkout.details.amount")
+                Text("Sends: \(amountText.isEmpty ? "—" : amountText)")
+                    .font(.caption.monospaced()).foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text("Amount — the same currency menu, moved to the leading slot instead.")
                     .font(.footnote).foregroundColor(.secondary).frame(maxWidth: .infinity, alignment: .leading)

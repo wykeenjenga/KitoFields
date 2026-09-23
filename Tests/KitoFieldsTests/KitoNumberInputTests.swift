@@ -93,3 +93,133 @@ final class KitoNumberInputTests: XCTestCase {
         }
     }
 }
+
+/// Unfocused fields show the grouped display form; focused ones show plain editable digits.
+final class KitoNumberDisplayTests: XCTestCase {
+    private func currency(_ value: Double?, focused: Bool) -> String {
+        let field = KitoCurrencyField("Amount", value: .constant(value), currencyCode: "USD")
+        return KitoNumberField.text(for: value ?? 0, focused: focused, display: field.base.formatter, editing: Self.editing(field.base))
+    }
+
+    private static func editing(_ field: KitoNumberField) -> NumberFormatter {
+        let f = NumberFormatter()
+        f.locale = .autoupdatingCurrent
+        f.numberStyle = .decimal
+        f.usesGroupingSeparator = false
+        f.maximumFractionDigits = 2
+        return f
+    }
+
+    func testAnUnfocusedCurrencyFieldShowsTheGroupedForm() {
+        let field = KitoCurrencyField("Amount", value: .constant(100000), currencyCode: "USD").locale(Locale(identifier: "en_US"))
+        XCTAssertEqual(KitoNumberField.text(for: 100000, focused: false, display: field.base.formatter, editing: Self.editing(field.base)), "100,000.00")
+    }
+
+    func testAnUnfocusedCurrencyFieldShowsFixedDecimals() {
+        let field = KitoCurrencyField("Amount", value: .constant(1250.5), currencyCode: "USD").locale(Locale(identifier: "en_US"))
+        XCTAssertEqual(KitoNumberField.text(for: 1250.5, focused: false, display: field.base.formatter, editing: Self.editing(field.base)), "1,250.50")
+    }
+
+    func testAPlainNumberFieldKeepsItsOwnFractionDigits() {
+        let field = KitoNumberField("Count", value: .constant(1250.5)).fractionDigits(0...2).locale(Locale(identifier: "en_US"))
+        XCTAssertEqual(KitoNumberField.text(for: 1250.5, focused: false, display: field.formatter, editing: Self.editing(field)), "1,250.5")
+    }
+
+    /// Focusing switches to plain digits so the formatter never fights typing.
+    func testAFocusedFieldShowsPlainEditableDigits() {
+        let field = KitoCurrencyField("Amount", value: .constant(1250.5), currencyCode: "USD").locale(Locale(identifier: "en_US"))
+        let editing = NumberFormatter()
+        editing.locale = Locale(identifier: "en_US")
+        editing.numberStyle = .decimal
+        editing.usesGroupingSeparator = false
+        editing.maximumFractionDigits = 2
+        XCTAssertEqual(KitoNumberField.text(for: 1250.5, focused: true, display: field.base.formatter, editing: editing), "1250.5")
+    }
+}
+
+/// `formatsAsYouType(true)` regroups the integer part after each keystroke.
+final class KitoFormatsAsYouTypeTests: XCTestCase {
+    private func group(_ s: String) -> String {
+        KitoNumberField.groupIntegerPart(s, decimalSeparator: ".", groupingSeparator: ",")
+    }
+
+    func testDigitsRegroupAsTheyAreTyped() {
+        XCTAssertEqual(group("1"), "1")
+        XCTAssertEqual(group("12"), "12")
+        XCTAssertEqual(group("123"), "123")
+        XCTAssertEqual(group("1234"), "1,234")
+        XCTAssertEqual(group("1234567"), "1,234,567")
+    }
+
+    func testATrailingDecimalSeparatorIsKeptMidEntry() {
+        XCTAssertEqual(group("1234."), "1,234.")
+        XCTAssertEqual(group("1234.5"), "1,234.5")
+    }
+
+    func testTheFractionIsNeverGrouped() {
+        XCTAssertEqual(group("1234.5678"), "1,234.5678")
+    }
+
+    func testNegativeAmounts() {
+        XCTAssertEqual(group("-1234"), "-1,234")
+    }
+
+    /// A regrouped string must survive the next keystroke's normalisation unchanged, or typing
+    /// would fight itself.
+    func testRegroupedTextIsAFixedPointOfTheTransform() {
+        for typed in ["1234", "1234567", "1234.5", "20000"] {
+            let once = group(KitoNumberField.normalizeNumericInput(typed, decimalSeparator: ".", groupingSeparator: ",", maximumFractionDigits: 2))
+            let twice = group(KitoNumberField.normalizeNumericInput(once, decimalSeparator: ".", groupingSeparator: ",", maximumFractionDigits: 2))
+            XCTAssertEqual(once, twice, "\(typed) regrouped to \(once) but then to \(twice)")
+        }
+    }
+
+    func testTheModifierIsStoredAndForwarded() {
+        XCTAssertFalse(KitoNumberField("N", value: .constant(nil)).formatsAsYouTypeValue)
+        XCTAssertTrue(KitoNumberField("N", value: .constant(nil)).formatsAsYouType().formatsAsYouTypeValue)
+        XCTAssertTrue(KitoCurrencyField("Amount", text: .constant(""), currencyCode: "USD").formatsAsYouType().base.formatsAsYouTypeValue)
+    }
+}
+
+/// The grouped display form must survive the field's own input transform, whatever focus state
+/// that transform happened to capture — otherwise blur writes "1,200.00" and it is immediately
+/// sanitised back to "1200.00".
+final class KitoDisplayFixedPointTests: XCTestCase {
+    private let display: NumberFormatter = {
+        let f = NumberFormatter()
+        f.locale = Locale(identifier: "en_US")
+        f.numberStyle = .currency
+        f.currencyCode = "USD"
+        f.currencySymbol = ""
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f
+    }()
+    private let editing: NumberFormatter = {
+        let f = NumberFormatter()
+        f.locale = Locale(identifier: "en_US")
+        f.numberStyle = .decimal
+        f.usesGroupingSeparator = false
+        f.maximumFractionDigits = 2
+        return f
+    }()
+
+    private func isDisplay(_ raw: String) -> Bool {
+        let normalized = KitoNumberField.normalizeNumericInput(raw, decimalSeparator: ".", groupingSeparator: ",", maximumFractionDigits: 2)
+        return KitoNumberField.isDisplayForm(raw, normalized: normalized, display: display, editing: editing)
+    }
+
+    func testTheGroupedDisplayFormIsRecognised() {
+        XCTAssertTrue(isDisplay("1,200.00"))
+        XCTAssertTrue(isDisplay("100,000.00"))
+        XCTAssertTrue(isDisplay("5.00"))
+    }
+
+    /// What someone types is not the display form, so it still gets sanitised as input.
+    func testTypedInputIsNotMistakenForTheDisplayForm() {
+        XCTAssertFalse(isDisplay("1200"))
+        XCTAssertFalse(isDisplay("1200.5"))
+        XCTAssertFalse(isDisplay("20,5"))
+        XCTAssertFalse(isDisplay(""))
+    }
+}
