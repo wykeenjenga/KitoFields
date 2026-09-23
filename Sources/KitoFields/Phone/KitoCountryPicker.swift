@@ -121,7 +121,7 @@ public struct KitoCountryPicker: View {
                 ForEach(items) { chip in
                     Button(action: chip.action) {
                         HStack(spacing: 6) {
-                            if let flag = chip.flag { KitoFlag(country: flag, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: 16) }
+                            if let flag = chip.flag { KitoFlag(country: flag, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: (theme.flagSize * 0.7).rounded()) }
                             if let symbol = chip.symbol { Image(systemName: symbol).font(.caption) }
                             Text(chip.label).font(theme.labelFont).lineLimit(1)
                         }
@@ -272,7 +272,7 @@ public struct KitoCountryRow: View {
 
     public var body: some View {
         HStack(spacing: 12) {
-            KitoFlag(country: country, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: 24)
+            KitoFlag(country: country, style: kitoResolvedFlagStyle(configuration.flagStyle, themeStyle: theme.flagStyle), size: theme.flagSize + 2)
             VStack(alignment: .leading, spacing: 2) {
                 highlighted(country.localizedName(in: configuration.locale ?? .autoupdatingCurrent))
                     .foregroundColor(.primary)

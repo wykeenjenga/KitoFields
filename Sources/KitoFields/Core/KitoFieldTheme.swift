@@ -87,6 +87,9 @@ public struct KitoFieldTheme: Sendable {
     /// set it once, e.g. `KitoFieldTheme.default.flagStyle = .emoji` in your `App`'s `init()`, to
     /// change that app-wide. A field's own `.flagStyle(_:)` still wins for that field.
     public var flagStyle: KitoFlagStyle? = nil
+    /// Flag diameter in the phone prefix and the country field. The picker list draws its flags
+    /// 2pt larger and its "recent" chips at 70% of this.
+    public var flagSize: CGFloat = 26
 
     // MARK: Layout
     public var accessorySpacing: CGFloat = 10

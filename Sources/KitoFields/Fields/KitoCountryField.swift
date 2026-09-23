@@ -183,7 +183,7 @@ public struct KitoCountryField: View, KitoFieldConfigurable {
         HStack(spacing: 8) {
             if let country = selection {
                 if config.showsFlag {
-                    KitoFlag(country: country, style: kitoResolvedFlagStyle(config.flagStyle, themeStyle: theme.flagStyle), size: theme.iconSize + 5)
+                    KitoFlag(country: country, style: kitoResolvedFlagStyle(config.flagStyle, themeStyle: theme.flagStyle), size: theme.flagSize)
                         .id(country.isoCode)
                         .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }
