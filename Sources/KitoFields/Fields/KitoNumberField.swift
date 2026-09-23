@@ -110,22 +110,13 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
         var field = KitoTextField(options.label, text: $text, prompt: options.placeholder)
         field.options = options
         field.options.keyboard = fractionDigits.upperBound == 0 ? .numberPad : .decimalPad
-        field.options.transform = { [editingFormatter] raw in
-            let separator = editingFormatter.decimalSeparator ?? "."
-            var cleaned = raw.replacingOccurrences(of: ".", with: separator).replacingOccurrences(of: ",", with: separator)
-            cleaned = cleaned.filter { $0.isNumber || String($0) == separator || $0 == "-" }
-            // one separator, one leading minus
-            var seen = false
-            cleaned = String(cleaned.enumerated().filter { i, ch in
-                if String(ch) == separator { if seen || fractionDigits.upperBound == 0 { return false }; seen = true }
-                if ch == "-" && i != 0 { return false }
-                return true
-            }.map(\.element))
-            if let idx = cleaned.firstIndex(of: Character(separator)) {
-                let frac = cleaned[cleaned.index(after: idx)...]
-                if frac.count > fractionDigits.upperBound { cleaned = String(cleaned.prefix(cleaned.distance(from: cleaned.startIndex, to: idx) + 1 + fractionDigits.upperBound)) }
-            }
-            return cleaned
+        field.options.transform = { [editingFormatter, locale, fractionDigits] raw in
+            Self.normalizeNumericInput(
+                raw,
+                decimalSeparator: editingFormatter.decimalSeparator ?? ".",
+                groupingSeparator: locale.groupingSeparator ?? ",",
+                maximumFractionDigits: fractionDigits.upperBound
+            )
         }
         var rules = options.rules
         if let range { rules += KitoRule.range(range, locale: locale) }
@@ -158,6 +149,68 @@ public struct KitoNumberField: View, KitoFieldConfigurable {
                 if newValue != parsed { text = newValue.map { editingFormatter.string(from: $0 as NSNumber) ?? "" } ?? "" }
             }
             .onAppear { if let value { text = focused ? (editingFormatter.string(from: value as NSNumber) ?? "") : (formatter.string(from: value as NSNumber) ?? "") } }
+    }
+
+    /// Cleans raw input down to a single-decimal-separator number the editing formatter can parse.
+    ///
+    /// Grouping separators have to be recognised as grouping rather than folded into the decimal
+    /// separator: `reformat()` writes a grouped string on blur ("20,000.00"), and mapping every
+    /// "." and "," to the decimal separator turned that into "20.00" — silently changing 20,000
+    /// into 20. A separator is treated as grouping when a decimal separator is also present, or
+    /// when every group after it is exactly three digits; otherwise it is still read as a decimal
+    /// separator, so someone typing "20,5" where the locale wants "20.5" still gets what they meant.
+    static func normalizeNumericInput(_ raw: String, decimalSeparator: String, groupingSeparator: String, maximumFractionDigits: Int) -> String {
+        let decimal = Character(decimalSeparator)
+        var working = raw
+
+        // A separator that can't possibly be a decimal point (a space, as in fr_FR) is grouping.
+        if let grouping = groupingSeparator.first, !grouping.isNumber, grouping != ".", grouping != "," {
+            working = working.replacingOccurrences(of: groupingSeparator, with: "")
+        }
+
+        // Decide what each of "." / "," is doing here before removing anything: the same character
+        // is a decimal point in one locale and a thousands separator in another.
+        let candidates: [Character] = [".", ","]
+        let present = candidates.filter { working.contains($0) }
+
+        if present.count > 1 {
+            // Both present: the last one is the decimal point, everything before it groups.
+            let lastIndex = present.compactMap { working.lastIndex(of: $0) }.max()!
+            let decimalRole = working[lastIndex]
+            working = String(working.enumerated().map { offset, ch -> String in
+                guard candidates.contains(ch) else { return String(ch) }
+                let index = working.index(working.startIndex, offsetBy: offset)
+                return index == lastIndex ? decimalSeparator : ""
+            }.joined())
+        } else if let only = present.first {
+            let occurrences = working.filter { $0 == only }.count
+            let trailing = working.split(separator: only, omittingEmptySubsequences: false).last.map(String.init) ?? ""
+            let leading = working.prefix { $0 != only }
+            // More than one of the same separator can only be grouping; a single one followed by
+            // exactly three digits is grouping too, but only when the locale actually groups with
+            // it — otherwise "20,5" would become 205 rather than 20.5.
+            let isGrouping = occurrences > 1
+                || (String(only) == groupingSeparator && trailing.count == 3 && trailing.allSatisfy(\.isNumber) && !leading.isEmpty)
+            working = working.replacingOccurrences(of: String(only), with: isGrouping ? "" : decimalSeparator)
+        }
+
+        var cleaned = working.filter { $0.isNumber || $0 == decimal || $0 == "-" }
+
+        // one separator, one leading minus
+        var seen = false
+        cleaned = String(cleaned.enumerated().filter { i, ch in
+            if ch == decimal { if seen || maximumFractionDigits == 0 { return false }; seen = true }
+            if ch == "-" && i != 0 { return false }
+            return true
+        }.map(\.element))
+
+        if let idx = cleaned.firstIndex(of: decimal) {
+            let frac = cleaned[cleaned.index(after: idx)...]
+            if frac.count > maximumFractionDigits {
+                cleaned = String(cleaned.prefix(cleaned.distance(from: cleaned.startIndex, to: idx) + 1 + maximumFractionDigits))
+            }
+        }
+        return cleaned
     }
 
     private func reformat() {
