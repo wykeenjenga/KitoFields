@@ -397,6 +397,14 @@ KitoLocalization.provider = { key, english in
 Per-field messages still win: `.required(message:)`, `.validation(.minLength(8, message: "…"))`,
 `.phoneErrorMessages { … }` and `.countryPicker { $0.strings.title = "…" }`.
 
+## Right-to-left
+
+- Fields mirror automatically in Arabic, Hebrew and other RTL layouts: labels, icons, prefixes/suffixes, clear and reveal buttons, the phone field's country prefix (`.leading` is the right edge) and the password meter all follow the layout direction.
+- `KitoCodeField` boxes always run left to right, so the first digit of a code stays on the left in every language.
+- Masked input (phone, card, expiry, date) is always written left to right so digit groups never reorder, while still aligning to the layout's leading edge.
+- Arabic-Indic and Persian digits typed on a localized number pad are accepted and converted in code, phone, card and masked fields; `KitoNumberField` parses them through its locale.
+- To keep a whole phone row in left-to-right order in an RTL app, wrap the field in `.environment(\.layoutDirection, .leftToRight)`.
+
 ## Phone numbers
 
 ```swift
@@ -414,7 +422,7 @@ KitoPhoneField(country: $country, nationalNumber: $digits)
     .phoneValidator(KitoPhoneValidator { number in number.nationalNumber.hasPrefix("7") ? nil : .custom("Mobile numbers only") })
     .phoneErrorMessages { error in localized(error) }
     .onPhoneNumberChange { number in } .onCountryChange { country in }
-    .prefixPlacement(.trailing)    // flag/dial-code prefix on the right, for RTL-style designs
+    .prefixPlacement(.trailing)    // flag/dial-code prefix on the trailing edge (follows layout direction)
     .prefixFont(.body.weight(.semibold)).prefixSpacing(8)
 ```
 
