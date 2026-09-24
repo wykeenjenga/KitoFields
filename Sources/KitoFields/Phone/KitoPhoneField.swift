@@ -574,7 +574,8 @@ public extension KitoPhoneField {
     func countrySelector<V: View>(@ViewBuilder _ view: @escaping (KitoCountry, @escaping (KitoCountry) -> Void) -> V) -> KitoPhoneField {
         mutatingPhone { $0.selectionMode = .custom { country, choose in AnyView(view(country, choose)) } }
     }
-    /// Puts the flag/dial-code prefix on the trailing edge instead of leading, for RTL-style designs.
+    /// Puts the flag/dial-code prefix on the trailing edge instead of leading. Both follow the layout
+    /// direction: `.leading` is already on the right in a right-to-left layout.
     func prefixPlacement(_ placement: KitoPrefixPlacement) -> KitoPhoneField { mutatingPhone { $0.prefixPlacement = placement } }
     /// Font for the dial code in the prefix control; nil (the default) uses the theme's field font.
     func prefixFont(_ font: Font?) -> KitoPhoneField { mutatingPhone { $0.prefixFont = font } }

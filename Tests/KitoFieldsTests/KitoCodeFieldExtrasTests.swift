@@ -15,6 +15,12 @@ final class KitoCodeSanitizeTests: XCTestCase {
         XCTAssertEqual(KitoCodeField.sanitize("12a3!4", characterSet: .digits, uppercases: true, length: 6), "1234")
     }
 
+    func testArabicIndicAndPersianDigitsBecomeASCII() {
+        XCTAssertEqual(KitoCodeField.sanitize("١٢٣٤٥٦", characterSet: .digits, uppercases: true, length: 6), "123456")
+        XCTAssertEqual(KitoCodeField.sanitize("۱۲۳-456", characterSet: .digits, uppercases: true, length: 6), "123456")
+        XCTAssertEqual("½²٣".asciiDigits, "3")
+    }
+
     func testPastedCodeStripsSpacesAndDashes() {
         XCTAssertEqual(KitoCodeField.sanitize("123 456", characterSet: .digits, uppercases: true, length: 6), "123456")
         XCTAssertEqual(KitoCodeField.sanitize("123-456", characterSet: .digits, uppercases: true, length: 6), "123456")

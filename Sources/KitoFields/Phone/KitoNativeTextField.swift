@@ -51,6 +51,7 @@ struct KitoNativeTextField: UIViewRepresentable {
         field.font = font ?? .preferredFont(forTextStyle: .body)
         field.textColor = UIColor(textColor)
         field.tintColor = UIColor(tint)
+        applyWritingDirection(to: field, layoutDirection: context.environment.layoutDirection)
         field.keyboardType = keyboard
         field.textContentType = contentType
         field.accessibilityLabel = accessibilityLabel
@@ -60,6 +61,19 @@ struct KitoNativeTextField: UIViewRepresentable {
         } else if !isFocused, field.isFirstResponder {
             DispatchQueue.main.async { field.resignFirstResponder() }
         }
+    }
+
+    /// Masked input (phone, card, date) is a number, which reads left to right even in Arabic or
+    /// Hebrew; with a right-to-left base direction its space-separated groups would be reordered.
+    /// Alignment still follows the layout, so the text sits on the same side as the placeholder.
+    private func applyWritingDirection(to field: UITextField, layoutDirection: LayoutDirection) {
+        let alignment: NSTextAlignment = layoutDirection == .rightToLeft ? .right : .left
+        let current = field.defaultTextAttributes[.paragraphStyle] as? NSParagraphStyle
+        guard current?.baseWritingDirection != .leftToRight || current?.alignment != alignment else { return }
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.baseWritingDirection = .leftToRight
+        paragraph.alignment = alignment
+        field.defaultTextAttributes[.paragraphStyle] = paragraph
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(parent: self) }

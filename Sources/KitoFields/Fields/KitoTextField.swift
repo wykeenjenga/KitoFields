@@ -271,7 +271,7 @@ public struct KitoTextField: View, KitoFieldConfigurable {
                     HStack {
                         Spacer()
                         Text(options.counterStyle == .count
-                             ? "\(text.count) / \(limit)"
+                             ? "\(text.count.formatted()) / \(limit.formatted())"
                              : KitoLocalization.format("counter.remaining", "%d left", max(limit - text.count, 0)))
                             .font(theme.helperFont)
                             .foregroundColor(text.count > limit ? theme.errorColor : (text.count == limit ? theme.helperColor.opacity(0.9) : theme.helperColor))

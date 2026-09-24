@@ -251,6 +251,8 @@ public struct KitoCodeField: View {
                         .padding(.trailing, offset == rowItems.count - 1 ? 0 : spacing)
                 }
             }
+            // Codes are read left to right in every locale, so the first digit stays on the left.
+            .environment(\.layoutDirection, .leftToRight)
         case .fill:
             GeometryReader { proxy in
                 let width = Self.resolvedBoxWidth(
@@ -267,6 +269,8 @@ public struct KitoCodeField: View {
                             .padding(.trailing, offset == rowItems.count - 1 ? 0 : spacing)
                     }
                 }
+                // Digits stay left to right; the row itself still aligns to the layout's leading edge.
+                .environment(\.layoutDirection, .leftToRight)
                 .frame(maxWidth: .infinity, alignment: alignmentValue == .leading ? .leading : .center)
             }
             .frame(height: resolvedBoxSize.height)
@@ -510,7 +514,8 @@ public struct KitoCodeField: View {
         var cleaned: String
         switch characterSet {
         case .digits:
-            cleaned = value.filter { $0.isASCII && $0.isNumber }
+            // Arabic-Indic / Persian digits (a number pad set to Arabic numerals) become ASCII.
+            cleaned = value.asciiDigits
         case .alphanumeric:
             cleaned = value.filter { $0.isLetter || $0.isNumber }
         case .custom(let set):

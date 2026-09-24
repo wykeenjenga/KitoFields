@@ -126,8 +126,18 @@ extension KitoCountry: Hashable {
 
 extension String {
     var digitCount: Int { filter { $0 == "#" }.count }
-    /// ASCII digits only.
-    var asciiDigits: String { filter { $0.isASCII && $0.isNumber } }
+    /// Decimal digits only, as ASCII. Digits from other scripts (Arabic-Indic "٠١٢", Persian "۰۱۲",
+    /// Devanagari…) are converted rather than dropped, so a phone/number pad set to Arabic numerals
+    /// still types into masked fields.
+    var asciiDigits: String {
+        String(compactMap { character -> Character? in
+            if character.isASCII { return character.isNumber ? character : nil }
+            guard character.unicodeScalars.count == 1,
+                  character.unicodeScalars.first?.properties.numericType == .decimal,
+                  let value = character.wholeNumberValue else { return nil }
+            return Character(String(value))
+        })
+    }
 }
 
 
