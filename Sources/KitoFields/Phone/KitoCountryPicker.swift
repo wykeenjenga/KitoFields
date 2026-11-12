@@ -31,23 +31,40 @@ public struct KitoCountryPicker: View {
     }
 
     public var body: some View {
-        NavigationView {
-            list
-                .onAppear {
-                    recents = KitoCountryRecents.load(key: configuration.recentsStorageKey, limit: configuration.recentsLimit)
-                    recentSearches = KitoCountryRecents.loadSearches(key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit)
-                }
-                .onSubmit(of: .search) { KitoCountryRecents.recordSearch(query, key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit) }
-                .navigationTitle(configuration.strings.title)
-                .modifier(InlineTitle())
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(configuration.strings.cancel) { dismiss() }
-                    }
-                }
-                .modifier(SearchModifier(query: $query, enabled: configuration.showsSearch, prompt: configuration.strings.searchPrompt))
+        // NavigationStack (single column everywhere) where available; plain NavigationView falls back
+        // on older OSes. NavigationView renders as a two-column split on macOS, which squeezes the
+        // list into a narrow sidebar and leaves a large empty detail pane.
+        container {
+            content
         }
         .modifier(StackNavigationStyle())
+    }
+
+    @ViewBuilder
+    private func container<Inner: View>(@ViewBuilder _ inner: () -> Inner) -> some View {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, visionOS 1.0, *) {
+            NavigationStack { inner() }
+        } else {
+            NavigationView { inner() }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        list
+            .onAppear {
+                recents = KitoCountryRecents.load(key: configuration.recentsStorageKey, limit: configuration.recentsLimit)
+                recentSearches = KitoCountryRecents.loadSearches(key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit)
+            }
+            .onSubmit(of: .search) { KitoCountryRecents.recordSearch(query, key: configuration.recentsStorageKey, limit: configuration.recentSearchesLimit) }
+            .navigationTitle(configuration.strings.title)
+            .modifier(InlineTitle())
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(configuration.strings.cancel) { dismiss() }
+                }
+            }
+            .modifier(SearchModifier(query: $query, enabled: configuration.showsSearch, prompt: configuration.strings.searchPrompt))
     }
 
     @ViewBuilder private var list: some View {
